@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BabysittingPool.Application\BabysittingPool.Application.csproj" />
+    <ProjectReference Include="..\BabysittingPool.Infrastructure\BabysittingPool.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
