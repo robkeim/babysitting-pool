@@ -111,7 +111,7 @@ public class CreditCostCalculatorTests
     [Fact]
     public void Calculation_is_deterministic()
     {
-        var request = new CreditRequestDetails(95, 2, transport: TransportOption.RoundTrip, meals: MealOption.Snack);
+        var request = new CreditRequestDetails(90, 2, transport: TransportOption.RoundTrip, meals: MealOption.Snack);
 
         CreditCostCalculator.Calculate(request).Should().Be(CreditCostCalculator.Calculate(request));
     }
@@ -119,6 +119,9 @@ public class CreditCostCalculatorTests
     [Theory]
     [InlineData(0, 1)]
     [InlineData(-15, 1)]
+    [InlineData(82, 1)]
+    [InlineData(10, 1)]
+    [InlineData(61, 1)]
     [InlineData(60, 0)]
     [InlineData(60, -1)]
     public void Invalid_requests_are_rejected(int minutes, int children)

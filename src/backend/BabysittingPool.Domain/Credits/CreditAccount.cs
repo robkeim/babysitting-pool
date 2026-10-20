@@ -56,6 +56,8 @@ public sealed class CreditAccount
     public void PayOut(decimal amount, CreditAccount sitter)
     {
         ArgumentNullException.ThrowIfNull(sitter);
+        if (ReferenceEquals(this, sitter))
+            throw new DomainException("A member cannot pay out to themselves.");
         RequirePositive(amount);
         RequireEscrowed(amount);
 

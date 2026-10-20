@@ -3,6 +3,9 @@ namespace BabysittingPool.Domain.Credits;
 /// <summary>The inputs that determine the cost of a babysitting request (spec §3).</summary>
 public sealed record CreditRequestDetails
 {
+    /// <summary>Durations are booked in whole increments of this many minutes (spec §3A).</summary>
+    public const int DurationIncrementMinutes = 15;
+
     public CreditRequestDetails(
         int durationMinutes,
         int childCount,
@@ -12,6 +15,9 @@ public sealed record CreditRequestDetails
     {
         if (durationMinutes <= 0)
             throw new DomainException("Duration must be greater than zero minutes.");
+        if (durationMinutes % DurationIncrementMinutes != 0)
+            throw new DomainException(
+                $"Duration must be a multiple of {DurationIncrementMinutes} minutes.");
         if (childCount < 1)
             throw new DomainException("A request must include at least one child.");
         if (location == BabysittingLocation.RequestingFamilysHouse && transport != TransportOption.None)

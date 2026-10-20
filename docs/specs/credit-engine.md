@@ -19,12 +19,24 @@ The total cost of a request is calculated deterministically using the following 
 
 ### A. Base Duration
 - Calculated in minutes, converted to fractional hours (e.g., 75 minutes = 1.25 hours).
+- Duration must be a positive multiple of **15 minutes** (15, 30, 45, 60, 75, ...). Any other value (e.g., 82 minutes) is rejected. This keeps every cost an exact decimal, so no rounding rule is needed.
 - Rate: 1.0 credit / hour for the 1st child.
 
 ### B. Additional Children Scaling (Per Hour)
-- **1st Child:** +1.0x base rate (1.0 / hr).
-- **2nd Child:** +0.50 / hr.
-- **3rd+ Child:** +0.25 / hr per additional child.
+- A request must include **at least 1 child**.
+- Each increment is **cumulative**, added on top of the previous children's rate:
+  - **1st Child:** +1.0x base rate (1.0 / hr).
+  - **2nd Child:** +0.50 / hr.
+  - **3rd+ Child:** +0.25 / hr per additional child.
+- Resulting total hourly rate:
+
+| Children | Hourly rate |
+| -------- | ----------- |
+| 1        | 1.00        |
+| 2        | 1.50        |
+| 3        | 1.75        |
+| 4        | 2.00        |
+| *n* (≥ 2) | 1.50 + 0.25 × (*n* − 2) |
 
 ### C. Location Premium
 - **At Sitter's House:** 0.0 additions.
@@ -62,7 +74,8 @@ The total cost of a request is calculated deterministically using the following 
 2. **Cancellation / Expiration:**
    - If a request is cancelled by the owner or expires unclaimed, the escrowed credits are immediately returned to the owner’s Available Balance.
 3. **Payout Trigger:**
-   - When the scheduled babysitting start time arrives (or when both parties mark it complete), the escrowed credits are released and transferred directly to the Sitter's Available Balance in an atomic transaction.
+   - When the scheduled babysitting start time arrives, the escrowed credits are released and transferred directly to the Sitter's Available Balance in an atomic transaction. There is no separate mutual-completion confirmation.
+   - The requester and the sitter must be different members.
 4. **Cancellation Policy Note (Future Backlog):**
    - For v1, last-minute cancellations return escrowed credits without penalty. Late-cancellation penalties are deferred to a future milestone.
 

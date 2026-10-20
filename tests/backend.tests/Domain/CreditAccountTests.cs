@@ -75,6 +75,18 @@ public class CreditAccountTests
     }
 
     [Fact]
+    public void Cannot_pay_out_to_the_same_account()
+    {
+        var account = CreditAccount.Open();
+        account.Escrow(4m);
+
+        var act = () => account.PayOut(4m, account);
+
+        act.Should().Throw<DomainException>();
+        account.Escrowed.Should().Be(4m);
+    }
+
+    [Fact]
     public void Cannot_release_more_than_is_escrowed()
     {
         var requester = CreditAccount.Open();
