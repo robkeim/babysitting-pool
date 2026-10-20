@@ -6,11 +6,22 @@ The Babysitting Co-op operates on a time-credit economy rather than fiat currenc
 ---
 
 ## 2. Initial Account State & Limits
-- **Starting Balance:** New members receive **10.0 credits** upon account activation.
+- **Starting Balance:** New members receive **10.0 credits** once, when they create their account from an Invitation (see §2A).
 - **Minimum Balance Floor:** 
   - The available balance can never drop below **0.0 credits**.
   - Members with a 0.0 credit balance cannot submit new babysitting requests until they earn credits by babysitting.
 - **Maximum Balance:** Uncapped.
+
+### 2A. Membership & Invitations
+- There is no public sign-up. The site offers only sign-in for existing Members.
+- Sign-in is passwordless: a Member requests a single-use magic link by email, which expires after a short time. An Invitation link is also single-use but valid longer (default 7 days), and an admin can re-send it.
+- An admin sends a prospective Member an **Invitation** (a magic link). Following it lets them create their account, which grants the Starting Balance.
+
+- **Offboarding:** When an admin offboards a Member, the system cancels their Posted Requests (refunding Escrow), withdraws their claims as Sitter (the Request returns to Posted, or expires if past the Claim Cutoff), cancels Requests they posted that are Claimed (refunding Escrow), and burns any remaining Available Balance via a Ledger entry. The account is closed, Ledger history is kept, and the person can only return via a new Invitation.
+
+- **Admin powers (v1, kept deliberately small):** An Admin can create Invitations, offboard Members, view each Member's situation (balances, Requests, Ledger) read-only, and view an aggregated overview of the whole pool. Admins cannot edit balances or Requests; there are no manual Adjustments in v1.
+- **Notifications (v1):** Members are notified by email and see events in an in-app feed. Which events trigger an email is a later policy decision.
+- **Times:** Instants are stored in UTC; one co-op-wide time zone setting drives display and the weekly Demurrage run.
 
 ---
 
@@ -55,7 +66,7 @@ The total cost of a request is calculated deterministically using the following 
 
 ## 4. Transaction & Escrow Lifecycle
 
-[Draft Request] 
+[New Request] 
       │
       ▼ (Check Available Balance >= Cost)
 [Posted / Announced] ────► Credits ESCROWED (Available Balance decreases)
@@ -63,27 +74,44 @@ The total cost of a request is calculated deterministically using the following 
       ├───► [Cancelled / Unclaimed] ────► Credits REFUNDED (Escrow released back to Available)
       │
       ▼
-[Claimed & Approved]
+[Claimed]
       │
       ▼ (Scheduled Babysitting Start Time Reached)
 [In Progress / Completed] ──────► Credits TRANSFERRED (Escrow released to Sitter's Available Balance)
 
-1. **Request Creation & Escrow:** 
+1. **Request Creation & Escrow:** A Request is created only when it is posted; "draft" is a UI-only half-filled form with no domain state.
    - Upon posting a request, the system calculates the required cost and moves that amount from the Requester’s **Available Balance** into **Escrow**.
    - If `Available Balance < Request Cost`, posting is blocked.
+   - A Request's start time must be at least the **Minimum Lead Time** (default 6 hours, configurable) after the time of posting; otherwise posting is blocked.
 2. **Cancellation / Expiration:**
    - If a request is cancelled by the owner or expires unclaimed, the escrowed credits are immediately returned to the owner’s Available Balance.
+   - **Claim Cutoff:** A Posted Request can no longer be claimed once the **Claim Cutoff** passes (default 3 hours before the start time, configurable). An unclaimed Request expires at the Claim Cutoff, so a Sitter is never claiming too late to arrange care.
+   - With the default settings, a Request has at least 3 hours (Minimum Lead Time minus Claim Cutoff) to be claimed.
 3. **Payout Trigger:**
    - When the scheduled babysitting start time arrives, the escrowed credits are released and transferred directly to the Sitter's Available Balance in an atomic transaction. There is no separate mutual-completion confirmation.
    - The requester and the sitter must be different members.
-4. **Cancellation Policy Note (Future Backlog):**
-   - For v1, last-minute cancellations return escrowed credits without penalty. Late-cancellation penalties are deferred to a future milestone.
+4. **Claiming:** The first Sitter to claim a Request wins; there is no Requester approval step.
+5. **Cancellation & Withdrawal:**
+   - The Requester may cancel a Posted or Claimed Request any time before the start time, with a full refund.
+   - The Sitter may withdraw a claim before the start time. The Request returns to Posted if time remains; otherwise (the Claim Cutoff has passed) it expires and is refunded.
+   - For v1, last-minute cancellations and withdrawals carry no penalty. Late-cancellation penalties are deferred to a future milestone.
+6. **Editing a Request:**
+   - A Requester can edit a Posted or Claimed Request any time before the start time.
+   - Cost drivers (start time, duration, child count, Location, transport, meals) re-price the Request. A higher cost needs enough Available Balance and escrows the difference; if the Requester can't cover it, the edit is rejected. A lower cost refunds the difference immediately.
+   - A start-time edit must satisfy the same Minimum Lead Time rule as posting, measured against the current time.
+   - The exact address is shown only to the counterparty once the Request is Claimed, and hidden again if the claim is dropped. Posted Requests show Members only a rough area.
+   - Editing a Claimed Request drops the claim. Every field the Sitter relies on (all cost drivers, address and drop-off point) does this; only free-text notes are exempt, and the Sitter is still notified of them. The Request returns to Posted with the new terms and its Escrow adjusted to the new cost. The former Sitter is notified and may claim it again like any other Member, first claim wins. Future: first rights for the former Sitter to reconfirm (backlog: #5).
+   - After the Claim Cutoff, a Claimed Request can only have its free-text notes edited. An edit that would drop the claim is blocked with an explanation, so the Request does not silently expire.
+7. **Sitter overlap (v1):** A Sitter may hold overlapping Claimed Requests; Sitter capacity is not modelled (backlog: #3).
+8. **Children (v1):** A Request records only the number of children (backlog for child profiles: #4).
+9. **Known v1 trade-off (Future Backlog):** Payout happens at the start time, so a no-show Sitter is still paid. Disputes and no-show handling are deferred.
 
 ---
 
 ## 5. Inactivity Policy (Demurrage)
-- **Definition of Activity:** Hosting or babysitting at least once within a rolling 21-day window.
-- **Penalty Trigger:** If a member has no completed hosting sessions for > 21 days:
+- **Definition of Activity:** Completing at least one Request as Sitter within a rolling 21-day window. Posting or paying as Requester does not count.
+- **Penalty Trigger:** If a member has no Requests completed as Sitter for > 21 days:
   - Apply a **-2.0 credits / week** penalty.
+  - Demurrage Credits are burned (recorded as a Ledger entry with no recipient).
   - **Hard Floor Protection:** Penalties stop strictly at **0.0 credits** (never drives an account into negative).
   - *Admin Flag:* Accounts sitting at 0.0 credits due to inactivity are flagged for review/offboarding.
