@@ -15,6 +15,7 @@ A web application for a community babysitting co-op powered by a time-credit led
 1. Never write code without first checking the relevant specification in `/docs/specs/`.
 2. Ensure domain models strictly enforce business invariants (e.g., balance floor >0).
 3. When adding or modifying features, keep docs updated if architectural decisions change.
+4. Write commit messages as Conventional Commits (`type(scope): description`, e.g. `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`).
 
 ## Agent skills
 
