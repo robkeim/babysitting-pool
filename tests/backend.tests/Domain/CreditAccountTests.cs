@@ -1,5 +1,5 @@
 using BabysittingPool.Domain.Credits;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace backend.tests.Domain;
 
