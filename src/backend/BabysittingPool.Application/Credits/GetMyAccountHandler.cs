@@ -6,6 +6,9 @@ namespace BabysittingPool.Application.Credits;
 
 public sealed record GetMyAccountQuery(Guid MemberId, string? Cursor = null, int? Limit = null);
 
+/// <summary>The supplied paging cursor was not one this API issued.</summary>
+public sealed class InvalidCursorException(Exception inner) : Exception("Invalid cursor.", inner);
+
 public sealed class GetMyAccountHandler(ICreditAccountReader reader)
 {
     private const int DefaultLimit = 50;
@@ -35,9 +38,16 @@ public sealed class GetMyAccountHandler(ICreditAccountReader reader)
 
     private static LedgerCursor Decode(string cursor)
     {
-        var parts = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(cursor)).Split('|');
-        return new LedgerCursor(
-            new DateTime(long.Parse(parts[0], CultureInfo.InvariantCulture), DateTimeKind.Utc),
-            Guid.ParseExact(parts[1], "N"));
+        try
+        {
+            var parts = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(cursor)).Split('|');
+            return new LedgerCursor(
+                new DateTime(long.Parse(parts[0], CultureInfo.InvariantCulture), DateTimeKind.Utc),
+                Guid.ParseExact(parts[1], "N"));
+        }
+        catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException or IndexOutOfRangeException)
+        {
+            throw new InvalidCursorException(ex);
+        }
     }
 }
