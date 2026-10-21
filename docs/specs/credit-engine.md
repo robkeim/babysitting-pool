@@ -110,8 +110,21 @@ The total cost of a request is calculated deterministically using the following 
 
 ## 5. Inactivity Policy (Demurrage)
 - **Definition of Activity:** Completing at least one Request as Sitter within a rolling 21-day window. Posting or paying as Requester does not count.
-- **Penalty Trigger:** If a member has no Requests completed as Sitter for > 21 days:
-  - Apply a **-2.0 credits / week** penalty.
+- **Penalty Trigger:** Demurrage is evaluated at a weekly boundary (default Monday 00:00 in the co-op time zone; weekday and time configurable). If a member's last Request completed as Sitter (or, if none, their account creation) is more than 21 days before the boundary:
+  - Apply a **-2.0 credits** penalty for that boundary. Because charges fall only on boundaries, the effective grace period is 21 to 28 days.
+  - Each charge is recorded with the boundary it belongs to, so a boundary can be charged at most once per Member. After downtime, every missed boundary is applied in order, each evaluated as of its own time. Boundaries before the account existed, and offboarded Members, are skipped.
+  - Only Available Balance is charged; Escrow is never touched.
   - Demurrage Credits are burned (recorded as a Ledger entry with no recipient).
-  - **Hard Floor Protection:** Penalties stop strictly at **0.0 credits** (never drives an account into negative).
+  - **Hard Floor Protection:** The charge is min(2.0, Available Balance); penalties stop strictly at **0.0 credits** (never drives an account into negative) and no zero-amount Ledger entry is written.
   - *Admin Flag:* Accounts sitting at 0.0 credits due to inactivity are flagged for review/offboarding.
+
+---
+
+## 6. Settle (Time-driven Processes)
+Expiry, Payout and Demurrage are applied by **Settle** (see ADR 0007).
+- **Order within a run:** Expire, then Payout, then Demurrage.
+- **Expire:** every Posted Request past its Claim Cutoff becomes Expired and its Escrow is refunded.
+- **Payout:** every Claimed Request past its start time becomes Completed and its Escrow is released to the Sitter.
+- **Claim Cutoff snapshot:** the cutoff instant is stored on the Request when it is posted or edited. Later changes to the setting affect only new or edited Requests.
+- **Between runs:** claims past the Claim Cutoff are rejected by the clock check, and read models show an overdue Posted Request as Expired.
+- **Idempotency:** Settle selects only Requests still Posted or Claimed past their trigger, so a repeat run does nothing. Demurrage is idempotent per (Member, boundary).

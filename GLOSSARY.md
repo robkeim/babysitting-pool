@@ -48,6 +48,14 @@ _Avoid_: Notice period
 The moment before a Request's start time after which it can no longer be claimed, and an unclaimed Request expires. Defaults to 3 hours before the start time and is configurable.
 _Avoid_: Deadline, expiry time
 
+**Expired**:
+The end state of a Request that was never claimed by its Claim Cutoff; its Escrow is refunded.
+_Avoid_: Lapsed, timed out
+
+**Completed**:
+The end state of a Claimed Request once its start time arrives and the Payout is made.
+_Avoid_: Done, finished
+
 **Session**:
 The period of care itself, from the Request's start time onward.
 _Avoid_: Booking, hosting session
@@ -85,3 +93,9 @@ _Avoid_: Settlement, transfer
 **Demurrage**:
 The weekly Credit penalty on a Member who has not completed a Request as Sitter within 21 days. Demurrage Credits are burned: they leave circulation with no recipient.
 _Avoid_: Inactivity fee, decay
+
+### Time
+
+**Settle**:
+The recurring run that applies every time-driven change that has become due: Expiry, Payout and Demurrage. It is not the same as a Payout.
+_Avoid_: Cron job, batch, sweep
