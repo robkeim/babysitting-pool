@@ -1,6 +1,6 @@
 using System.Text.Json;
 using backend.tests.Support;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace backend.tests.Api;
 

@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using backend.tests.Support;
 using BabysittingPool.Domain.Credits;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace backend.tests.Api;
 

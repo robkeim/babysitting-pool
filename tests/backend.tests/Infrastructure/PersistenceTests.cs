@@ -1,7 +1,7 @@
 using backend.tests.Support;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Infrastructure.Persistence;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 

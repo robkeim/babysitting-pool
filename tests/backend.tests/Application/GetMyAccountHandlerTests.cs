@@ -1,7 +1,7 @@
 using backend.tests.Support;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Domain.Credits;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.tests.Application;

@@ -6,7 +6,7 @@ A web application for a community babysitting co-op powered by a time-credit led
 ## Architecture Guidelines
 - **Backend:** .NET 10 / C#, SQLite, Hexagonal Architecture (Ports & Adapters), DDD, CQRS principles.
   - Domain layer must remain pure C# with zero dependencies on frameworks/databases.
-  - Test runner: xUnit + FluentAssertions.
+  - Test runner: xUnit + AwesomeAssertions.
 - **Frontend:** React, TypeScript, Tailwind CSS, shadcn/ui.
   - Test runner: Vitest + React Testing Library.
 - **Documentation:** Functional specs reside in `/docs/specs/`. Always check these files for business rules before implementing domain logic.
