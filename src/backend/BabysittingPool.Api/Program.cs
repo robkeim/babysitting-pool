@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using BabysittingPool.Api;
 using BabysittingPool.Application;
 using BabysittingPool.Infrastructure;
@@ -11,6 +12,10 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
     document.Servers?.Clear();
     return Task.CompletedTask;
 }));
+// Numbers are numbers (ADR 0001): without this the schema also admits strings, and the generated
+// frontend types become `number | string`.
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(

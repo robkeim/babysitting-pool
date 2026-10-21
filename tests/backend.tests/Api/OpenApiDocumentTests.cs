@@ -1,3 +1,4 @@
+using System.Text.Json;
 using backend.tests.Support;
 using FluentAssertions;
 
@@ -28,6 +29,18 @@ public class OpenApiDocumentTests : IDisposable
 
         File.Exists(committedPath).Should().BeTrue("docs/api/openapi.json must be committed");
         Normalize(await File.ReadAllTextAsync(committedPath)).Should().Be(generated);
+    }
+
+    [Fact]
+    public async Task Quarter_credit_fields_are_plain_integers_in_the_schema()
+    {
+        using var client = _factory.CreateClient();
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+
+        var account = document.RootElement.GetProperty("components").GetProperty("schemas").GetProperty("AccountView");
+
+        account.GetProperty("properties").GetProperty("availableQuarterCredits")
+            .GetProperty("type").GetString().Should().Be("integer");
     }
 
     private static string Normalize(string json) => json.ReplaceLineEndings("\n").TrimEnd() + "\n";
