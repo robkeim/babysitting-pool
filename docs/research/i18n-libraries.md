@@ -51,7 +51,7 @@ Sources: [pseudolocalization guide](https://lingui.dev/guides/pseudolocalization
 
 ### Android `en-XA`
 
-Source: [Android pseudolocales](https://developer.android.com/guide/topics/resources/pseudolocale). Accented Latin text, extra non-accented text to expand it, and brackets around each message unit to expose truncation. The page gives **no numeric expansion percentage**. It confirms the model (accents, brackets, expansion), not specific tiers.
+Source: [Android pseudolocales](https://developer.android.com/guide/topics/resources/pseudolocales). Accented Latin text, extra non-accented text to expand it, and brackets around each message unit to expose truncation. The page gives **no numeric expansion percentage**. It confirms the model (accents, brackets, expansion), not specific tiers.
 
 ## Reusable pieces vs custom
 
