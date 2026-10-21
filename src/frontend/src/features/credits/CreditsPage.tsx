@@ -1,7 +1,14 @@
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { useMyAccount } from './api'
 import { formatCredits, formatInstant } from './format'
 
@@ -54,13 +61,19 @@ export function CreditsPage() {
             <TableRow key={entry.id}>
               <TableCell>{formatInstant(entry.occurredAt)}</TableCell>
               <TableCell>{entry.kind}</TableCell>
-              <TableCell className="text-right">{formatCredits(entry.amountQuarterCredits)}</TableCell>
+              <TableCell className="text-right">
+                {formatCredits(entry.amountQuarterCredits)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
       {account.hasNextPage && (
-        <Button variant="outline" onClick={() => void account.fetchNextPage()} disabled={account.isFetchingNextPage}>
+        <Button
+          variant="outline"
+          onClick={() => void account.fetchNextPage()}
+          disabled={account.isFetchingNextPage}
+        >
           Load more
         </Button>
       )}

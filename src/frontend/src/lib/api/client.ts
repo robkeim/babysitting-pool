@@ -23,7 +23,11 @@ export async function apiFetch<T>(path: string): Promise<T> {
   })
   if (!response.ok) {
     const problem = (await response.json().catch(() => ({}))) as Problem
-    throw new ApiError(response.status, problem.code ?? 'unknown', problem.title ?? response.statusText)
+    throw new ApiError(
+      response.status,
+      problem.code ?? 'unknown',
+      problem.title ?? response.statusText,
+    )
   }
   return (await response.json()) as T
 }

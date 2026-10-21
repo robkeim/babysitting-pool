@@ -29,7 +29,9 @@ describe('CreditsPage', () => {
 
     const available = await screen.findByRole('group', { name: 'Available' })
     expect(within(available).getByText('10.25')).toBeInTheDocument()
-    expect(within(screen.getByRole('group', { name: 'In escrow' })).getByText('2.00')).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('group', { name: 'In escrow' })).getByText('2.00'),
+    ).toBeInTheDocument()
     const row = screen.getByRole('row', { name: /grant/i })
     expect(within(row).getByText('10.25')).toBeInTheDocument()
     expect(within(row).getByText(/1 Mar 2026/)).toBeInTheDocument()

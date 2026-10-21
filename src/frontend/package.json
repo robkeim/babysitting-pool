@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:api": "npx --yes openapi-typescript@7.13.0 ../../docs/api/openapi.json -o src/lib/api/schema.gen.ts"
+    "generate:api": "npx --yes openapi-typescript@7.13.0 ../../docs/api/openapi.json -o src/lib/api/schema.gen.ts",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -38,6 +40,7 @@
     "jsdom": "^29.1.1",
     "msw": "^3.0.3",
     "oxlint": "^1.88.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "~7.0.2",
     "vite": "^8.3.4",

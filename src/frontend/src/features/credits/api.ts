@@ -12,7 +12,9 @@ export function useMyAccount() {
     queryKey: creditsKeys.account(),
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
-      apiFetch<AccountView>(pageParam ? `/api/me/account?cursor=${encodeURIComponent(pageParam)}` : '/api/me/account'),
+      apiFetch<AccountView>(
+        pageParam ? `/api/me/account?cursor=${encodeURIComponent(pageParam)}` : '/api/me/account',
+      ),
     getNextPageParam: (lastPage) => lastPage.ledger.nextCursor ?? undefined,
   })
 }
