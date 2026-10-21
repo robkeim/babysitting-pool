@@ -1,3 +1,4 @@
+using BabysittingPool.Application.Credits;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ public static class DependencyInjection
         services.AddDbContext<BabysittingPoolDbContext>(options => options
             .UseSqlite(connectionString)
             .AddInterceptors(new SqliteConnectionSetup()));
+        services.AddScoped<ICreditAccountReader, CreditAccountReader>();
         return services;
     }
 
