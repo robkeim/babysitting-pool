@@ -275,6 +275,225 @@
           }
         }
       }
+    },
+    "/api/requests": {
+      "post": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "PostRequest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/requests": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "ListMyRequests",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfRequestView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests/quote": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "QuoteRequest",
+        "parameters": [
+          {
+            "name": "DurationMinutes",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ChildCount",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Location",
+            "in": "query",
+            "schema": {
+              "default": "SittersHouse",
+              "$ref": "#/components/schemas/BabysittingLocation"
+            }
+          },
+          {
+            "name": "Transport",
+            "in": "query",
+            "schema": {
+              "default": "None",
+              "$ref": "#/components/schemas/TransportOption"
+            }
+          },
+          {
+            "name": "LunchOrDinner",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "Snack",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostQuote"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -318,6 +537,24 @@
           },
           "ledger": {
             "$ref": "#/components/schemas/PageOfLedgerEntryView"
+          }
+        }
+      },
+      "BabysittingLocation": {
+        "enum": [
+          "SittersHouse",
+          "RequestingFamilysHouse"
+        ]
+      },
+      "CostQuote": {
+        "required": [
+          "costQuarterCredits"
+        ],
+        "type": "object",
+        "properties": {
+          "costQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -403,6 +640,79 @@
           }
         }
       },
+      "PageOfRequestView": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "PostRequestBody": {
+        "required": [
+          "startsAt",
+          "durationMinutes",
+          "childCount",
+          "location",
+          "transport",
+          "lunchOrDinner",
+          "snack",
+          "area",
+          "address"
+        ],
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "location": {
+            "$ref": "#/components/schemas/BabysittingLocation"
+          },
+          "transport": {
+            "$ref": "#/components/schemas/TransportOption"
+          },
+          "lunchOrDinner": {
+            "type": "boolean"
+          },
+          "snack": {
+            "type": "boolean"
+          },
+          "area": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -439,6 +749,85 @@
           }
         }
       },
+      "RequestStatus": {
+        "enum": [
+          "Posted",
+          "Claimed",
+          "Completed",
+          "Cancelled",
+          "Expired"
+        ]
+      },
+      "RequestView": {
+        "required": [
+          "id",
+          "startsAt",
+          "durationMinutes",
+          "childCount",
+          "location",
+          "transport",
+          "lunchOrDinner",
+          "snack",
+          "area",
+          "address",
+          "costQuarterCredits",
+          "claimCutoffAt",
+          "postedAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "location": {
+            "$ref": "#/components/schemas/BabysittingLocation"
+          },
+          "transport": {
+            "$ref": "#/components/schemas/TransportOption"
+          },
+          "lunchOrDinner": {
+            "type": "boolean"
+          },
+          "snack": {
+            "type": "boolean"
+          },
+          "area": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "costQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCutoffAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "postedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RequestStatus"
+          }
+        }
+      },
       "SignInLinkRequest": {
         "required": [
           "email"
@@ -466,6 +855,13 @@
             ]
           }
         }
+      },
+      "TransportOption": {
+        "enum": [
+          "None",
+          "OneWay",
+          "RoundTrip"
+        ]
       }
     }
   },

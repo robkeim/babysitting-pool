@@ -4,4 +4,7 @@ namespace BabysittingPool.Domain.Credits;
 public enum LedgerEntryKind
 {
     Grant,
+    Escrow,
+    Refund,
+    Payout,
 }

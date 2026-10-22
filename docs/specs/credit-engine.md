@@ -85,6 +85,7 @@ The total cost of a request is calculated deterministically using the following 
 1. **Request Creation & Escrow:** A Request is created only when it is posted; "draft" is a UI-only half-filled form with no domain state.
    - Upon posting a request, the system calculates the required cost and moves that amount from the Requester’s **Available Balance** into **Escrow**.
    - If `Available Balance < Request Cost`, posting is blocked.
+   - A Request records the cost drivers, a rough **Area** and the exact address. Both are required. While Posted, other Members see only the Area (§4.6); in v1 only the Requester's own "My Requests" list shows the exact address.
    - A Request's start time must be at least the **Minimum Lead Time** (default 6 hours, configurable) after the time of posting; otherwise posting is blocked.
 2. **Cancellation / Expiration:**
    - If a request is cancelled by the owner or expires unclaimed, the escrowed credits are immediately returned to the owner’s Available Balance.

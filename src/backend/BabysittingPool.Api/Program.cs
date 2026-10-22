@@ -17,7 +17,11 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
 // Numbers are numbers (ADR 0001): without this the schema also admits strings, and the generated
 // frontend types become `number | string`.
 builder.Services.ConfigureHttpJsonOptions(options =>
-    options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict);
+{
+    options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+    // Enums travel as their names, so the contract says "Posted" rather than 0.
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 if (builder.Environment.IsEnvironment(TestEndpoints.Environment))
 {
     builder.Services.AddTestClock();
@@ -86,6 +90,7 @@ app.UseCsrfHeaderCheck();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
+app.MapRequestEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(TestEndpoints.Environment))
 {

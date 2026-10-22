@@ -1,4 +1,5 @@
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Requests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -8,6 +9,7 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
 {
     public DbSet<CreditAccountRecord> CreditAccounts => Set<CreditAccountRecord>();
     public DbSet<LedgerEntryRecord> LedgerEntries => Set<LedgerEntryRecord>();
+    public DbSet<RequestRecord> Requests => Set<RequestRecord>();
     public DbSet<MemberRecord> Members => Set<MemberRecord>();
     public DbSet<InvitationRecord> Invitations => Set<InvitationRecord>();
     public DbSet<SignInLinkRecord> SignInLinks => Set<SignInLinkRecord>();
@@ -19,6 +21,9 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
         configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
         configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
         configurationBuilder.Properties<LedgerEntryKind>().HaveConversion<string>();
+        configurationBuilder.Properties<RequestStatus>().HaveConversion<string>();
+        configurationBuilder.Properties<BabysittingLocation>().HaveConversion<string>();
+        configurationBuilder.Properties<TransportOption>().HaveConversion<string>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,6 +70,17 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
             session.HasOne<MemberRecord>().WithMany().HasForeignKey(s => s.MemberId).OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<RequestRecord>(request =>
+        {
+            request.ToTable("Requests");
+            request.HasKey(r => r.Id);
+            request.Property(r => r.Cost).HasColumnName("CostQuarterCredits");
+            request.Property(r => r.Version).IsConcurrencyToken();
+            request.HasOne<MemberRecord>().WithMany().HasForeignKey(r => r.RequesterId).OnDelete(DeleteBehavior.Restrict);
+            request.HasOne<MemberRecord>().WithMany().HasForeignKey(r => r.SitterId).OnDelete(DeleteBehavior.Restrict);
+            request.HasIndex(r => new { r.RequesterId, r.PostedAt, r.Id });
+        });
+
         modelBuilder.Entity<LedgerEntryRecord>(entry =>
         {
             entry.ToTable("LedgerEntries");
@@ -72,6 +88,9 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
             entry.Property(e => e.Amount).HasColumnName("AmountQuarterCredits");
             entry.HasOne<CreditAccountRecord>().WithMany().HasForeignKey(e => e.MemberId).OnDelete(DeleteBehavior.Restrict);
             entry.HasIndex(e => new { e.MemberId, e.OccurredAt, e.Id });
+            // Each Request's Escrow, Refund and Payout can be recorded at most once. No foreign key to Requests:
+            // adding one would make SQLite rebuild this table and drop its append-only triggers.
+            entry.HasIndex(e => new { e.RequestId, e.Kind }).IsUnique().HasFilter("RequestId IS NOT NULL");
         });
     }
 

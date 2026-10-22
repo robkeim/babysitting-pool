@@ -1,3 +1,5 @@
+using BabysittingPool.Domain.Credits;
+
 namespace BabysittingPool.Api;
 
 /// <summary>Non-2xx responses: <c>application/problem+json</c> with a stable machine-readable <c>code</c> (ADR 0006).</summary>
@@ -21,6 +23,13 @@ internal static class Problems
             "invalid_request",
             "The request is malformed.",
             new Dictionary<string, string[]> { [field] = [fieldCode] });
+
+    /// <summary>A business rule said no (spec §4); the code is the one the domain raised.</summary>
+    public static IResult DomainRule(DomainException exception) =>
+        Problem(StatusCodes.Status422UnprocessableEntity, exception.Code, exception.Message);
+
+    public static IResult Conflict() =>
+        Problem(StatusCodes.Status409Conflict, "concurrent_update", "The state changed meanwhile; try again.");
 
     public static IResult AccountNotFound() =>
         Problem(StatusCodes.Status404NotFound, "account_not_found", "The Member has no Credit Account.");
