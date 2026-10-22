@@ -30,6 +30,10 @@ _Avoid_: Inactive Member, churned
 Closing a Member's account, which cancels or releases their open Requests and burns their remaining balance. Ledger history is kept.
 _Avoid_: Deleting, banning
 
+**Erasure**:
+Removing a closed Member's personal details (name, email, notes, addresses) while keeping the Ledger entries as anonymous history. Separate from Offboarding, which keeps those details. Only an Admin can erase, and only after Offboarding.
+_Avoid_: Deleting an account, GDPR delete
+
 **Invitation**:
 A magic link an admin sends to a prospective Member, which is the only way to create an account.
 _Avoid_: Sign-up, registration

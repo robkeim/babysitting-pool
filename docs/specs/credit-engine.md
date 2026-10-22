@@ -17,7 +17,7 @@ The Babysitting Co-op operates on a time-credit economy rather than fiat currenc
 - Sign-in is passwordless: a Member requests a single-use magic link by email, which expires after a short time. An Invitation link is also single-use but valid longer (default 7 days), and an admin can re-send it.
 - An admin sends a prospective Member an **Invitation** (a magic link). Following it lets them create their account, which grants the Starting Balance.
 
-- **Offboarding:** When an admin offboards a Member, the system cancels their Posted Requests (refunding Escrow), withdraws their claims as Sitter (the Request returns to Posted, or expires if past the Claim Cutoff), cancels Requests they posted that are Claimed (refunding Escrow), and burns any remaining Available Balance via a Ledger entry. The account is closed, Ledger history is kept, and the person can only return via a new Invitation.
+- **Offboarding:** When an admin offboards a Member, the system cancels their Posted Requests (refunding Escrow), withdraws their claims as Sitter (the Request returns to Posted, or expires if past the Claim Cutoff), cancels Requests they posted that are Claimed (refunding Escrow), and burns any remaining Available Balance via a Ledger entry. The account is closed, Ledger history is kept, and the person can only return via a new Invitation. Offboarding does not remove personal data; that is a separate Admin action, **Erasure** (ADR 0014): on a closed Member it replaces name and email with "Former member", deletes Request notes and addresses and any outstanding Invitation or sign-in link, and keeps Ledger amounts and ids.
 
 - **Admin powers (v1, kept deliberately small):** An Admin can create and re-send Invitations, offboard Members, view each Member's situation (balances, Requests, Ledger) read-only, view an aggregated overview of the whole pool, and view the list of Dormant Members (§5). Admins cannot edit balances or Requests; there are no manual Adjustments in v1.
 - **One Admin (v1):** The co-op has exactly one Admin. The Admin is a full Member with a Credit Account and the Starting Balance. There is no way to create, promote or demote Admins, and the Admin cannot be offboarded. How the first Admin comes to exist is decided in #21.
@@ -106,7 +106,7 @@ The total cost of a request is calculated deterministically using the following 
    - Editing a Claimed Request drops the claim. Every field the Sitter relies on (all cost drivers, address and drop-off point) does this; only free-text notes are exempt. The Request returns to Posted with the new terms and its Escrow adjusted to the new cost. The former Sitter may claim it again like any other Member, first claim wins. Future: first rights for the former Sitter to reconfirm (backlog: #5).
    - After the Claim Cutoff, a Claimed Request can only have its free-text notes edited. An edit that would drop the claim is blocked with an explanation, so the Request does not silently expire.
 7. **Sitter overlap (v1):** A Sitter may hold overlapping Claimed Requests; Sitter capacity is not modelled (backlog: #3).
-8. **Children (v1):** A Request records only the number of children (backlog for child profiles: #4).
+8. **Children (v1):** A Request records only the number of children (backlog for child profiles: #4). Any further child data needs its own ADR and privacy review first (ADR 0014).
 9. **Known v1 trade-off (Future Backlog):** Payout happens at the start time, so a no-show Sitter is still paid. Disputes and no-show handling are deferred.
 
 ---
