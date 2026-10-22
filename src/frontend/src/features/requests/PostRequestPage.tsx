@@ -1,10 +1,12 @@
 import { useState, type SyntheticEvent } from 'react'
+import { FormattedMessage, useIntl } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { formatCredits, useMyAccount } from '@/features/credits'
 import { ApiError } from '@/lib/api/client'
+import { type MessageId } from '@/lib/i18n'
 import { useQuote, usePostRequest } from './api'
 import type { BabysittingLocation, QuoteDetails, TransportOption } from './types'
 
@@ -17,24 +19,21 @@ const DURATION_STEP_MINUTES = 15
 const selectClass =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30'
 
-function postFailure(error: unknown): string {
+const POST_FAILURE_CODES: Partial<Record<string, MessageId>> = {
+  below_minimum_lead_time: 'error.below_minimum_lead_time',
+  no_available_credits: 'error.no_available_credits',
+  insufficient_credits: 'error.insufficient_credits',
+  concurrent_update: 'error.concurrent_update',
+}
+
+function postFailure(error: unknown): MessageId {
   const code = error instanceof ApiError ? error.code : ''
-  switch (code) {
-    case 'below_minimum_lead_time':
-      return 'That start time is too soon. Pick a later start.'
-    case 'no_available_credits':
-      return 'You have no available credits, so you can’t post a request until you earn some.'
-    case 'insufficient_credits':
-      return 'You don’t have enough available credits for this request.'
-    case 'concurrent_update':
-      return 'Your balance changed while you were posting. Please try again.'
-    default:
-      return 'Please check the details and try again.'
-  }
+  return POST_FAILURE_CODES[code] ?? 'requests.post.failed.generic'
 }
 
 /** The post form: a live cost preview, then one submit that takes the cost into Escrow (spec §4.1). */
 export function PostRequestPage({ onPosted }: PostRequestPageProps) {
+  const intl = useIntl()
   const account = useMyAccount()
   const post = usePostRequest()
   const [startsAt, setStartsAt] = useState('')
@@ -83,13 +82,15 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Post a request</CardTitle>
+        <CardTitle>
+          <FormattedMessage id="requests.post.title" />
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="startsAt" className="text-sm font-medium">
-              Start time (your local time)
+              <FormattedMessage id="requests.post.startsAt" />
             </label>
             <Input
               id="startsAt"
@@ -104,7 +105,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label htmlFor="duration" className="text-sm font-medium">
-                Duration (minutes, in steps of 15)
+                <FormattedMessage id="requests.post.duration" />
               </label>
               <Input
                 id="duration"
@@ -120,7 +121,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             </div>
             <div className="space-y-2">
               <label htmlFor="children" className="text-sm font-medium">
-                Number of children
+                <FormattedMessage id="requests.post.children" />
               </label>
               <Input
                 id="children"
@@ -138,7 +139,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label htmlFor="location" className="text-sm font-medium">
-                Location
+                <FormattedMessage id="requests.post.location" />
               </label>
               <select
                 id="location"
@@ -148,13 +149,17 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   changeLocation(event.target.value as BabysittingLocation)
                 }}
               >
-                <option value="SittersHouse">Sitter&apos;s house</option>
-                <option value="RequestingFamilysHouse">Requesting family&apos;s house</option>
+                <option value="SittersHouse">
+                  {intl.formatMessage({ id: 'requests.post.location.SittersHouse' })}
+                </option>
+                <option value="RequestingFamilysHouse">
+                  {intl.formatMessage({ id: 'requests.post.location.RequestingFamilysHouse' })}
+                </option>
               </select>
             </div>
             <div className="space-y-2">
               <label htmlFor="transport" className="text-sm font-medium">
-                Transport
+                <FormattedMessage id="requests.post.transport" />
               </label>
               <select
                 id="transport"
@@ -165,14 +170,22 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setTransport(event.target.value as TransportOption)
                 }}
               >
-                <option value="None">No transport</option>
-                <option value="OneWay">One way</option>
-                <option value="RoundTrip">Round trip</option>
+                <option value="None">
+                  {intl.formatMessage({ id: 'requests.post.transport.None' })}
+                </option>
+                <option value="OneWay">
+                  {intl.formatMessage({ id: 'requests.post.transport.OneWay' })}
+                </option>
+                <option value="RoundTrip">
+                  {intl.formatMessage({ id: 'requests.post.transport.RoundTrip' })}
+                </option>
               </select>
             </div>
           </div>
           <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">Meals</legend>
+            <legend className="text-sm font-medium">
+              <FormattedMessage id="requests.post.meals" />
+            </legend>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -181,7 +194,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setLunchOrDinner(event.target.checked)
                 }}
               />
-              Lunch or dinner
+              <FormattedMessage id="requests.post.meals.lunchOrDinner" />
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -191,12 +204,12 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setSnack(event.target.checked)
                 }}
               />
-              Snack
+              <FormattedMessage id="requests.post.meals.snack" />
             </label>
           </fieldset>
           <div className="space-y-2">
             <label htmlFor="area" className="text-sm font-medium">
-              Area (shown to other members)
+              <FormattedMessage id="requests.post.area" />
             </label>
             <Input
               id="area"
@@ -210,7 +223,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
           </div>
           <div className="space-y-2">
             <label htmlFor="address" className="text-sm font-medium">
-              Exact address (shown only to the sitter once they claim)
+              <FormattedMessage id="requests.post.address" />
             </label>
             <Input
               id="address"
@@ -223,25 +236,52 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             />
           </div>
           <p aria-live="polite" className="text-sm">
-            Cost: <strong>{cost === undefined ? '—' : `${formatCredits(cost)} credits`}</strong>
-            {available !== undefined && <> · You have {formatCredits(available)} available</>}
+            {cost === undefined ? (
+              <FormattedMessage
+                id="requests.post.costUnknown"
+                values={{ strong: (chunks) => <strong>{chunks}</strong> }}
+              />
+            ) : (
+              <FormattedMessage
+                id="requests.post.cost"
+                values={{
+                  cost: formatCredits(cost),
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                }}
+              />
+            )}
+            {available !== undefined && (
+              <>
+                {' · '}
+                <FormattedMessage
+                  id="requests.post.available"
+                  values={{ available: formatCredits(available) }}
+                />
+              </>
+            )}
           </p>
           {cannotAfford && (
             <Alert variant="destructive">
-              <AlertTitle>Not enough credits</AlertTitle>
+              <AlertTitle>
+                <FormattedMessage id="requests.post.cannotAfford.title" />
+              </AlertTitle>
               <AlertDescription>
-                This request costs more than your available balance.
+                <FormattedMessage id="requests.post.cannotAfford.body" />
               </AlertDescription>
             </Alert>
           )}
           {post.isError && (
             <Alert variant="destructive">
-              <AlertTitle>We couldn&apos;t post your request</AlertTitle>
-              <AlertDescription>{postFailure(post.error)}</AlertDescription>
+              <AlertTitle>
+                <FormattedMessage id="requests.post.failed.title" />
+              </AlertTitle>
+              <AlertDescription>
+                <FormattedMessage id={postFailure(post.error)} />
+              </AlertDescription>
             </Alert>
           )}
           <Button type="submit" disabled={post.isPending || !detailsValid || cannotAfford}>
-            Post request
+            <FormattedMessage id="requests.post.submit" />
           </Button>
         </form>
       </CardContent>

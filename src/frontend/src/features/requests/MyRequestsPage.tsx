@@ -1,3 +1,4 @@
+import { FormattedMessage } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,25 +19,42 @@ export function MyRequestsPage() {
   if (requests.isError) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>We couldn&apos;t load your requests</AlertTitle>
-        <AlertDescription>Please try again in a moment.</AlertDescription>
+        <AlertTitle>
+          <FormattedMessage id="requests.myRequests.loadFailed.title" />
+        </AlertTitle>
+        <AlertDescription>
+          <FormattedMessage id="requests.myRequests.loadFailed.body" />
+        </AlertDescription>
       </Alert>
     )
   }
   if (!requests.data) return null
 
   const items = requests.data.pages.flatMap((page) => page.items)
-  if (items.length === 0) return <p>You haven&apos;t posted any requests yet.</p>
+  if (items.length === 0)
+    return (
+      <p>
+        <FormattedMessage id="requests.myRequests.empty" />
+      </p>
+    )
 
   return (
     <div className="space-y-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Starts</TableHead>
-            <TableHead>Area and address</TableHead>
-            <TableHead>State</TableHead>
-            <TableHead className="text-right">Credits</TableHead>
+            <TableHead>
+              <FormattedMessage id="requests.myRequests.starts" />
+            </TableHead>
+            <TableHead>
+              <FormattedMessage id="requests.myRequests.areaAndAddress" />
+            </TableHead>
+            <TableHead>
+              <FormattedMessage id="requests.myRequests.state" />
+            </TableHead>
+            <TableHead className="text-right">
+              <FormattedMessage id="requests.myRequests.credits" />
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,7 +66,9 @@ export function MyRequestsPage() {
                 <br />
                 <span className="text-muted-foreground">{request.address}</span>
               </TableCell>
-              <TableCell>{request.status}</TableCell>
+              <TableCell>
+                <FormattedMessage id={`requests.status.${request.status}`} />
+              </TableCell>
               <TableCell className="text-right">
                 {formatCredits(request.costQuarterCredits)}
               </TableCell>
@@ -62,7 +82,7 @@ export function MyRequestsPage() {
           onClick={() => void requests.fetchNextPage()}
           disabled={requests.isFetchingNextPage}
         >
-          Load more
+          <FormattedMessage id="requests.myRequests.loadMore" />
         </Button>
       )}
     </div>

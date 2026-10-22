@@ -23,7 +23,7 @@ test('a Member posts a Request, the cost goes into Escrow and it shows in My Req
   await expect(row).toContainText('Posted')
   await expect(row).toContainText('2.00')
   await expect(row).toContainText('12 River Rd')
-  await expect(row).toContainText('2 Mar 2026, 10:00 UTC')
+  await expect(row).toContainText('Mar 2, 2026, 10:00 AM UTC')
 
   await page.goto('/credits')
   await expect(page.getByRole('group', { name: 'Available' })).toContainText('8.00')
