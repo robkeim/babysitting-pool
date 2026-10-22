@@ -12,6 +12,7 @@ const ada = {
   memberId: '2f6c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e11',
   email: 'ada@example.com',
   displayName: 'Ada',
+  language: 'en-US',
   isAdmin: false,
 }
 
@@ -30,6 +31,26 @@ describe('AccountMenu', () => {
     await waitFor(() => {
       expect(onSignedOut).toHaveBeenCalledTimes(1)
     })
+  })
+
+  it('saves the Language the Member picks and shows it selected', async () => {
+    let saved: unknown
+    server.use(
+      meHandler(ada),
+      http.put('*/api/me/language', async ({ request }) => {
+        saved = await request.json()
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
+
+    const dropdown = await screen.findByRole('combobox', { name: 'Language' })
+    await userEvent.selectOptions(dropdown, 'Ünïcödé Tëst')
+
+    await waitFor(() => {
+      expect(dropdown).toHaveValue('en-XA')
+    })
+    expect(saved).toEqual({ language: 'en-XA' })
   })
 
   it('renders nothing when nobody is signed in', async () => {

@@ -18,6 +18,19 @@ public class IdentityTests
     }
 
     [Theory]
+    [InlineData("en-US", false, true)]
+    [InlineData("en-XA", false, false)]
+    [InlineData("en-XA", true, true)]
+    [InlineData("fr-FR", true, false)]
+    [InlineData(null, true, false)]
+    public void Test_languages_are_only_parsed_outside_production(string? tag, bool includeTest, bool expected) =>
+        Language.TryParse(tag, includeTest, out _).Should().Be(expected);
+
+    [Fact]
+    public void A_retired_stored_language_falls_back_to_english() =>
+        Language.Restore("xx").Should().Be(Language.EnglishUs);
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]

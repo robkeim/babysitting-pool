@@ -1,4 +1,5 @@
 import { useState, type SyntheticEvent } from 'react'
+import { FormattedMessage } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,9 +25,11 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
   if (!token || preview.isError) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>This invitation can&apos;t be used</AlertTitle>
+        <AlertTitle>
+          <FormattedMessage id="auth.invitation.unusable.title" />
+        </AlertTitle>
         <AlertDescription>
-          It may have been used already or have expired. Ask the co-op&apos;s Admin for a new one.
+          <FormattedMessage id="auth.invitation.unusable.body" />
         </AlertDescription>
       </Alert>
     )
@@ -36,16 +39,24 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Join the co-op</CardTitle>
+        <CardTitle>
+          <FormattedMessage id="auth.invitation.title" />
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
           <p>
-            You&apos;re joining as <strong>{preview.data.email}</strong>.
+            <FormattedMessage
+              id="auth.invitation.joiningAs"
+              values={{
+                email: preview.data.email,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              }}
+            />
           </p>
           <div className="space-y-2">
             <label htmlFor="displayName" className="text-sm font-medium">
-              Your name
+              <FormattedMessage id="auth.invitation.name" />
             </label>
             <Input
               id="displayName"
@@ -60,15 +71,16 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
           </div>
           {accept.isError && (
             <Alert variant="destructive">
-              <AlertTitle>We couldn&apos;t create your account</AlertTitle>
+              <AlertTitle>
+                <FormattedMessage id="auth.invitation.failed.title" />
+              </AlertTitle>
               <AlertDescription>
-                Use 1 to 60 characters for your name. If it still fails, the invitation may have
-                expired.
+                <FormattedMessage id="auth.invitation.failed.body" />
               </AlertDescription>
             </Alert>
           )}
           <Button type="submit" disabled={accept.isPending}>
-            Create my account
+            <FormattedMessage id="auth.invitation.submit" />
           </Button>
         </form>
       </CardContent>

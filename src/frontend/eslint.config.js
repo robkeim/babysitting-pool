@@ -1,5 +1,6 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import formatjs from 'eslint-plugin-formatjs'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
@@ -39,6 +40,16 @@ export default defineConfig(
     },
   },
   ...boundaryConfigs,
+  {
+    // User-visible text lives in the catalogs (ADR 0009).
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', 'src/test/**'],
+    plugins: { formatjs },
+    rules: {
+      'formatjs/no-literal-string-in-jsx': 'error',
+      'formatjs/no-literal-string-in-object': 'error',
+    },
+  },
   {
     files: ['**/*.{test,spec}.{ts,tsx}', 'src/test/**', 'e2e/**'],
     rules: { 'react-refresh/only-export-components': 'off' },

@@ -133,6 +133,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/language": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ChangeMyLanguage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/account": {
         parameters: {
             query?: never;
@@ -167,6 +183,9 @@ export interface components {
         InvitationPreview: {
             email: string;
         };
+        LanguageRequest: {
+            language: null | string;
+        };
         LedgerEntryView: {
             /** Format: uuid */
             id: string;
@@ -181,6 +200,7 @@ export interface components {
             memberId: string;
             email: string;
             displayName: string;
+            language: string;
             isAdmin: boolean;
         };
         PageOfLedgerEntryView: {
@@ -379,6 +399,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MemberView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ChangeMyLanguage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LanguageRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Unauthorized */

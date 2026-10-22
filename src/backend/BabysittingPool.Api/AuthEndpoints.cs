@@ -90,7 +90,32 @@ internal static class AuthEndpoints
         .WithName("GetMe")
         .Produces<MemberView>()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        app.MapPut("/api/me/language", async (
+            HttpContext context, LanguageRequest request, ChangeLanguageHandler handler, IHostEnvironment environment,
+            CancellationToken cancellationToken) =>
+        {
+            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
+            {
+                return Problems.Unauthenticated();
+            }
+
+            // Ünïcödé Tëst is a test aid, never offered in production (GLOSSARY: Ünïcödé Tëst).
+            if (!Language.TryParse(request.Language, includeTest: !environment.IsProduction(), out var language))
+            {
+                return Problems.InvalidRequest("language", "unsupported");
+            }
+
+            await handler.HandleAsync(member.MemberId, language, cancellationToken);
+            return Results.NoContent();
+        })
+        .WithName("ChangeMyLanguage")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
+
+    private sealed record LanguageRequest(string? Language);
 
     private sealed record SignInLinkRequest(string? Email);
 

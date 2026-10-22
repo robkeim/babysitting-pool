@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<RequestSignInLinkHandler>();
         services.AddScoped<RedeemSignInLinkHandler>();
         services.AddScoped<ResolveSessionHandler>();
+        services.AddScoped<ChangeLanguageHandler>();
         services.AddScoped<EndSessionHandler>();
         services.AddScoped<BootstrapAdminHandler>();
         return services;

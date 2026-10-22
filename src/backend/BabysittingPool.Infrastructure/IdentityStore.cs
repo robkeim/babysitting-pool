@@ -27,6 +27,10 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         return record is null ? null : ToDomain(record);
     }
 
+    public async Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken) =>
+        await db.Members.Where(m => m.Id == memberId)
+            .ExecuteUpdateAsync(m => m.SetProperty(x => x.Language, language.Tag), cancellationToken);
+
     public async Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken)
     {
         db.Invitations.Add(new InvitationRecord
@@ -61,6 +65,7 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
             Id = member.Id,
             Email = member.Email.Value,
             DisplayName = member.DisplayName.Value,
+            Language = member.Language.Tag,
             IsAdmin = member.IsAdmin,
             CreatedAt = member.CreatedAt,
         });
@@ -160,5 +165,5 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
     }
 
     private static Member ToDomain(MemberRecord r) => Member.Restore(
-        r.Id, EmailAddress.Restore(r.Email), DisplayName.Restore(r.DisplayName), r.IsAdmin, r.CreatedAt, r.ClosedAt);
+        r.Id, EmailAddress.Restore(r.Email), DisplayName.Restore(r.DisplayName), Language.Restore(r.Language), r.IsAdmin, r.CreatedAt, r.ClosedAt);
 }
