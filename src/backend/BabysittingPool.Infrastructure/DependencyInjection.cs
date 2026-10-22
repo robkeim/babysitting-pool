@@ -1,4 +1,5 @@
 using BabysittingPool.Application.Credits;
+using BabysittingPool.Application.Identity;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,22 @@ public static class DependencyInjection
             .UseSqlite(connectionString)
             .AddInterceptors(new SqliteConnectionSetup()));
         services.AddScoped<ICreditAccountReader, CreditAccountReader>();
+        services.AddScoped<IIdentityStore, IdentityStore>();
+        return services;
+    }
+
+    /// <summary>Development, E2E and tests: emails are kept and logged, never sent.</summary>
+    public static IServiceCollection AddEmailOutbox(this IServiceCollection services)
+    {
+        services.AddSingleton<EmailOutbox>();
+        services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<EmailOutbox>());
+        return services;
+    }
+
+    /// <summary>Production until an email provider exists.</summary>
+    public static IServiceCollection AddUnconfiguredEmailSender(this IServiceCollection services)
+    {
+        services.AddSingleton<IEmailSender, UnconfiguredEmailSender>();
         return services;
     }
 

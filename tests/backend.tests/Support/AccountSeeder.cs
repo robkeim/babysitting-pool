@@ -14,6 +14,7 @@ internal static class AccountSeeder
         var memberId = Guid.NewGuid();
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
+        db.Members.Add(NewMember(memberId, clock));
         db.CreditAccounts.Add(new CreditAccountRecord { MemberId = memberId, Available = available, Escrowed = escrowed });
         for (var i = 0; i < grants.Length; i++)
         {
@@ -36,6 +37,7 @@ internal static class AccountSeeder
         var memberId = Guid.NewGuid();
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
+        db.Members.Add(NewMember(memberId, clock));
         db.CreditAccounts.Add(new CreditAccountRecord
         {
             MemberId = memberId,
@@ -56,4 +58,23 @@ internal static class AccountSeeder
         await db.SaveChangesAsync();
         return memberId;
     }
+
+    /// <summary>A Member with no Credit Account, for tests about the missing-account case.</summary>
+    public static async Task<Guid> SeedMemberAsync(IServiceProvider services, TimeProvider clock)
+    {
+        var memberId = Guid.NewGuid();
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
+        db.Members.Add(NewMember(memberId, clock));
+        await db.SaveChangesAsync();
+        return memberId;
+    }
+
+    private static MemberRecord NewMember(Guid id, TimeProvider clock) => new()
+    {
+        Id = id,
+        Email = $"{id:N}@example.test",
+        DisplayName = "Test Member",
+        CreatedAt = clock.GetUtcNow().UtcDateTime,
+    };
 }

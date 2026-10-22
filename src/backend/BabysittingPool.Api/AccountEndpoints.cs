@@ -8,20 +8,19 @@ internal static class AccountEndpoints
     {
         app.MapGet("/api/me/account", async (
             HttpContext context,
-            IHostEnvironment environment,
             GetMyAccountHandler handler,
             string? cursor,
             int? limit,
             CancellationToken cancellationToken) =>
         {
-            if (DevIdentity.CurrentMemberId(context, environment) is not { } memberId)
+            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
             {
                 return Problems.Unauthenticated();
             }
 
             try
             {
-                var account = await handler.HandleAsync(new GetMyAccountQuery(memberId, cursor, limit), cancellationToken);
+                var account = await handler.HandleAsync(new GetMyAccountQuery(member.MemberId, cursor, limit), cancellationToken);
                 return account is null ? Problems.AccountNotFound() : Results.Ok(account);
             }
             catch (InvalidCursorException)
