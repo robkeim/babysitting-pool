@@ -7,5 +7,7 @@ dist/
 *.db-shm
 *.db-wal
 
-# Claude Code local state
-.claude/
+# Claude Code local state; the shared settings and hooks are committed (ADR 0008)
+.claude/*
+!.claude/settings.json
+!.claude/hooks/

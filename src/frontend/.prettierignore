@@ -3,3 +3,6 @@ node_modules
 package-lock.json
 *.gen.ts
 src/components/ui
+test-results
+playwright-report
+.tanstack

@@ -1,0 +1,8 @@
+# No direct pushes to main (ADR 0008): GitHub cannot enforce this on a private free repo, so the hook does.
+while read -r _ _ remote_ref _; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "pre-push: direct pushes to main are blocked; open a PR from an <issue>-<slug> branch." >&2
+    exit 1
+  fi
+done
+scripts/check.sh all --fast --stamped

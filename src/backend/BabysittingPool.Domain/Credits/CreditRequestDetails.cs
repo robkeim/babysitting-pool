@@ -14,15 +14,26 @@ public sealed record CreditRequestDetails
         MealOption meals = MealOption.None)
     {
         if (durationMinutes <= 0)
+        {
             throw new DomainException("Duration must be greater than zero minutes.");
+        }
+
         if (durationMinutes % DurationIncrementMinutes != 0)
+        {
             throw new DomainException(
                 $"Duration must be a multiple of {DurationIncrementMinutes} minutes.");
+        }
+
         if (childCount < 1)
+        {
             throw new DomainException("A request must include at least one child.");
+        }
+
         if (location == BabysittingLocation.RequestingFamilysHouse && transport != TransportOption.None)
+        {
             throw new DomainException(
                 "Transport fees cannot be combined with the requesting family's house location premium.");
+        }
 
         DurationMinutes = durationMinutes;
         ChildCount = childCount;

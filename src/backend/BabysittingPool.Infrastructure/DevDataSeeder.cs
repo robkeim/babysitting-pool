@@ -13,7 +13,10 @@ public static class DevDataSeeder
     {
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
-        if (await db.CreditAccounts.AnyAsync(a => a.MemberId == memberId, cancellationToken)) return;
+        if (await db.CreditAccounts.AnyAsync(a => a.MemberId == memberId, cancellationToken))
+        {
+            return;
+        }
 
         var account = CreditAccount.Open();
         var available = Credits.FromDecimal(account.Available);

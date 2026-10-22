@@ -20,3 +20,5 @@ Agents are kept inside the guidelines by deterministic layers, not prompts alone
 6. Agents must not edit lint config, `.editorconfig` or workflows to make a failure pass unless the issue says so; CODEOWNERS on those files makes any change visible.
 
 We chose this over relying on CI alone because CI minutes are the scarce resource on a private repo: every failure that reaches CI that a local gate could have caught is wasted budget. Lefthook and third-party analyzers were considered; Husky is kept because Node is already required, and analyzers add noise before there is evidence of drift.
+
+Amendment (2026-10): the repository is private on the free GitHub plan, which offers neither rulesets nor branch protection. The ruleset is therefore not applied. Instead the pre-push hook and a Claude Code deny rule refuse pushes to `main`, and the repo allows squash-merge only with branches deleted on merge. `ci-ok` still runs and reports on every PR, but nothing server-side stops a merge while it is red. This is accepted because there is one maintainer on one machine; revisit (GitHub Pro or a public repo) if that changes.

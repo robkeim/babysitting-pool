@@ -13,7 +13,11 @@ internal static class DevIdentity
 
     public static Guid? CurrentMemberId(HttpContext context, IHostEnvironment environment)
     {
-        if (!environment.IsDevelopment() && !environment.IsEnvironment("E2E")) return null;
+        if (!environment.IsDevelopment() && !environment.IsEnvironment("E2E"))
+        {
+            return null;
+        }
+
         return Guid.TryParse(context.Request.Headers[HeaderName], out var id) ? id : null;
     }
 }

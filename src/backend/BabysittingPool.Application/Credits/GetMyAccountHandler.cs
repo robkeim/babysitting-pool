@@ -22,7 +22,10 @@ public sealed class GetMyAccountHandler(ICreditAccountReader reader)
 
         // Ask for one extra entry to learn whether another page follows.
         var account = await reader.FindAsync(query.MemberId, after, limit + 1, cancellationToken);
-        if (account is null) return null;
+        if (account is null)
+        {
+            return null;
+        }
 
         var items = account.LedgerEntries.Take(limit).ToList();
         var nextCursor = account.LedgerEntries.Count > limit ? Encode(items[^1]) : null;

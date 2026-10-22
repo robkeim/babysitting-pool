@@ -1,9 +1,8 @@
-/// <reference types="vitest/config" />
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import { configDefaults } from 'vitest/config'
 
 // The API seeds this Member in Development; there is no real sign-in yet (see DevIdentity in the API).

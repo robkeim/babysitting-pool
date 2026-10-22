@@ -11,7 +11,10 @@ internal sealed class CreditAccountReader(BabysittingPoolDbContext db) : ICredit
     {
         var account = await db.CreditAccounts.AsNoTracking()
             .SingleOrDefaultAsync(a => a.MemberId == memberId, cancellationToken);
-        if (account is null) return null;
+        if (account is null)
+        {
+            return null;
+        }
 
         var ledger = db.LedgerEntries.AsNoTracking().Where(e => e.MemberId == memberId);
         if (after is not null)

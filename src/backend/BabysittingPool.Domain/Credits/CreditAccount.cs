@@ -22,8 +22,16 @@ public sealed class CreditAccount
     /// <summary>Rehydrates an account from persisted balances.</summary>
     public static CreditAccount Restore(decimal available, decimal escrowed)
     {
-        if (available < 0m) throw new DomainException("Available balance cannot be negative.");
-        if (escrowed < 0m) throw new DomainException("Escrowed balance cannot be negative.");
+        if (available < 0m)
+        {
+            throw new DomainException("Available balance cannot be negative.");
+        }
+
+        if (escrowed < 0m)
+        {
+            throw new DomainException("Escrowed balance cannot be negative.");
+        }
+
         return new CreditAccount(available, escrowed);
     }
 
@@ -35,8 +43,10 @@ public sealed class CreditAccount
     {
         RequirePositive(amount);
         if (Available < amount)
+        {
             throw new DomainException(
                 $"Insufficient balance: {Available} available, {amount} required.");
+        }
 
         Available -= amount;
         Escrowed += amount;
@@ -57,7 +67,10 @@ public sealed class CreditAccount
     {
         ArgumentNullException.ThrowIfNull(sitter);
         if (ReferenceEquals(this, sitter))
+        {
             throw new DomainException("A member cannot pay out to themselves.");
+        }
+
         RequirePositive(amount);
         RequireEscrowed(amount);
 
@@ -68,11 +81,16 @@ public sealed class CreditAccount
     private void RequireEscrowed(decimal amount)
     {
         if (Escrowed < amount)
+        {
             throw new DomainException($"Only {Escrowed} is escrowed; cannot release {amount}.");
+        }
     }
 
     private static void RequirePositive(decimal amount)
     {
-        if (amount <= 0m) throw new DomainException("Amount must be greater than zero.");
+        if (amount <= 0m)
+        {
+            throw new DomainException("Amount must be greater than zero.");
+        }
     }
 }
