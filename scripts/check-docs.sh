@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 fail=0
 err() { echo "docs: $*" >&2; fail=1; }
 
-lines=$(wc -l <AGENTS.md)
+lines=$(wc -l <AGENTS.md | tr -d ' ')
 ((lines <= 60)) || err "AGENTS.md has $lines lines (max 60): move detail into docs/ and link to it"
 
 for adr in docs/adr/[0-9]*.md; do
