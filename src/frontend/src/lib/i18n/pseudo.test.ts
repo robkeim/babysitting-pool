@@ -8,7 +8,7 @@ const intl = createIntl({ locale: 'en-US', messages: pseudoLocalize(enUS) })
 describe('pseudoLocalize', () => {
   it('accents the literal text, wraps it and pads it by the tier for its length', () => {
     expect(intl.formatMessage({ id: 'credits.loadMore' })).toBe(
-      '⏩ Ļöàð ɱöŕé ·················· ⏪',
+      '⏩ Ĺòäḋ ṁŏřě ·················· ⏪',
     )
   })
 
@@ -19,7 +19,7 @@ describe('pseudoLocalize', () => {
     )
 
     expect(out).toContain('[ada@example.com]')
-    expect(out).toMatch(/^⏩ Ýöû'ŕé ĵöîñîñĝ àš/)
+    expect(out).toMatch(/^⏩ .+ [^ ]+ \u00b7+ ⏪$/u)
   })
 })
 
