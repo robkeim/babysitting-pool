@@ -19,7 +19,7 @@ describe('MyRequestsPage', () => {
     expect(within(posted).getByText('Posted')).toBeInTheDocument()
     expect(within(posted).getByText('2.00')).toBeInTheDocument()
     expect(within(posted).getByText('12 River Rd')).toBeInTheDocument()
-    expect(within(posted).getByText(/2 Mar 2026, 10:00 UTC/)).toBeInTheDocument()
+    expect(within(posted).getByText(/Mar 2, 2026, 10:00 AM UTC/)).toBeInTheDocument()
     expect(
       within(screen.getByRole('row', { name: /hilltop/i })).getByText('Expired'),
     ).toBeInTheDocument()

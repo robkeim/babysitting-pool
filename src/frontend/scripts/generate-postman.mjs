@@ -1,5 +1,6 @@
 // Generates docs/api/postman_collection.json from docs/api/openapi.json (ADR 0006).
-// The converter emits random ids; they are stripped so the output is deterministic and drift-checkable.
+// The converter emits random ids and picks random enum examples; ids are stripped and every enum is narrowed to
+// its first value in the copy handed to the converter, so the output is deterministic and drift-checkable.
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -9,9 +10,23 @@ const spec = new URL('../../../docs/api/openapi.json', import.meta.url).pathname
 const target = new URL('../../../docs/api/postman_collection.json', import.meta.url).pathname
 const dir = mkdtempSync(join(tmpdir(), 'postman-'))
 const raw = join(dir, 'collection.json')
+const pinnedSpec = join(dir, 'openapi.json')
+
+const pinEnums = (node) => {
+  if (Array.isArray(node)) return node.map(pinEnums)
+  if (node && typeof node === 'object') {
+    const pinned = Object.fromEntries(
+      Object.entries(node).map(([key, value]) => [key, pinEnums(value)]),
+    )
+    if (Array.isArray(pinned.enum)) pinned.enum = pinned.enum.slice(0, 1)
+    return pinned
+  }
+  return node
+}
 
 try {
-  execFileSync('npx', ['--yes', 'openapi-to-postmanv2@5.0.0', '-s', spec, '-o', raw, '-p'], {
+  writeFileSync(pinnedSpec, JSON.stringify(pinEnums(JSON.parse(readFileSync(spec, 'utf8')))))
+  execFileSync('npx', ['--yes', 'openapi-to-postmanv2@5.0.0', '-s', pinnedSpec, '-o', raw, '-p'], {
     stdio: 'inherit',
   })
   const strip = (node) => {
