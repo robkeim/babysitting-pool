@@ -21,7 +21,11 @@ public sealed class ApiFactory(string environment = "E2E") : WebApplicationFacto
         builder.UseEnvironment(environment);
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(
             new Dictionary<string, string?> { ["ConnectionStrings:Default"] = $"Data Source={_path}" }));
-        builder.ConfigureServices(services => services.Replace(ServiceDescriptor.Singleton<TimeProvider>(Clock)));
+        builder.ConfigureServices(services =>
+        {
+            services.Replace(ServiceDescriptor.Singleton<TimeProvider>(Clock));
+            services.Replace(ServiceDescriptor.Singleton(Clock));
+        });
     }
 
     public HttpClient CreateMemberClient(Guid memberId)

@@ -16,7 +16,8 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
 // frontend types become `number | string`.
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict);
-builder.Services.AddSingleton(TimeProvider.System);
+if (builder.Environment.IsEnvironment(TestEndpoints.Environment)) builder.Services.AddTestClock();
+else builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("Default") ?? "Data Source=babysitting.db");
@@ -39,6 +40,11 @@ app.UseHttpsRedirection();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAccountEndpoints();
+
+if (app.Environment.IsEnvironment(TestEndpoints.Environment))
+{
+    app.MapTestEndpoints();
+}
 
 app.Run();
 
