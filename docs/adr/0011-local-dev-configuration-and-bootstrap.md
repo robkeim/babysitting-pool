@@ -1,0 +1,11 @@
+# Local dev is one command, co-op rules are code, and the first Admin is bootstrapped by configuration
+
+`scripts/dev.sh` starts the API and the Vite dev server together. It is plain shell with no root `package.json`; the two-command route stays documented in `docs/development.md`.
+
+Co-op rules (Minimum Lead Time, Claim Cutoff, the Demurrage weekday and time, the dormancy threshold, the co-op time zone, Invitation and magic-link lifetimes) live in one `CoopSettings` record in the Application layer, with the defaults as property initializers, injected wherever a rule is needed. Changing a rule is a one-line edit and a redeploy, which the spec accepts because there is no Admin settings screen. They are not read from configuration; tests construct `CoopSettings` directly. Configuration (`appsettings*.json`, then environment variables as `Section__Key`, with `dotnet user-secrets` for development secrets, no `.env` files) holds only deployment values: `Bootstrap:AdminEmail`, the production email provider and credentials, the SQLite path.
+
+Invitations are the only way in, so the first Admin comes from `Bootstrap:AdminEmail`: when the database has no Admin at startup, the API issues an Admin Invitation to that address and does nothing once an Admin exists. Production refuses to start with neither. There is no CLI or SQL step. Development seeds a fixed, idempotent set through the application layer (one Admin, three Members with different balances); Production never seeds.
+
+In Development the `IEmailSender` fake outbox also logs every message, including the full link, to the console and is readable at a Development-only `GET /api/dev/outbox`; nothing is written to files and nothing is sent. The seeded Admin's sign-in link is logged at startup. The `X-Dev-Member-Id` shortcut is removed when real sign-in lands, so development and production share one authentication path; E2E gets a test-only way to create a session instead.
+
+The Postman collection is generated from `docs/api/openapi.json` by `npm run generate:postman` (pinned `openapi-to-postmanv2` through `npx`, random ids stripped for determinism). Its `baseUrl` is the Vite origin so cookies and the proxy behave as in the browser, and it presets `X-Requested-With` for the CSRF check (ADR 0006).
