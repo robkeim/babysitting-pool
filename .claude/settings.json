@@ -9,7 +9,12 @@
       "Bash(git push * -f *)",
       "Bash(git push -f*)",
       "Bash(git push * main*)",
-      "Bash(git push * HEAD:main*)"
+      "Bash(git push * HEAD:main*)",
+      "Read(./src/frontend/package-lock.json)",
+      "Read(./src/frontend/src/lib/api/schema.gen.ts)",
+      "Read(./docs/api/postman_collection.json)",
+      "Read(./src/backend/**/Migrations/**)",
+      "Read(./docs/research/**)"
     ]
   },
   "hooks": {
