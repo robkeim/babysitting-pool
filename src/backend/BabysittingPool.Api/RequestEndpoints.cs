@@ -67,6 +67,88 @@ internal static class RequestEndpoints
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized);
 
+        app.MapGet("/api/requests/open", async (
+            HttpContext context,
+            ListOpenRequestsHandler handler,
+            string? cursor,
+            int? limit,
+            CancellationToken cancellationToken) =>
+        {
+            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
+            {
+                return Problems.Unauthenticated();
+            }
+
+            try
+            {
+                return Results.Ok(await handler.HandleAsync(new ListOpenRequestsQuery(member.MemberId, cursor, limit), cancellationToken));
+            }
+            catch (InvalidCursorException)
+            {
+                return Problems.InvalidRequest("cursor", "invalid");
+            }
+        })
+        .WithName("ListOpenRequests")
+        .Produces<Page<OpenRequestView>>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        app.MapGet("/api/me/claims", async (
+            HttpContext context,
+            ListMyClaimsHandler handler,
+            string? cursor,
+            int? limit,
+            CancellationToken cancellationToken) =>
+        {
+            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
+            {
+                return Problems.Unauthenticated();
+            }
+
+            try
+            {
+                return Results.Ok(await handler.HandleAsync(new ListMyClaimsQuery(member.MemberId, cursor, limit), cancellationToken));
+            }
+            catch (InvalidCursorException)
+            {
+                return Problems.InvalidRequest("cursor", "invalid");
+            }
+        })
+        .WithName("ListMyClaims")
+        .Produces<Page<RequestView>>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        app.MapPost("/api/requests/{id:guid}/claim", async (
+            Guid id, HttpContext context, ClaimRequestHandler handler, CancellationToken cancellationToken) =>
+        {
+            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
+            {
+                return Problems.Unauthenticated();
+            }
+
+            try
+            {
+                return await handler.HandleAsync(new ClaimRequestCommand(id, member.MemberId), cancellationToken) is { } view
+                    ? Results.Ok(view)
+                    : Problems.RequestNotFound();
+            }
+            catch (DomainException ex)
+            {
+                return Problems.DomainRule(ex);
+            }
+            catch (ConcurrencyConflictException)
+            {
+                return Problems.Conflict();
+            }
+        })
+        .WithName("ClaimRequest")
+        .Produces<RequestView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
         app.MapGet("/api/requests/quote", async (
             HttpContext context, [AsParameters] QuoteQuery query, CancellationToken cancellationToken) =>
         {

@@ -1,5 +1,12 @@
 import { http, HttpResponse } from 'msw'
-import type { CostQuote, PostRequestBody, RequestPage, RequestView } from './types'
+import type {
+  CostQuote,
+  OpenRequestPage,
+  OpenRequestView,
+  PostRequestBody,
+  RequestPage,
+  RequestView,
+} from './types'
 
 export const sampleRequest: RequestView = {
   id: '2f6c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e11',
@@ -61,5 +68,62 @@ export function availableBalanceHandler(availableQuarterCredits: number) {
       escrowedQuarterCredits: 0,
       ledger: { items: [], nextCursor: null },
     }),
+  )
+}
+
+export const sampleOpenRequest: OpenRequestView = {
+  id: '9d1f2c3e-5d8a-4a38-9b1d-0a7a1c1b9e22',
+  startsAt: '2026-03-02T10:00:00Z',
+  durationMinutes: 120,
+  childCount: 2,
+  location: 'SittersHouse',
+  transport: 'None',
+  lunchOrDinner: false,
+  snack: false,
+  area: 'Riverside',
+  costQuarterCredits: 12,
+  claimCutoffAt: '2026-03-02T07:00:00Z',
+}
+
+export function openRequestsHandler(page: OpenRequestPage) {
+  return http.get('*/api/requests/open', () => HttpResponse.json(page))
+}
+
+export function openRequestsFailureHandler() {
+  return http.get('*/api/requests/open', () =>
+    HttpResponse.json(
+      { status: 500, title: 'Boom', code: 'internal_error' },
+      { status: 500, headers: { 'content-type': 'application/problem+json' } },
+    ),
+  )
+}
+
+export function myClaimsHandler(page: RequestPage) {
+  return http.get('*/api/me/claims', () => HttpResponse.json(page))
+}
+
+export function myClaimsFailureHandler() {
+  return http.get('*/api/me/claims', () =>
+    HttpResponse.json(
+      { status: 500, title: 'Boom', code: 'internal_error' },
+      { status: 500, headers: { 'content-type': 'application/problem+json' } },
+    ),
+  )
+}
+
+/** Calls `onClaim` with the Request id, then answers 200 with the claimed Request. */
+export function claimRequestHandler(onClaim: (requestId: string) => void) {
+  return http.post('*/api/requests/:id/claim', ({ params }) => {
+    onClaim(String(params.id))
+    return HttpResponse.json({ ...sampleRequest, status: 'Claimed' })
+  })
+}
+
+export function claimRequestRejectedHandler(status: number, code: string) {
+  return http.post('*/api/requests/:id/claim', () =>
+    HttpResponse.json(
+      { status, title: code, code },
+      { status, headers: { 'content-type': 'application/problem+json' } },
+    ),
   )
 }

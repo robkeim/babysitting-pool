@@ -17,6 +17,15 @@ public interface IRequestStore
     /// transaction. Throws <see cref="ConcurrencyConflictException"/> if the account changed since it was read.
     /// </summary>
     Task AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>The Request, or null. The store remembers the version it read (ADR 0004).</summary>
+    Task<Request?> FindRequestAsync(Guid requestId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Saves a Request's Claim. Throws <see cref="ConcurrencyConflictException"/> if the Request changed since it
+    /// was read, which is how the loser of a claim race finds out (ADR 0004).
+    /// </summary>
+    Task SaveClaimedAsync(Request request, CancellationToken cancellationToken);
 }
 
 /// <summary>Read port: queries project straight from the database (ADR 0002).</summary>
@@ -25,4 +34,15 @@ public interface IRequestReader
     /// <summary>The Requester's Requests, newest posted first, starting after <paramref name="after"/>.</summary>
     Task<IReadOnlyList<RequestRead>> ListByRequesterAsync(
         Guid requesterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Posted Requests still before their Claim Cutoff at <paramref name="now"/>, other than the Member's own,
+    /// earliest start first, starting after <paramref name="after"/>.
+    /// </summary>
+    Task<IReadOnlyList<RequestRead>> ListOpenAsync(
+        Guid excludeRequesterId, DateTime now, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
+
+    /// <summary>The Requests the Member claimed as Sitter, latest start first, starting after <paramref name="after"/>.</summary>
+    Task<IReadOnlyList<RequestRead>> ListClaimedByAsync(
+        Guid sitterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
 }

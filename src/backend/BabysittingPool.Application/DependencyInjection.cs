@@ -22,6 +22,9 @@ public static class DependencyInjection
         services.AddScoped<BootstrapAdminHandler>();
         services.AddScoped<PostRequestHandler>();
         services.AddScoped<ListMyRequestsHandler>();
+        services.AddScoped<ListOpenRequestsHandler>();
+        services.AddScoped<ListMyClaimsHandler>();
+        services.AddScoped<ClaimRequestHandler>();
         return services;
     }
 }

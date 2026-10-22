@@ -30,10 +30,7 @@ public sealed class PostRequestHandler(IRequestStore store, TimeProvider clock, 
             now, settings.MinimumLeadTime, settings.ClaimCutoff);
         await store.AddPostedAsync(request, account, now, cancellationToken);
 
-        return new RequestRead(
-            request.Id, request.StartsAt, request.Details.DurationMinutes, request.Details.ChildCount,
-            request.Details.Location, request.Details.Transport, request.Details.Meals, request.Area, request.Address,
-            request.Cost.QuarterCredits, request.ClaimCutoffAt, request.PostedAt, request.Status).ToView(now);
+        return RequestRead.From(request).ToView(now);
     }
 }
 

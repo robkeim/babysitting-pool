@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as InvitationRouteImport } from './routes/invitation'
+import { Route as AuthedClaimsRouteImport } from './routes/_authed/claims'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
+import { Route as AuthedOpenRequestsRouteImport } from './routes/_authed/open-requests'
 import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
 import { Route as AuthedRequestsIndexRouteImport } from './routes/_authed/requests/index'
@@ -32,9 +34,19 @@ const InvitationRoute = InvitationRouteImport.update({
   path: '/invitation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedClaimsRoute = AuthedClaimsRouteImport.update({
+  id: '/claims',
+  path: '/claims',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedCreditsRoute = AuthedCreditsRouteImport.update({
   id: '/credits',
   path: '/credits',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedOpenRequestsRoute = AuthedOpenRequestsRouteImport.update({
+  id: '/open-requests',
+  path: '/open-requests',
   getParentRoute: () => AuthedRoute,
 } as any)
 const SignInIndexRoute = SignInIndexRouteImport.update({
@@ -61,7 +73,9 @@ const AuthedRequestsNewRoute = AuthedRequestsNewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/invitation': typeof InvitationRoute
+  '/claims': typeof AuthedClaimsRoute
   '/credits': typeof AuthedCreditsRoute
+  '/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
   '/requests/new': typeof AuthedRequestsNewRoute
@@ -70,7 +84,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/invitation': typeof InvitationRoute
+  '/claims': typeof AuthedClaimsRoute
   '/credits': typeof AuthedCreditsRoute
+  '/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in': typeof SignInIndexRoute
   '/requests/new': typeof AuthedRequestsNewRoute
@@ -81,7 +97,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/invitation': typeof InvitationRoute
+  '/_authed/claims': typeof AuthedClaimsRoute
   '/_authed/credits': typeof AuthedCreditsRoute
+  '/_authed/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
   '/_authed/requests/new': typeof AuthedRequestsNewRoute
@@ -92,7 +110,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/invitation'
+    | '/claims'
     | '/credits'
+    | '/open-requests'
     | '/sign-in/verify'
     | '/sign-in/'
     | '/requests/new'
@@ -101,7 +121,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/invitation'
+    | '/claims'
     | '/credits'
+    | '/open-requests'
     | '/sign-in/verify'
     | '/sign-in'
     | '/requests/new'
@@ -111,7 +133,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/invitation'
+    | '/_authed/claims'
     | '/_authed/credits'
+    | '/_authed/open-requests'
     | '/sign-in/verify'
     | '/sign-in/'
     | '/_authed/requests/new'
@@ -149,11 +173,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/claims': {
+      id: '/_authed/claims'
+      path: '/claims'
+      fullPath: '/claims'
+      preLoaderRoute: typeof AuthedClaimsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/credits': {
       id: '/_authed/credits'
       path: '/credits'
       fullPath: '/credits'
       preLoaderRoute: typeof AuthedCreditsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/open-requests': {
+      id: '/_authed/open-requests'
+      path: '/open-requests'
+      fullPath: '/open-requests'
+      preLoaderRoute: typeof AuthedOpenRequestsRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/sign-in/': {
@@ -188,13 +226,17 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedClaimsRoute: typeof AuthedClaimsRoute
   AuthedCreditsRoute: typeof AuthedCreditsRoute
+  AuthedOpenRequestsRoute: typeof AuthedOpenRequestsRoute
   AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
   AuthedRequestsIndexRoute: typeof AuthedRequestsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedClaimsRoute: AuthedClaimsRoute,
   AuthedCreditsRoute: AuthedCreditsRoute,
+  AuthedOpenRequestsRoute: AuthedOpenRequestsRoute,
   AuthedRequestsNewRoute: AuthedRequestsNewRoute,
   AuthedRequestsIndexRoute: AuthedRequestsIndexRoute,
 }

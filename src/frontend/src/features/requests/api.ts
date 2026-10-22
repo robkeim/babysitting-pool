@@ -1,10 +1,19 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { creditsKeys } from '@/features/credits'
 import { apiFetch } from '@/lib/api/client'
-import type { CostQuote, PostRequestBody, QuoteDetails, RequestPage, RequestView } from './types'
+import type {
+  CostQuote,
+  OpenRequestPage,
+  PostRequestBody,
+  QuoteDetails,
+  RequestPage,
+  RequestView,
+} from './types'
 
 export const requestsKeys = {
   mine: () => ['requests', 'mine'] as const,
+  open: () => ['requests', 'open'] as const,
+  claims: () => ['requests', 'claims'] as const,
   quote: (details: QuoteDetails) => ['requests', 'quote', details] as const,
 }
 
@@ -51,6 +60,49 @@ export function usePostRequest() {
       await Promise.all([
         client.invalidateQueries({ queryKey: requestsKeys.mine() }),
         client.invalidateQueries({ queryKey: creditsKeys.account() }),
+      ])
+    },
+  })
+}
+
+function pagedUrl(path: string, cursor: string | undefined): string {
+  return cursor ? `${path}?cursor=${encodeURIComponent(cursor)}` : path
+}
+
+/** Posted Requests other Members can still claim, earliest start first. */
+export function useOpenRequests() {
+  return useInfiniteQuery({
+    queryKey: requestsKeys.open(),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      apiFetch<OpenRequestPage>(pagedUrl('/api/requests/open', pageParam)),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  })
+}
+
+/** The Requests the Member claimed as Sitter, latest start first. */
+export function useMyClaims() {
+  return useInfiniteQuery({
+    queryKey: requestsKeys.claims(),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => apiFetch<RequestPage>(pagedUrl('/api/me/claims', pageParam)),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  })
+}
+
+/**
+ * Claims a Request; the first Sitter wins. Whatever the answer, the open list is stale afterwards: a lost race
+ * means the Request is gone, a win means it moved to My Claims.
+ */
+export function useClaimRequest() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (requestId: string) =>
+      apiFetch<RequestView>(`/api/requests/${requestId}/claim`, { method: 'POST' }),
+    onSettled: async () => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: requestsKeys.open() }),
+        client.invalidateQueries({ queryKey: requestsKeys.claims() }),
       ])
     },
   })

@@ -1,2 +1,4 @@
+export { MyClaimsPage } from './MyClaimsPage'
 export { MyRequestsPage } from './MyRequestsPage'
+export { OpenRequestsPage } from './OpenRequestsPage'
 export { PostRequestPage } from './PostRequestPage'
