@@ -19,8 +19,11 @@ The Babysitting Co-op operates on a time-credit economy rather than fiat currenc
 
 - **Offboarding:** When an admin offboards a Member, the system cancels their Posted Requests (refunding Escrow), withdraws their claims as Sitter (the Request returns to Posted, or expires if past the Claim Cutoff), cancels Requests they posted that are Claimed (refunding Escrow), and burns any remaining Available Balance via a Ledger entry. The account is closed, Ledger history is kept, and the person can only return via a new Invitation.
 
-- **Admin powers (v1, kept deliberately small):** An Admin can create Invitations, offboard Members, view each Member's situation (balances, Requests, Ledger) read-only, and view an aggregated overview of the whole pool. Admins cannot edit balances or Requests; there are no manual Adjustments in v1.
-- **Notifications (v1):** Members are notified by email and see events in an in-app feed. Which events trigger an email is a later policy decision.
+- **Admin powers (v1, kept deliberately small):** An Admin can create and re-send Invitations, offboard Members, view each Member's situation (balances, Requests, Ledger) read-only, view an aggregated overview of the whole pool, and view the list of Dormant Members (§5). Admins cannot edit balances or Requests; there are no manual Adjustments in v1.
+- **One Admin (v1):** The co-op has exactly one Admin. The Admin is a full Member with a Credit Account and the Starting Balance. There is no way to create, promote or demote Admins, and the Admin cannot be offboarded. How the first Admin comes to exist is decided in #21.
+- **Returning Members:** A person who was offboarded can only return via a new Invitation, which creates a brand-new Member with a fresh Starting Balance. The closed account and its Ledger remain as history.
+- **Settings (v1):** Minimum Lead Time, Claim Cutoff, the Demurrage weekday and time, the dormancy threshold and the co-op time zone are configuration values. There is no Admin settings screen in v1.
+- **Notifications (out of v1):** Members are not notified of events; they see changes on their "My Requests" and "My Claims" lists. Only sign-in and Invitation emails are sent.
 - **Times:** Instants are stored in UTC; one co-op-wide time zone setting drives display and the weekly Demurrage run.
 
 ---
@@ -95,12 +98,12 @@ The total cost of a request is calculated deterministically using the following 
    - The Requester may cancel a Posted or Claimed Request any time before the start time, with a full refund.
    - The Sitter may withdraw a claim before the start time. The Request returns to Posted if time remains; otherwise (the Claim Cutoff has passed) it expires and is refunded.
    - For v1, last-minute cancellations and withdrawals carry no penalty. Late-cancellation penalties are deferred to a future milestone.
-6. **Editing a Request:**
+6. **Editing a Request (post-v1):** Not built in v1; to change a Request, a Requester cancels and re-posts. The rules below are the target behaviour for the milestone that adds editing.
    - A Requester can edit a Posted or Claimed Request any time before the start time.
    - Cost drivers (start time, duration, child count, Location, transport, meals) re-price the Request. A higher cost needs enough Available Balance and escrows the difference; if the Requester can't cover it, the edit is rejected. A lower cost refunds the difference immediately.
    - A start-time edit must satisfy the same Minimum Lead Time rule as posting, measured against the current time.
    - The exact address is shown only to the counterparty once the Request is Claimed, and hidden again if the claim is dropped. Posted Requests show Members only a rough area.
-   - Editing a Claimed Request drops the claim. Every field the Sitter relies on (all cost drivers, address and drop-off point) does this; only free-text notes are exempt, and the Sitter is still notified of them. The Request returns to Posted with the new terms and its Escrow adjusted to the new cost. The former Sitter is notified and may claim it again like any other Member, first claim wins. Future: first rights for the former Sitter to reconfirm (backlog: #5).
+   - Editing a Claimed Request drops the claim. Every field the Sitter relies on (all cost drivers, address and drop-off point) does this; only free-text notes are exempt. The Request returns to Posted with the new terms and its Escrow adjusted to the new cost. The former Sitter may claim it again like any other Member, first claim wins. Future: first rights for the former Sitter to reconfirm (backlog: #5).
    - After the Claim Cutoff, a Claimed Request can only have its free-text notes edited. An edit that would drop the claim is blocked with an explanation, so the Request does not silently expire.
 7. **Sitter overlap (v1):** A Sitter may hold overlapping Claimed Requests; Sitter capacity is not modelled (backlog: #3).
 8. **Children (v1):** A Request records only the number of children (backlog for child profiles: #4).
@@ -108,15 +111,23 @@ The total cost of a request is calculated deterministically using the following 
 
 ---
 
-## 5. Inactivity Policy (Demurrage)
-- **Definition of Activity:** Completing at least one Request as Sitter within a rolling 21-day window. Posting or paying as Requester does not count.
-- **Penalty Trigger:** Demurrage is evaluated at a weekly boundary (default Monday 00:00 in the co-op time zone; weekday and time configurable). If a member's last Request completed as Sitter (or, if none, their account creation) is more than 21 days before the boundary:
+## 5. Inactivity Policy (Demurrage and Dormancy)
+- **Definition of Activity:** A Request Completed, as Requester or as Sitter. Posting, claiming, cancelling or withdrawing without following through does not count. A Member's last activity is the start time of the last Request that reached Completed in either role or, if none, their account creation.
+- **Two stages of the same inactivity:** after 21 days without activity Demurrage begins; after the dormancy threshold (default 6 weeks, configurable) the Member also appears on the Admin's dormant list.
+
+### Demurrage
+- **Penalty Trigger:** Demurrage is evaluated at a weekly boundary (default Monday 00:00 in the co-op time zone; weekday and time configurable). If a Member's last activity is more than 21 days before the boundary:
   - Apply a **-2.0 credits** penalty for that boundary. Because charges fall only on boundaries, the effective grace period is 21 to 28 days.
   - Each charge is recorded with the boundary it belongs to, so a boundary can be charged at most once per Member. After downtime, every missed boundary is applied in order, each evaluated as of its own time. Boundaries before the account existed, and offboarded Members, are skipped.
   - Only Available Balance is charged; Escrow is never touched.
   - Demurrage Credits are burned (recorded as a Ledger entry with no recipient).
   - **Hard Floor Protection:** The charge is min(2.0, Available Balance); penalties stop strictly at **0.0 credits** (never drives an account into negative) and no zero-amount Ledger entry is written.
-  - *Admin Flag:* Accounts sitting at 0.0 credits due to inactivity are flagged for review/offboarding.
+  - Demurrage keeps applying weekly until the Member has activity again or reaches 0.0.
+
+### Dormant Members (Admin view)
+- A Member is **dormant** when their last activity is older than the dormancy threshold (default 6 weeks, configurable). The Admin is never listed.
+- Only the Admin sees the list; no other Member can tell who is dormant. It shows name, email, last activity date and Available Balance, sorted by longest dormant, and links to the Member detail. The Admin contacts the Member outside the app and decides whether to offboard.
+- The list is derived from Requests and the Ledger; no page views or sign-ins are tracked.
 
 ---
 

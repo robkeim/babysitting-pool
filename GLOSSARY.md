@@ -22,6 +22,10 @@ _Avoid_: Host, babysitter
 A Member who runs the co-op: creates Invitations, offboards Members, and has read-only views of every Member and the whole pool. Admins cannot change balances.
 _Avoid_: Moderator, superuser
 
+**Dormant Member**:
+A Member with no Request Completed, as Requester or as Sitter, for longer than the dormancy threshold (default 6 weeks), counted from account creation if they have none. Only Admins can see who is dormant, so that they can reach out and decide whether the Member should stay. Dormancy is the longer-period stage of the same inactivity that triggers Demurrage.
+_Avoid_: Inactive Member, churned
+
 **Offboarding**:
 Closing a Member's account, which cancels or releases their open Requests and burns their remaining balance. Ledger history is kept.
 _Avoid_: Deleting, banning
@@ -91,7 +95,7 @@ The release of escrowed Credits to the Sitter when the Request's start time arri
 _Avoid_: Settlement, transfer
 
 **Demurrage**:
-The weekly Credit penalty on a Member who has not completed a Request as Sitter within 21 days. Demurrage Credits are burned: they leave circulation with no recipient.
+The weekly Credit penalty on a Member who has had no Request Completed, as Requester or as Sitter, within 21 days. Posting or claiming without following through does not count. Demurrage Credits are burned: they leave circulation with no recipient.
 _Avoid_: Inactivity fee, decay
 
 ### Time
