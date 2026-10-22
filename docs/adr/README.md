@@ -17,3 +17,4 @@ One line per ADR so you can pick what to open (ADR 0013). Read an ADR only if it
 | [0011](0011-local-dev-configuration-and-bootstrap.md) | One-command dev, co-op rules as code, first Admin bootstrapped by configuration | ops, backend |
 | [0012](0012-passwordless-auth.md) | Passwordless auth: single-use hashed links and server-side sessions | backend, auth |
 | [0013](0013-documentation-structure-and-token-economy.md) | Doc layers, router-style AGENTS.md, token budget, one-slice tickets | docs, ops |
+| [0014](0014-security-and-privacy-baseline.md) | Deny-by-default authorization, rate limits and hardening headers, and personal-data erasure separate from Offboarding | backend, auth, ops |
