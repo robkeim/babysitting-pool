@@ -19,6 +19,14 @@ cd src/frontend && npm run dev                                               # S
 - **API contract:** after changing an endpoint, run `UPDATE_OPENAPI=1 dotnet test --filter OpenApiDocumentTests`, then `npm run generate:api` and `npm run generate:postman` in `src/frontend` and commit the generated files (`schema.gen.ts`, `docs/api/postman_collection.json`).
 - **Migrations:** `dotnet dotnet-ef migrations add <Name> --project src/backend/BabysittingPool.Infrastructure --output-dir Persistence/Migrations`.
 
+## Checks
+
+```sh
+scripts/check.sh [backend|frontend|all] [--fast] [--e2e]
+```
+
+The one definition of green (ADR 0008): backend `dotnet format --verify-no-changes`, build, tests; frontend `eslint --max-warnings 0`, `prettier --check`, `tsc -b`, `vitest run`. `--fast` skips the backend API and Infrastructure tests, `--e2e` adds Playwright. A passing `all` run stamps the tree in `.git/check-stamp`; the pre-push hook and the Claude Code push gate skip the re-run when the stamp matches. Husky hooks install on `npm install` in `src/frontend`; pre-commit formats staged files, pre-push runs `scripts/check.sh all --fast --stamped`.
+
 ## Postman
 
 1. Run `scripts/dev.sh`.

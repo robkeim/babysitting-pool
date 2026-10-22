@@ -10,7 +10,7 @@ using Microsoft.Extensions.Time.Testing;
 namespace backend.tests.Support;
 
 /// <summary>The real API over HTTP on a throwaway SQLite file and a fake clock.</summary>
-public sealed class ApiFactory(string environment = "E2E") : WebApplicationFactory<Program>
+internal sealed class ApiFactory(string environment = "E2E") : WebApplicationFactory<Program>
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-api-{Guid.NewGuid():N}.db");
 
@@ -43,6 +43,11 @@ public sealed class ApiFactory(string environment = "E2E") : WebApplicationFacto
         base.Dispose(disposing);
         SqliteConnection.ClearAllPools();
         foreach (var file in new[] { _path, _path + "-wal", _path + "-shm" })
-            if (File.Exists(file)) File.Delete(file);
+        {
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+        }
     }
 }

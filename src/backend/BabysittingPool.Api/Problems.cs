@@ -20,7 +20,11 @@ internal static class Problems
         int status, string code, string title, Dictionary<string, string[]>? errors = null)
     {
         var extensions = new Dictionary<string, object?> { ["code"] = code };
-        if (errors is not null) extensions["errors"] = errors;
+        if (errors is not null)
+        {
+            extensions["errors"] = errors;
+        }
+
         return Results.Problem(statusCode: status, title: title, extensions: extensions);
     }
 }

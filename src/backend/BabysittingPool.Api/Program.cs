@@ -16,8 +16,15 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
 // frontend types become `number | string`.
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict);
-if (builder.Environment.IsEnvironment(TestEndpoints.Environment)) builder.Services.AddTestClock();
-else builder.Services.AddSingleton(TimeProvider.System);
+if (builder.Environment.IsEnvironment(TestEndpoints.Environment))
+{
+    builder.Services.AddTestClock();
+}
+else
+{
+    builder.Services.AddSingleton(TimeProvider.System);
+}
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("Default") ?? "Data Source=babysitting.db");

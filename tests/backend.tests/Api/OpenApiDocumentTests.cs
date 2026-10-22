@@ -1,6 +1,6 @@
 using System.Text.Json;
-using backend.tests.Support;
 using AwesomeAssertions;
+using backend.tests.Support;
 
 namespace backend.tests.Api;
 
@@ -49,7 +49,10 @@ public class OpenApiDocumentTests : IDisposable
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "AGENTS.md")))
+        {
             directory = directory.Parent;
+        }
+
         return directory?.FullName ?? throw new InvalidOperationException("Repository root not found.");
     }
 }

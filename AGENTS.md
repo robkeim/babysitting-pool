@@ -17,6 +17,11 @@ A web application for a community babysitting co-op powered by a time-credit led
 3. When adding or modifying features, keep docs updated if architectural decisions change.
 4. Write commit messages as Conventional Commits (`type(scope): description`, e.g. `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`).
 
+## Definition of done
+- `scripts/check.sh` is green (`--fast` while iterating, `--e2e` when you touch a user journey). It is the single gate that git hooks, Claude Code hooks and CI all call (ADR `docs/adr/0008-enforcement-loop.md`).
+- Do not edit lint config, `.editorconfig`, `.claude/`, `.husky/` or workflows to make a failure pass unless the issue says so. Never use `--no-verify` or force-push.
+- Open PRs as drafts; branch `<issue>-<slug>`, Conventional Commit title, body ends in `Closes #n` (use the `pr` skill).
+
 ## Agent skills
 
 ### Issue tracker

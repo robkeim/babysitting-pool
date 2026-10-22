@@ -11,7 +11,7 @@ namespace backend.tests.Support;
 /// <summary>
 /// A throwaway SQLite file built from the real migrations (ADR 0004), with a fake clock.
 /// </summary>
-public sealed class TestDatabase : IAsyncDisposable
+internal sealed class TestDatabase : IAsyncDisposable
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-{Guid.NewGuid():N}.db");
     private readonly ServiceProvider _services;
@@ -53,6 +53,11 @@ public sealed class TestDatabase : IAsyncDisposable
         await _services.DisposeAsync();
         SqliteConnection.ClearAllPools();
         foreach (var file in new[] { _path, _path + "-wal", _path + "-shm" })
-            if (File.Exists(file)) File.Delete(file);
+        {
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+        }
     }
 }

@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using backend.tests.Support;
-using BabysittingPool.Domain.Credits;
 using AwesomeAssertions;
+using BabysittingPool.Domain.Credits;
+using backend.tests.Support;
 
 namespace backend.tests.Api;
 

@@ -26,6 +26,7 @@ export function CreditsPage() {
   if (!account.data) return null
 
   const [first] = account.data.pages
+  if (!first) return null
   const entries = account.data.pages.flatMap((page) => page.ledger.items)
 
   return (

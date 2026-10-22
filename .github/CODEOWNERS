@@ -1,0 +1,12 @@
+# Config that defines "green" (ADR 0008): any change is visible to the maintainer.
+/.github/ @robkeim
+/.editorconfig @robkeim
+/Directory.Build.props @robkeim
+/Directory.Packages.props @robkeim
+/global.json @robkeim
+/scripts/check.sh @robkeim
+/.claude/ @robkeim
+/.husky/ @robkeim
+/src/frontend/eslint.config.js @robkeim
+/src/frontend/eslint.boundaries.js @robkeim
+/src/frontend/.prettierrc.json @robkeim

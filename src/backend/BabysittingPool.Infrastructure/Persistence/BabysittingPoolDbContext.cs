@@ -9,11 +9,11 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
     public DbSet<CreditAccountRecord> CreditAccounts => Set<CreditAccountRecord>();
     public DbSet<LedgerEntryRecord> LedgerEntries => Set<LedgerEntryRecord>();
 
-    protected override void ConfigureConventions(ModelConfigurationBuilder configuration)
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        configuration.Properties<Credits>().HaveConversion<CreditsConverter>();
-        configuration.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
-        configuration.Properties<LedgerEntryKind>().HaveConversion<string>();
+        configurationBuilder.Properties<Credits>().HaveConversion<CreditsConverter>();
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<LedgerEntryKind>().HaveConversion<string>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

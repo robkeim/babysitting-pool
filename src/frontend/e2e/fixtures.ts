@@ -24,7 +24,9 @@ async function freePort(): Promise<number> {
     server.once('error', reject)
     server.listen(0, '127.0.0.1', () => {
       const { port } = server.address() as { port: number }
-      server.close(() => resolve(port))
+      server.close(() => {
+        resolve(port)
+      })
     })
   })
 }
@@ -63,7 +65,7 @@ async function post(url: string, body: unknown, method = 'POST'): Promise<Respon
 
 export const test = base.extend<object, { backend: Backend }>({
   backend: [
-    // oxlint-disable-next-line no-empty-pattern -- Playwright requires a destructuring pattern here
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a destructuring pattern here
     async ({}, provide) => {
       const dataDirectory = await mkdtemp(path.join(tmpdir(), 'babysitting-e2e-'))
       const apiPort = await freePort()

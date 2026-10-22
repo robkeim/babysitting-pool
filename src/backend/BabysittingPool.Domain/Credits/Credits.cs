@@ -15,7 +15,11 @@ public readonly record struct Credits
 
     public static Credits FromQuarterCredits(long quarterCredits)
     {
-        if (quarterCredits < 0) throw new DomainException("Credits cannot be negative.");
+        if (quarterCredits < 0)
+        {
+            throw new DomainException("Credits cannot be negative.");
+        }
+
         return new Credits(quarterCredits);
     }
 
@@ -23,7 +27,10 @@ public readonly record struct Credits
     {
         var quarters = credits * QuartersPerCredit;
         if (quarters != decimal.Truncate(quarters))
+        {
             throw new DomainException($"Credits must be a multiple of 0.25, got {credits}.");
+        }
+
         return FromQuarterCredits((long)quarters);
     }
 }

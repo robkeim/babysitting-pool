@@ -15,7 +15,9 @@ internal static class AccountEndpoints
             CancellationToken cancellationToken) =>
         {
             if (DevIdentity.CurrentMemberId(context, environment) is not { } memberId)
+            {
                 return Problems.Unauthenticated();
+            }
 
             try
             {

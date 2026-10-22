@@ -28,7 +28,9 @@ internal static class TestEndpoints
         group.MapPost("/members", async (SeedMemberRequest request, IServiceProvider services, CancellationToken cancellationToken) =>
         {
             if (request.GrantsQuarterCredits is not { Length: > 0 } || request.GrantsQuarterCredits.Any(g => g < 0))
+            {
                 return Problems.InvalidRequest("grantsQuarterCredits", "invalid");
+            }
 
             var grants = request.GrantsQuarterCredits.Select(Credits.FromQuarterCredits).ToList();
             var memberId = await services.SeedMemberWithGrantsAsync(grants, cancellationToken);

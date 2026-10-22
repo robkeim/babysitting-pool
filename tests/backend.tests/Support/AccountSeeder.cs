@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace backend.tests.Support;
 
 /// <summary>Arranges Credit Accounts directly in the database for read-side tests.</summary>
-public static class AccountSeeder
+internal static class AccountSeeder
 {
     /// <summary>A Credit Account whose Ledger holds the given Grants, one hour apart starting at the clock.</summary>
     public static async Task<Guid> SeedAccountAsync(
