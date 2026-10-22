@@ -1,6 +1,12 @@
 # Local development
 
-Run the API and the SPA side by side; the Vite dev server proxies `/api` to the API, so the browser sees one origin (ADR 0006).
+Run the API and the SPA together; the Vite dev server proxies `/api` to the API, so the browser sees one origin (ADR 0006).
+
+```sh
+scripts/dev.sh        # both, Ctrl-C stops both
+```
+
+Or in two terminals:
 
 ```sh
 dotnet run --project src/backend/BabysittingPool.Api --launch-profile http   # API on :5120
@@ -9,8 +15,16 @@ cd src/frontend && npm run dev                                               # S
 
 - **Database:** a SQLite file `babysitting.db` is created next to the API and migrated at startup (ADR 0004). Delete it to start fresh.
 - **Identity:** there is no sign-in yet. Outside Production the caller names the current Member in an `X-Dev-Member-Id` header; the Vite proxy sends the Member that the API seeds in Development (10.0 credits, see `DevIdentity`).
-- **API contract:** after changing an endpoint, run `UPDATE_OPENAPI=1 dotnet test --filter OpenApiDocumentTests`, then `npm run generate:api` in `src/frontend` and commit both generated files.
+- **Configuration:** `appsettings*.json`, then environment variables (`Section__Key`), then `dotnet user-secrets`; no `.env` files. Only deployment values go here (`Bootstrap:AdminEmail`, email provider, database path). Co-op rules such as Minimum Lead Time are defaults in the `CoopSettings` record, not configuration (ADR 0011).
+- **API contract:** after changing an endpoint, run `UPDATE_OPENAPI=1 dotnet test --filter OpenApiDocumentTests`, then `npm run generate:api` and `npm run generate:postman` in `src/frontend` and commit the generated files (`schema.gen.ts`, `docs/api/postman_collection.json`).
 - **Migrations:** `dotnet dotnet-ef migrations add <Name> --project src/backend/BabysittingPool.Infrastructure --output-dir Persistence/Migrations`.
+
+## Postman
+
+1. Run `scripts/dev.sh`.
+2. In Postman, import `docs/api/postman_collection.json`. Its `baseUrl` is `http://localhost:5173` (the Vite origin, not the API port) and it sends `X-Requested-With` on every request.
+3. Today the Vite proxy names the seeded Member for you, so requests work immediately. Once sign-in exists (ADR 0011) you sign in by requesting a link, reading it from the console or `GET /api/dev/outbox`, and opening it; Postman keeps the session cookie.
+4. After an endpoint change, regenerate with `npm run generate:postman` in `src/frontend`.
 
 ## End-to-end tests (Playwright)
 
