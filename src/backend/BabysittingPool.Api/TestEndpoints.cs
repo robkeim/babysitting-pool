@@ -1,4 +1,6 @@
+using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure;
 using Microsoft.Extensions.Time.Testing;
 
@@ -33,8 +35,19 @@ internal static class TestEndpoints
             }
 
             var grants = request.GrantsQuarterCredits.Select(Credits.FromQuarterCredits).ToList();
-            var memberId = await services.SeedMemberWithGrantsAsync(grants, cancellationToken);
-            return Results.Created($"/api/test/members/{memberId}", new SeedMemberResponse(memberId));
+            var email = request.Email ?? $"member-{Guid.NewGuid():N}@example.test";
+            var memberId = await services.SeedMemberAsync(email, request.DisplayName ?? "Test Member", false, grants, cancellationToken);
+            return Results.Created($"/api/test/members/{memberId}", new SeedMemberResponse(memberId, email));
+        });
+
+        // The sign-in shortcut for journeys that are not about signing in: a session secret for the browser's cookie.
+        group.MapPost("/sessions", async (
+            CreateSessionRequest request, IIdentityStore store, TimeProvider clock, CancellationToken cancellationToken) =>
+        {
+            var secret = Secrets.Generate();
+            await store.AddSessionAsync(
+                Session.Start(request.MemberId, Secrets.Hash(secret), clock.GetUtcNow().UtcDateTime), cancellationToken);
+            return Results.Ok(new CreateSessionResponse(secret));
         });
 
         group.MapPut("/clock", (SetClockRequest request, FakeTimeProvider clock) =>
@@ -44,9 +57,13 @@ internal static class TestEndpoints
         });
     }
 
-    private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits);
+    private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits, string? Email, string? DisplayName);
 
-    private sealed record SeedMemberResponse(Guid MemberId);
+    private sealed record SeedMemberResponse(Guid MemberId, string Email);
+
+    private sealed record CreateSessionRequest(Guid MemberId);
+
+    private sealed record CreateSessionResponse(string Token);
 
     private sealed record SetClockRequest(DateTimeOffset Now);
 }

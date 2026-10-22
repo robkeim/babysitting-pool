@@ -1,10 +1,10 @@
-import { expect, signInAs, test } from './fixtures.ts'
+import { expect, test } from './fixtures.ts'
 
 test('a Member sees their balance and Ledger as credits', async ({ page, backend }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
   // 10.00 then 0.25 credits as quarter-credits: the 41 on the account is the round trip of 10.25.
   const memberId = await backend.seedMember([40, 1])
-  await signInAs(page, memberId)
+  await backend.signIn(page.context(), memberId)
 
   await page.goto('/credits')
 

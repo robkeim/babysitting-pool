@@ -1,4 +1,4 @@
-import { test as base, type Page } from '@playwright/test'
+import { test as base, type BrowserContext } from '@playwright/test'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { createServer } from 'node:net'
@@ -6,7 +6,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { API_DLL, API_PROJECT, FRONTEND_ROOT } from './paths.ts'
 
-const IDENTITY_HEADER = 'X-Dev-Member-Id'
+/** The address the API invites as Admin at startup; its Invitation is the entry point for the sign-in journey. */
+export const BOOTSTRAP_ADMIN_EMAIL = 'root@example.test'
 
 /** One worker's private stack: its own API process, SQLite file, fake clock and SPA dev server. */
 export interface Backend {
@@ -14,6 +15,10 @@ export interface Backend {
   appUrl: string
   /** Seeds a Member whose Credit Account holds the given Grants (quarter-credits, ADR 0001). */
   seedMember(grantsQuarterCredits: number[]): Promise<string>
+  /** The newest link (Invitation or sign-in) emailed to the address, read from the fake outbox. */
+  latestLink(email: string): Promise<string>
+  /** Signs the browser context in as a seeded Member without going through email. */
+  signIn(context: BrowserContext, memberId: string): Promise<void>
   /** Sets the server clock to an absolute instant. */
   setClock(now: string): Promise<void>
 }
@@ -80,6 +85,8 @@ export const test = base.extend<object, { backend: Backend }>({
           ...process.env,
           ASPNETCORE_ENVIRONMENT: 'E2E',
           ASPNETCORE_URLS: apiUrl,
+          App__BaseUrl: appUrl,
+          Bootstrap__AdminEmail: BOOTSTRAP_ADMIN_EMAIL,
           ConnectionStrings__Default: `Data Source=${path.join(dataDirectory, 'babysitting.db')}`,
         },
       })
@@ -96,6 +103,18 @@ export const test = base.extend<object, { backend: Backend }>({
           async seedMember(grantsQuarterCredits) {
             const response = await post(`${apiUrl}/api/test/members`, { grantsQuarterCredits })
             return ((await response.json()) as { memberId: string }).memberId
+          },
+          async latestLink(email) {
+            const response = await fetch(`${apiUrl}/api/dev/outbox?to=${encodeURIComponent(email)}`)
+            const messages = (await response.json()) as { link: string }[]
+            const latest = messages.at(-1)
+            if (!latest) throw new Error(`No email was sent to ${email}`)
+            return latest.link
+          },
+          async signIn(context, memberId) {
+            const response = await post(`${apiUrl}/api/test/sessions`, { memberId })
+            const { token } = (await response.json()) as { token: string }
+            await context.addCookies([{ name: 'session', value: token, url: appUrl }])
           },
           async setClock(now) {
             await post(`${apiUrl}/api/test/clock`, { now }, 'PUT')
@@ -115,8 +134,3 @@ export const test = base.extend<object, { backend: Backend }>({
 })
 
 export { expect } from '@playwright/test'
-
-/** Stand-in for sign-in until authentication exists: every request from this page names the Member. */
-export async function signInAs(page: Page, memberId: string): Promise<void> {
-  await page.context().setExtraHTTPHeaders({ [IDENTITY_HEADER]: memberId })
-}

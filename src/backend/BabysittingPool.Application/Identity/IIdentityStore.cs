@@ -1,0 +1,43 @@
+using BabysittingPool.Domain.Identity;
+
+namespace BabysittingPool.Application.Identity;
+
+/// <summary>Persistence port for Members, Invitations, sign-in links and Sessions.</summary>
+public interface IIdentityStore
+{
+    Task<bool> AdminExistsAsync(CancellationToken cancellationToken);
+
+    Task<bool> HasLiveAdminInvitationAsync(DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>The Member with this address who is not closed.</summary>
+    Task<Member?> FindActiveMemberAsync(EmailAddress email, CancellationToken cancellationToken);
+
+    Task<Member?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken);
+
+    Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken);
+
+    Task<Invitation?> FindInvitationAsync(string secretHash, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// In one transaction: consumes the Invitation, adds the Member with a Credit Account holding the Starting
+    /// Balance, and adds the Session. Returns false, changing nothing, if the Invitation was consumed meanwhile
+    /// or the address is already a Member.
+    /// </summary>
+    Task<bool> TryAcceptInvitationAsync(
+        Invitation invitation, Member member, Session session, DateTime now, CancellationToken cancellationToken);
+
+    Task AddSignInLinkAsync(SignInLink link, CancellationToken cancellationToken);
+
+    Task<SignInLink?> FindSignInLinkAsync(string secretHash, CancellationToken cancellationToken);
+
+    /// <summary>Consumes the link and adds the Session in one transaction; false if it was consumed meanwhile.</summary>
+    Task<bool> TryRedeemSignInLinkAsync(SignInLink link, Session session, DateTime now, CancellationToken cancellationToken);
+
+    Task AddSessionAsync(Session session, CancellationToken cancellationToken);
+
+    Task<Session?> FindSessionAsync(string secretHash, CancellationToken cancellationToken);
+
+    Task TouchSessionAsync(Guid sessionId, DateTime now, CancellationToken cancellationToken);
+
+    Task EndSessionAsync(string secretHash, CancellationToken cancellationToken);
+}

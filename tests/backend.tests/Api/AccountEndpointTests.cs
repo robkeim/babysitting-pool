@@ -37,7 +37,7 @@ public class AccountEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task Rejects_a_request_that_names_no_member_with_401_problem_json()
+    public async Task Rejects_a_request_without_a_session_with_401_problem_json()
     {
         using var client = _factory.CreateClient();
 
@@ -49,7 +49,7 @@ public class AccountEndpointTests : IDisposable
     [Fact]
     public async Task Answers_404_problem_json_when_the_member_has_no_account()
     {
-        using var client = _factory.CreateMemberClient(Guid.NewGuid());
+        using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
 
         var response = await client.GetAsync("/api/me/account");
 
@@ -85,21 +85,6 @@ public class AccountEndpointTests : IDisposable
         await AssertProblemAsync(response, HttpStatusCode.BadRequest, "invalid_request");
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         json.RootElement.GetProperty("errors").GetProperty("cursor")[0].GetString().Should().Be("invalid");
-    }
-
-    [Fact]
-    public async Task Development_seeds_a_dev_member_with_the_ten_credit_starting_balance()
-    {
-        using var development = new ApiFactory("Development");
-        using var client = development.CreateMemberClient(Guid.Parse("00000000-0000-0000-0000-00000000de01"));
-
-        var json = await client.GetFromJsonAsync<JsonElement>("/api/me/account");
-
-        json.GetProperty("availableQuarterCredits").GetInt64().Should().Be(40);
-        json.GetProperty("escrowedQuarterCredits").GetInt64().Should().Be(0);
-        var entry = json.GetProperty("ledger").GetProperty("items").EnumerateArray().Single();
-        entry.GetProperty("kind").GetString().Should().Be("Grant");
-        entry.GetProperty("amountQuarterCredits").GetInt64().Should().Be(40);
     }
 
     private static async Task<JsonElement> GetLedgerAsync(HttpClient client, string url)

@@ -1,4 +1,5 @@
 using BabysittingPool.Application;
+using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Infrastructure;
 using BabysittingPool.Infrastructure.Persistence;
@@ -23,12 +24,17 @@ internal sealed class TestDatabase : IAsyncDisposable
         services.AddSingleton<TimeProvider>(Clock);
         services.AddApplication();
         services.AddInfrastructure($"Data Source={_path}");
+        services.AddLogging();
+        services.AddEmailOutbox();
+        services.AddSingleton(new AppLinks(new Uri("https://coop.example/")));
         _services = services.BuildServiceProvider();
     }
 
     public FakeTimeProvider Clock { get; }
 
     public IServiceProvider Services => _services;
+
+    public EmailOutbox Outbox => _services.GetRequiredService<EmailOutbox>();
 
     public static async Task<TestDatabase> CreateMigratedAsync()
     {

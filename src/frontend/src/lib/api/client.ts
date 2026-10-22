@@ -16,10 +16,24 @@ interface Problem {
   code?: string
 }
 
-/** Thin typed `fetch` wrapper: same-origin base URL, JSON in and out, ProblemDetails into ApiError. */
-export async function apiFetch<T>(path: string): Promise<T> {
+interface RequestOptions {
+  method?: 'GET' | 'POST' | 'DELETE'
+  body?: unknown
+}
+
+/**
+ * Thin typed `fetch` wrapper: same-origin base URL, JSON in and out, ProblemDetails into ApiError. Every call
+ * carries `X-Requested-With`, which the API requires on state-changing calls (CSRF, ADR 0006).
+ */
+export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const response = await fetch(new URL(path, window.location.origin), {
-    headers: { accept: 'application/json' },
+    method: options.method ?? 'GET',
+    headers: {
+      accept: 'application/json',
+      'x-requested-with': 'fetch',
+      ...(options.body === undefined ? {} : { 'content-type': 'application/json' }),
+    },
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
   })
   if (!response.ok) {
     const problem = (await response.json().catch(() => ({}))) as Problem
@@ -29,5 +43,6 @@ export async function apiFetch<T>(path: string): Promise<T> {
       problem.title ?? response.statusText,
     )
   }
+  if (response.status === 204 || response.status === 202) return undefined as T
   return (await response.json()) as T
 }
