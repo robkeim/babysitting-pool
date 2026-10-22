@@ -6,6 +6,15 @@ internal static class Problems
     public static IResult Unauthenticated() =>
         Problem(StatusCodes.Status401Unauthorized, "unauthenticated", "Not signed in.");
 
+    public static IResult CsrfHeaderMissing() =>
+        Problem(StatusCodes.Status403Forbidden, "csrf_header_missing", "State-changing calls need the X-Requested-With header.");
+
+    public static IResult InvitationInvalid() =>
+        Problem(StatusCodes.Status422UnprocessableEntity, "invitation_invalid", "The Invitation is unknown, used or expired.");
+
+    public static IResult SignInLinkInvalid() =>
+        Problem(StatusCodes.Status422UnprocessableEntity, "sign_in_link_invalid", "The sign-in link is unknown, used or expired.");
+
     public static IResult InvalidRequest(string field, string fieldCode) =>
         Problem(
             StatusCodes.Status400BadRequest,

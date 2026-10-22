@@ -53,7 +53,7 @@ public class TestEndpointTests
     [InlineData("Development")]
     public async Task Does_not_exist_outside_E2E(string environment)
     {
-        using var factory = new ApiFactory(environment);
+        using var factory = new ApiFactory(environment, bootstrapAdminEmail: "root@example.com");
         using var client = factory.CreateClient();
 
         (await client.PostAsJsonAsync("/api/test/members", new { grantsQuarterCredits = new[] { 40 } }))

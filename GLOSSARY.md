@@ -34,6 +34,14 @@ _Avoid_: Deleting, banning
 A magic link an admin sends to a prospective Member, which is the only way to create an account.
 _Avoid_: Sign-up, registration
 
+**Sign-in link**:
+A single-use, one-day magic link emailed to an existing Member, which signs them in. Invitations create accounts; sign-in links only sign in.
+_Avoid_: Login link, password reset
+
+**Sign-in session**:
+A signed-in browser, ended by signing out or after 30 days without use. Called `Session` in the Identity code; not the period of care, which is a Session under Requests.
+_Avoid_: Login
+
 ### Requests
 
 **Request**:
