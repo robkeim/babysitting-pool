@@ -1,4 +1,5 @@
 using BabysittingPool.Application.Requests;
+using BabysittingPool.Domain.Requests;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,8 +22,47 @@ internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReade
             .Take(take)
             .ToListAsync(cancellationToken);
 
-        return rows.Select(r => new RequestRead(
-            r.Id, r.StartsAt, r.DurationMinutes, r.ChildCount, r.Location, r.Transport, r.Meals, r.Area, r.Address,
-            r.Cost.QuarterCredits, r.ClaimCutoffAt, r.PostedAt, r.Status)).ToList();
+        return rows.Select(ToRead).ToList();
     }
+
+    public async Task<IReadOnlyList<RequestRead>> ListOpenAsync(
+        Guid excludeRequesterId, DateTime now, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken)
+    {
+        var requests = db.Requests.AsNoTracking().Where(r =>
+            r.Status == RequestStatus.Posted && r.ClaimCutoffAt > now && r.RequesterId != excludeRequesterId);
+        if (after is { } position)
+        {
+            requests = requests.Where(r => r.StartsAt > position.At
+                || (r.StartsAt == position.At && r.Id.CompareTo(position.Id) > 0));
+        }
+
+        var rows = await requests
+            .OrderBy(r => r.StartsAt).ThenBy(r => r.Id)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(ToRead).ToList();
+    }
+
+    public async Task<IReadOnlyList<RequestRead>> ListClaimedByAsync(
+        Guid sitterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken)
+    {
+        var requests = db.Requests.AsNoTracking().Where(r => r.SitterId == sitterId);
+        if (after is { } position)
+        {
+            requests = requests.Where(r => r.StartsAt < position.At
+                || (r.StartsAt == position.At && r.Id.CompareTo(position.Id) < 0));
+        }
+
+        var rows = await requests
+            .OrderByDescending(r => r.StartsAt).ThenByDescending(r => r.Id)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(ToRead).ToList();
+    }
+
+    private static RequestRead ToRead(RequestRecord r) => new(
+        r.Id, r.StartsAt, r.DurationMinutes, r.ChildCount, r.Location, r.Transport, r.Meals, r.Area, r.Address,
+        r.Cost.QuarterCredits, r.ClaimCutoffAt, r.PostedAt, r.Status);
 }

@@ -24,15 +24,24 @@ internal static class Problems
             "The request is malformed.",
             new Dictionary<string, string[]> { [field] = [fieldCode] });
 
-    /// <summary>A business rule said no (spec §4); the code is the one the domain raised.</summary>
+    /// <summary>
+    /// A business rule said no (spec §4); the code is the one the domain raised. A Request that is no longer in
+    /// the right state is a conflict (409), anything else a rule violation (422), per ADR 0006.
+    /// </summary>
     public static IResult DomainRule(DomainException exception) =>
-        Problem(StatusCodes.Status422UnprocessableEntity, exception.Code, exception.Message);
+        Problem(
+            exception.Code == "invalid_state" ? StatusCodes.Status409Conflict : StatusCodes.Status422UnprocessableEntity,
+            exception.Code,
+            exception.Message);
 
     public static IResult Conflict() =>
         Problem(StatusCodes.Status409Conflict, "concurrent_update", "The state changed meanwhile; try again.");
 
     public static IResult AccountNotFound() =>
         Problem(StatusCodes.Status404NotFound, "account_not_found", "The Member has no Credit Account.");
+
+    public static IResult RequestNotFound() =>
+        Problem(StatusCodes.Status404NotFound, "request_not_found", "There is no such Request.");
 
     private static IResult Problem(
         int status, string code, string title, Dictionary<string, string[]>? errors = null)

@@ -5,7 +5,7 @@ using BabysittingPool.Application.Credits;
 
 namespace BabysittingPool.Application;
 
-/// <summary>Opaque paging cursor over lists ordered newest first by a timestamp, ties broken by id.</summary>
+/// <summary>Opaque paging cursor over lists ordered by a timestamp, ties broken by id.</summary>
 internal static class TimestampCursor
 {
     public static string Encode(DateTime at, Guid id) =>

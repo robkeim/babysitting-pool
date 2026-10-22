@@ -20,6 +20,12 @@ function AuthedLayout() {
         <Link to="/requests" activeProps={{ className: 'underline' }}>
           <FormattedMessage id="requests.myRequests.title" />
         </Link>
+        <Link to="/open-requests" activeProps={{ className: 'underline' }}>
+          <FormattedMessage id="requests.open.title" />
+        </Link>
+        <Link to="/claims" activeProps={{ className: 'underline' }}>
+          <FormattedMessage id="requests.claims.title" />
+        </Link>
       </nav>
       <Outlet />
     </RequireMember>

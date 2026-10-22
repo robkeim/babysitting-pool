@@ -111,6 +111,117 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task Open_requests_show_other_members_the_rough_area_but_never_the_address_or_their_own_requests()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var browser = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var browserClient = _factory.CreateMemberClient(browser);
+        (await ownerClient.PostAsJsonAsync("/api/requests", Body())).EnsureSuccessStatusCode();
+
+        var seen = await browserClient.GetFromJsonAsync<JsonElement>("/api/requests/open");
+        var own = await ownerClient.GetFromJsonAsync<JsonElement>("/api/requests/open");
+
+        var item = seen.GetProperty("items").EnumerateArray().Single();
+        item.GetProperty("area").GetString().Should().Be("Riverside");
+        item.GetProperty("costQuarterCredits").GetInt64().Should().Be(8);
+        item.TryGetProperty("address", out _).Should().BeFalse();
+        item.TryGetProperty("requesterId", out _).Should().BeFalse();
+        own.GetProperty("items").GetArrayLength().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Claiming_answers_200_with_the_address_and_moves_the_request_to_my_claims_and_off_the_open_list()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var sitter = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(sitter);
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+
+        var response = await sitterClient.PostAsync($"/api/requests/{id}/claim", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var claimed = await response.Content.ReadFromJsonAsync<JsonElement>();
+        claimed.GetProperty("status").GetString().Should().Be("Claimed");
+        claimed.GetProperty("address").GetString().Should().Be("12 River Rd");
+        var claims = await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims");
+        claims.GetProperty("items").EnumerateArray().Single().GetProperty("id").GetString().Should().Be(id);
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").GetArrayLength().Should().Be(0);
+        var mine = await ownerClient.GetFromJsonAsync<JsonElement>("/api/me/requests");
+        mine.GetProperty("items").EnumerateArray().Single().GetProperty("status").GetString().Should().Be("Claimed");
+    }
+
+    [Fact]
+    public async Task A_second_claim_on_the_same_request_answers_409()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var first = await _factory.SeedMemberAsync();
+        var second = await _factory.SeedMemberAsync();
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        using var firstClient = _factory.CreateMemberClient(first);
+        using var secondClient = _factory.CreateMemberClient(second);
+        (await firstClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        var response = await secondClient.PostAsync($"/api/requests/{id}/claim", null);
+
+        await AssertProblemAsync(response, HttpStatusCode.Conflict, "invalid_state");
+    }
+
+    [Fact]
+    public async Task Claiming_your_own_request_answers_422()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(owner);
+        var posted = await (await client.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+
+        var response = await client.PostAsync($"/api/requests/{posted.GetProperty("id").GetString()}/claim", null);
+
+        await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "own_request");
+    }
+
+    [Fact]
+    public async Task Claiming_after_the_claim_cutoff_answers_422()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        _factory.Clock.Advance(TimeSpan.FromHours(7));
+
+        var response = await sitterClient.PostAsync($"/api/requests/{posted.GetProperty("id").GetString()}/claim", null);
+
+        await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "claim_cutoff_passed");
+    }
+
+    [Fact]
+    public async Task Claiming_an_unknown_request_answers_404()
+    {
+        using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+
+        var response = await client.PostAsync($"/api/requests/{Guid.NewGuid()}/claim", null);
+
+        await AssertProblemAsync(response, HttpStatusCode.NotFound, "request_not_found");
+    }
+
+    [Theory]
+    [InlineData("GET", "/api/requests/open")]
+    [InlineData("GET", "/api/me/claims")]
+    [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/claim")]
+    public async Task Browsing_and_claiming_without_a_session_answer_401(string method, string path)
+    {
+        using var client = _factory.CreateSpaClient();
+        using var request = new HttpRequestMessage(new HttpMethod(method), path);
+
+        var response = await client.SendAsync(request);
+
+        await AssertProblemAsync(response, HttpStatusCode.Unauthorized, "unauthenticated");
+    }
+
+    [Fact]
     public async Task Quote_returns_the_calculators_cost_in_quarter_credits()
     {
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
