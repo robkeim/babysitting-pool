@@ -75,6 +75,9 @@ frontend() {
   fi
 }
 
+step "docs"
+scripts/check-docs.sh
+
 case "$scope" in
   backend) (backend) ;;
   frontend) (frontend) ;;
