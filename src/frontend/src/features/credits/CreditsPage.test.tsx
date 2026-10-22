@@ -34,7 +34,7 @@ describe('CreditsPage', () => {
     ).toBeInTheDocument()
     const row = screen.getByRole('row', { name: /grant/i })
     expect(within(row).getByText('10.25')).toBeInTheDocument()
-    expect(within(row).getByText(/1 Mar 2026/)).toBeInTheDocument()
+    expect(within(row).getByText(/Mar 1, 2026/)).toBeInTheDocument()
   })
 
   it('shows an error without exposing the server message when the account cannot be loaded', async () => {

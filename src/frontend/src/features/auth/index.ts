@@ -1,3 +1,4 @@
+export { useMe } from './api'
 export { AccountMenu } from './AccountMenu'
 export { InvitationPage } from './InvitationPage'
 export { RequireMember } from './RequireMember'

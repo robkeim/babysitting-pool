@@ -48,6 +48,33 @@ public class AuthEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task A_member_changes_their_language_and_it_is_stored_on_the_member()
+    {
+        using var client = await JoinAsync("ada@example.com");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("language").GetString().Should().Be("en-US");
+
+        var changed = await client.PutAsJsonAsync("/api/me/language", new { language = "en-XA" });
+        var rejected = await client.PutAsJsonAsync("/api/me/language", new { language = "fr-FR" });
+
+        changed.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await AssertProblemAsync(rejected, HttpStatusCode.BadRequest, "invalid_request");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("language").GetString().Should().Be("en-XA");
+    }
+
+    [Fact]
+    public async Task Unicode_test_is_not_a_choosable_language_in_production()
+    {
+        using var production = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com");
+        var memberId = await production.SeedMemberAsync();
+        using var client = production.CreateMemberClient(memberId);
+
+        var response = await client.PutAsJsonAsync("/api/me/language", new { language = "en-XA" });
+
+        await AssertProblemAsync(response, HttpStatusCode.BadRequest, "invalid_request");
+        (await client.PutAsJsonAsync("/api/me/language", new { language = "en-US" })).StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
     public async Task The_session_cookie_is_http_only_and_same_site_lax()
     {
         await _factory.InviteAsync("ada@example.com");
@@ -132,6 +159,7 @@ public class AuthEndpointTests : IDisposable
     [InlineData("POST", "/api/auth/sessions")]
     [InlineData("POST", "/api/invitations/accept")]
     [InlineData("DELETE", "/api/auth/sessions/current")]
+    [InlineData("PUT", "/api/me/language")]
     public async Task State_changing_calls_without_the_csrf_header_are_403(string method, string path)
     {
         using var client = _factory.CreateClient();

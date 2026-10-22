@@ -59,6 +59,18 @@ export function useAcceptInvitation(token: string) {
   })
 }
 
+/** Saves the Member's Language and applies it at once; the server confirms on the next `me` fetch. */
+export function useChangeLanguage() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (language: string) =>
+      apiFetch<undefined>('/api/me/language', { method: 'PUT', body: { language } }),
+    onSuccess: (_data, language) => {
+      client.setQueryData<MemberView>(authKeys.me(), (me) => (me ? { ...me, language } : me))
+    },
+  })
+}
+
 export function useSignOut() {
   const client = useQueryClient()
   return useMutation({

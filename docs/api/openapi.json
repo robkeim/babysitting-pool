@@ -209,6 +209,49 @@
         }
       }
     },
+    "/api/me/language": {
+      "put": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "ChangeMyLanguage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanguageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/me/account": {
       "get": {
         "tags": [
@@ -569,6 +612,20 @@
           }
         }
       },
+      "LanguageRequest": {
+        "required": [
+          "language"
+        ],
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "LedgerEntryView": {
         "required": [
           "id",
@@ -600,6 +657,7 @@
           "memberId",
           "email",
           "displayName",
+          "language",
           "isAdmin"
         ],
         "type": "object",
@@ -612,6 +670,9 @@
             "type": "string"
           },
           "displayName": {
+            "type": "string"
+          },
+          "language": {
             "type": "string"
           },
           "isAdmin": {

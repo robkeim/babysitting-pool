@@ -5,6 +5,7 @@ public sealed class MemberRecord
     public Guid Id { get; set; }
     public string Email { get; set; } = "";
     public string DisplayName { get; set; } = "";
+    public string Language { get; set; } = "en-US";
     public bool IsAdmin { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? ClosedAt { get; set; }

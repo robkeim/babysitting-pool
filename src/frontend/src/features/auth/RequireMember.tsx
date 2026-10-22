@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { FormattedMessage } from 'react-intl'
 import { isUnauthenticated, useMe } from './api'
 
 interface RequireMemberProps {
@@ -9,7 +10,14 @@ interface RequireMemberProps {
 
 export function RequireMember({ children, signedOut }: RequireMemberProps) {
   const me = useMe()
-  if (me.isError) return isUnauthenticated(me.error) ? signedOut : <p>Something went wrong.</p>
+  if (me.isError)
+    return isUnauthenticated(me.error) ? (
+      signedOut
+    ) : (
+      <p>
+        <FormattedMessage id="common.somethingWentWrong" />
+      </p>
+    )
   if (!me.data) return null
   return children
 }

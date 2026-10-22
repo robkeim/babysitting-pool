@@ -135,6 +135,12 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("en-US");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")

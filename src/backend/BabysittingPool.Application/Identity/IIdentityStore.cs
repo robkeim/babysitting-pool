@@ -14,6 +14,8 @@ public interface IIdentityStore
 
     Task<Member?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken);
 
+    Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken);
+
     Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken);
 
     Task<Invitation?> FindInvitationAsync(string secretHash, CancellationToken cancellationToken);

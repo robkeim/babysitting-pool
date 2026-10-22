@@ -7,7 +7,7 @@ export function formatCredits(quarterCredits: number): string {
 
 /** Stand-in until the co-op time zone setting exists (spec §2A): instants are shown in UTC. */
 export function formatInstant(iso: string): string {
-  const formatted = new Intl.DateTimeFormat('en-GB', {
+  const formatted = new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'UTC',

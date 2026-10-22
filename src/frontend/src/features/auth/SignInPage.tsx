@@ -1,4 +1,5 @@
 import { useState, type SyntheticEvent } from 'react'
+import { FormattedMessage } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,22 +19,25 @@ export function SignInPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
+        <CardTitle>
+          <FormattedMessage id="auth.signIn.title" />
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {request.isSuccess ? (
           <Alert>
-            <AlertTitle>Check your email</AlertTitle>
+            <AlertTitle>
+              <FormattedMessage id="auth.signIn.sent.title" />
+            </AlertTitle>
             <AlertDescription>
-              If that address belongs to a Member, we&apos;ve sent a sign-in link. It works once and
-              expires in a day.
+              <FormattedMessage id="auth.signIn.sent.body" />
             </AlertDescription>
           </Alert>
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email address
+                <FormattedMessage id="auth.signIn.email" />
               </label>
               <Input
                 id="email"
@@ -48,12 +52,16 @@ export function SignInPage() {
             </div>
             {request.isError && (
               <Alert variant="destructive">
-                <AlertTitle>That doesn&apos;t look like an email address</AlertTitle>
-                <AlertDescription>Please check it and try again.</AlertDescription>
+                <AlertTitle>
+                  <FormattedMessage id="auth.signIn.invalid.title" />
+                </AlertTitle>
+                <AlertDescription>
+                  <FormattedMessage id="auth.signIn.invalid.body" />
+                </AlertDescription>
               </Alert>
             )}
             <Button type="submit" disabled={request.isPending}>
-              Email me a sign-in link
+              <FormattedMessage id="auth.signIn.submit" />
             </Button>
           </form>
         )}
