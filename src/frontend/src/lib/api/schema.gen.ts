@@ -149,6 +149,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PostRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListMyRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["QuoteRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -163,6 +211,12 @@ export interface components {
             /** Format: int64 */
             escrowedQuarterCredits: number;
             ledger: components["schemas"]["PageOfLedgerEntryView"];
+        };
+        /** @enum {unknown} */
+        BabysittingLocation: "SittersHouse" | "RequestingFamilysHouse";
+        CostQuote: {
+            /** Format: int64 */
+            costQuarterCredits: number;
         };
         InvitationPreview: {
             email: string;
@@ -187,6 +241,24 @@ export interface components {
             items: components["schemas"]["LedgerEntryView"][];
             nextCursor: null | string;
         };
+        PageOfRequestView: {
+            items: components["schemas"]["RequestView"][];
+            nextCursor: null | string;
+        };
+        PostRequestBody: {
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            durationMinutes: number;
+            /** Format: int32 */
+            childCount: number;
+            location: components["schemas"]["BabysittingLocation"];
+            transport: components["schemas"]["TransportOption"];
+            lunchOrDinner: boolean;
+            snack: boolean;
+            area: null | string;
+            address: null | string;
+        };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -195,12 +267,39 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        /** @enum {unknown} */
+        RequestStatus: "Posted" | "Claimed" | "Completed" | "Cancelled" | "Expired";
+        RequestView: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            durationMinutes: number;
+            /** Format: int32 */
+            childCount: number;
+            location: components["schemas"]["BabysittingLocation"];
+            transport: components["schemas"]["TransportOption"];
+            lunchOrDinner: boolean;
+            snack: boolean;
+            area: string;
+            address: string;
+            /** Format: int64 */
+            costQuarterCredits: number;
+            /** Format: date-time */
+            claimCutoffAt: string;
+            /** Format: date-time */
+            postedAt: string;
+            status: components["schemas"]["RequestStatus"];
+        };
         SignInLinkRequest: {
             email: null | string;
         };
         TokenRequest: {
             token: null | string;
         };
+        /** @enum {unknown} */
+        TransportOption: "None" | "OneWay" | "RoundTrip";
     };
     responses: never;
     parameters: never;
@@ -433,6 +532,152 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    PostRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMyRequests: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageOfRequestView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    QuoteRequest: {
+        parameters: {
+            query: {
+                DurationMinutes: number;
+                ChildCount: number;
+                Location?: components["schemas"]["BabysittingLocation"];
+                Transport?: components["schemas"]["TransportOption"];
+                LunchOrDinner?: boolean;
+                Snack?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostQuote"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

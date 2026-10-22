@@ -15,6 +15,8 @@ import { Route as InvitationRouteImport } from './routes/invitation'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
+import { Route as AuthedRequestsIndexRouteImport } from './routes/_authed/requests/index'
+import { Route as AuthedRequestsNewRouteImport } from './routes/_authed/requests/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,6 +47,16 @@ const SignInVerifyRoute = SignInVerifyRouteImport.update({
   path: '/sign-in/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedRequestsIndexRoute = AuthedRequestsIndexRouteImport.update({
+  id: '/requests/',
+  path: '/requests/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedRequestsNewRoute = AuthedRequestsNewRouteImport.update({
+  id: '/requests/new',
+  path: '/requests/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -52,6 +64,8 @@ export interface FileRoutesByFullPath {
   '/credits': typeof AuthedCreditsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
+  '/requests/new': typeof AuthedRequestsNewRoute
+  '/requests/': typeof AuthedRequestsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +73,8 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthedCreditsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in': typeof SignInIndexRoute
+  '/requests/new': typeof AuthedRequestsNewRoute
+  '/requests': typeof AuthedRequestsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +84,28 @@ export interface FileRoutesById {
   '/_authed/credits': typeof AuthedCreditsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
+  '/_authed/requests/new': typeof AuthedRequestsNewRoute
+  '/_authed/requests/': typeof AuthedRequestsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/invitation' | '/credits' | '/sign-in/verify' | '/sign-in/'
+  fullPaths:
+    | '/'
+    | '/invitation'
+    | '/credits'
+    | '/sign-in/verify'
+    | '/sign-in/'
+    | '/requests/new'
+    | '/requests/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/invitation' | '/credits' | '/sign-in/verify' | '/sign-in'
+  to:
+    | '/'
+    | '/invitation'
+    | '/credits'
+    | '/sign-in/verify'
+    | '/sign-in'
+    | '/requests/new'
+    | '/requests'
   id:
     | '__root__'
     | '/'
@@ -82,6 +114,8 @@ export interface FileRouteTypes {
     | '/_authed/credits'
     | '/sign-in/verify'
     | '/sign-in/'
+    | '/_authed/requests/new'
+    | '/_authed/requests/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -136,15 +170,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/requests/': {
+      id: '/_authed/requests/'
+      path: '/requests'
+      fullPath: '/requests/'
+      preLoaderRoute: typeof AuthedRequestsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/requests/new': {
+      id: '/_authed/requests/new'
+      path: '/requests/new'
+      fullPath: '/requests/new'
+      preLoaderRoute: typeof AuthedRequestsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRoute
+  AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
+  AuthedRequestsIndexRoute: typeof AuthedRequestsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRoute,
+  AuthedRequestsNewRoute: AuthedRequestsNewRoute,
+  AuthedRequestsIndexRoute: AuthedRequestsIndexRoute,
 }
 
 const AuthedRouteWithChildren =

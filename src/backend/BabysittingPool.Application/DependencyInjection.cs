@@ -1,5 +1,6 @@
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Requests;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BabysittingPool.Application;
@@ -18,6 +19,8 @@ public static class DependencyInjection
         services.AddScoped<ResolveSessionHandler>();
         services.AddScoped<EndSessionHandler>();
         services.AddScoped<BootstrapAdminHandler>();
+        services.AddScoped<PostRequestHandler>();
+        services.AddScoped<ListMyRequestsHandler>();
         return services;
     }
 }

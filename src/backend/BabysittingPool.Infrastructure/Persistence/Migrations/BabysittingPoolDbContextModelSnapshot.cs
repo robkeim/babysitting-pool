@@ -98,7 +98,14 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("OccurredAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("RequestId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RequestId", "Kind")
+                        .IsUnique()
+                        .HasFilter("RequestId IS NOT NULL");
 
                     b.HasIndex("MemberId", "OccurredAt", "Id");
 
@@ -135,6 +142,73 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .HasFilter("ClosedAt IS NULL");
 
                     b.ToTable("Members", (string)null);
+                });
+
+            modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.RequestRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ChildCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ClaimCutoffAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Cost")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("CostQuarterCredits");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Meals")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("PostedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RequesterId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SitterId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("StartsAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Transport")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SitterId");
+
+                    b.HasIndex("RequesterId", "PostedAt", "Id");
+
+                    b.ToTable("Requests", (string)null);
                 });
 
             modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.SessionRecord", b =>
@@ -206,6 +280,20 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.RequestRecord", b =>
+                {
+                    b.HasOne("BabysittingPool.Infrastructure.Persistence.MemberRecord", null)
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BabysittingPool.Infrastructure.Persistence.MemberRecord", null)
+                        .WithMany()
+                        .HasForeignKey("SitterId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.SessionRecord", b =>

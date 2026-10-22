@@ -15,24 +15,26 @@ public sealed record CreditRequestDetails
     {
         if (durationMinutes <= 0)
         {
-            throw new DomainException("Duration must be greater than zero minutes.");
+            throw new DomainException("Duration must be greater than zero minutes.", "invalid_duration");
         }
 
         if (durationMinutes % DurationIncrementMinutes != 0)
         {
             throw new DomainException(
-                $"Duration must be a multiple of {DurationIncrementMinutes} minutes.");
+                $"Duration must be a multiple of {DurationIncrementMinutes} minutes.",
+                "invalid_duration");
         }
 
         if (childCount < 1)
         {
-            throw new DomainException("A request must include at least one child.");
+            throw new DomainException("A request must include at least one child.", "invalid_child_count");
         }
 
         if (location == BabysittingLocation.RequestingFamilysHouse && transport != TransportOption.None)
         {
             throw new DomainException(
-                "Transport fees cannot be combined with the requesting family's house location premium.");
+                "Transport fees cannot be combined with the requesting family's house location premium.",
+                "transport_with_family_house");
         }
 
         DurationMinutes = durationMinutes;
