@@ -1,6 +1,6 @@
 # Architecture decisions
 
-One line per ADR so you can pick what to open (ADR 0012). Read an ADR only if its area matches your task. ADRs are append-only: a changed decision gets a new ADR and the old one is marked `Superseded by`.
+One line per ADR so you can pick what to open (ADR 0013). Read an ADR only if its area matches your task. ADRs are append-only: a changed decision gets a new ADR and the old one is marked `Superseded by`.
 
 | ADR | Decision | Area |
 |---|---|---|
@@ -15,4 +15,5 @@ One line per ADR so you can pick what to open (ADR 0012). Read an ADR only if it
 | [0009](0009-react-intl-for-frontend-i18n.md) | react-intl with key-based catalogs and a pseudo-locale | frontend, i18n |
 | [0010](0010-structured-logging-and-correlation.md) | Structured Serilog, W3C trace correlation, never-log list | backend, ops |
 | [0011](0011-local-dev-configuration-and-bootstrap.md) | One-command dev, co-op rules as code, first Admin bootstrapped by configuration | ops, backend |
-| [0012](0012-documentation-structure-and-token-economy.md) | Doc layers, router-style AGENTS.md, token budget, one-slice tickets | docs, ops |
+| [0012](0012-passwordless-auth.md) | Passwordless auth: single-use hashed links and server-side sessions | backend, auth |
+| [0013](0013-documentation-structure-and-token-economy.md) | Doc layers, router-style AGENTS.md, token budget, one-slice tickets | docs, ops |

@@ -14,7 +14,7 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
-## Ticket sizing (ADR 0012)
+## Ticket sizing (ADR 0013)
 
 - One ticket is one vertical slice, one PR, small enough for one context window. Do not bundle slices; split a ticket that needs more than about 5 files of context.
 - Every `ready-for-agent` ticket has a **Read first:** line right after `Blocked by:`, naming the spec sections and ADRs it needs (for example `Read first: spec §2, §2A; ADR 0006`). Agents read those and nothing else up front.

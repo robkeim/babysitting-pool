@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cheap doc hygiene (ADR 0012), run first by scripts/check.sh:
+# Cheap doc hygiene (ADR 0013), run first by scripts/check.sh:
 #   - AGENTS.md stays a router of at most 60 lines
 #   - every docs/adr/NNNN-*.md is listed in docs/adr/README.md
 #   - every relative Markdown link in the repo's docs resolves

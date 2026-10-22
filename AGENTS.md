@@ -1,6 +1,6 @@
 # Agent Instructions
 
-A community babysitting co-op web app powered by a time-credit ledger. This file is a router: rules live in the docs it links to (ADR 0012), never restated here.
+A community babysitting co-op web app powered by a time-credit ledger. This file is a router: rules live in the docs it links to (ADR 0013), never restated here.
 
 ## Stack
 - **Backend:** .NET 10 / C#, SQLite, Hexagonal Architecture, DDD, CQRS. The domain layer is pure C# with no framework or database dependencies. Tests: xUnit + AwesomeAssertions.
@@ -11,7 +11,7 @@ Read only the row that matches your task. Skip files the ticket's **Read first:*
 
 | Task | Read |
 |---|---|
-| Domain logic or business rules | the relevant section of [`docs/specs/credit-engine.md`](docs/specs/credit-engine.md), then [`GLOSSARY.md`](GLOSSARY.md) |
+| Domain logic or business rules | the relevant section of [`docs/specs/`](docs/specs/credit-engine.md) (`credit-engine.md` for credits and requests, `sign-in.md` for invitations and sign-in), then [`GLOSSARY.md`](GLOSSARY.md) |
 | Backend structure, persistence | [ADR index](docs/adr/README.md), then the ADRs tagged `backend` |
 | API change | [ADR 0006](docs/adr/0006-rest-contract.md), [`docs/development.md`](docs/development.md) (regenerating the contract) |
 | Frontend | ADRs tagged `frontend` in the [ADR index](docs/adr/README.md) |
