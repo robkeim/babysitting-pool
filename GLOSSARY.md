@@ -99,3 +99,13 @@ _Avoid_: Inactivity fee, decay
 **Settle**:
 The recurring run that applies every time-driven change that has become due: Expiry, Payout and Demurrage. It is not the same as a Payout.
 _Avoid_: Cron job, batch, sweep
+
+### Language
+
+**Language**:
+The language a Member reads the co-op in, chosen by the Member and kept on their profile. English (en-US) is the first; others are added over time.
+_Avoid_: Locale, translation
+
+**Ünïcödé Tëst**:
+A Language that renders English as accented look-alike text padded to roughly the length other languages need, so layout problems show up before a real translation exists. It is never offered to Members in production.
+_Avoid_: Pseudo-locale, fake language
