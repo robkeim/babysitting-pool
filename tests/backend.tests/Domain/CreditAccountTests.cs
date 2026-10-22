@@ -45,7 +45,6 @@ public class CreditAccountTests
         account.Escrow(2.0m);
 
         account.Available.Should().Be(0m);
-        account.CanSubmitRequests.Should().BeFalse();
     }
 
     [Fact]

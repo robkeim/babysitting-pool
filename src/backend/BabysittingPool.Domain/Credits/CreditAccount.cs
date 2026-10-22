@@ -35,9 +35,6 @@ public sealed class CreditAccount
         return new CreditAccount(available, escrowed);
     }
 
-    /// <summary>A member with no available credits cannot submit new requests.</summary>
-    public bool CanSubmitRequests => Available > 0m;
-
     /// <summary>Moves the cost of a posted request from Available into Escrow.</summary>
     public void Escrow(decimal amount)
     {
