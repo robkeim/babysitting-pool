@@ -21,7 +21,7 @@ export interface Backend {
   signIn(context: BrowserContext, memberId: string): Promise<void>
   /** Sets the server clock to an absolute instant. */
   setClock(now: string): Promise<void>
-  /** Runs Settle as the Admin, the way the hosted service does on its tick (switched off in E2E). */
+  /** Runs Settle, the way the hosted service does on its tick (switched off in E2E). */
   settle(): Promise<void>
 }
 
@@ -100,7 +100,6 @@ export const test = base.extend<object, { backend: Backend }>({
 
       try {
         await Promise.all([waitFor(`${apiUrl}/health`, api, 'API'), waitFor(appUrl, spa, 'SPA')])
-        let adminToken: string | undefined
         await provide({
           appUrl,
           async seedMember(grantsQuarterCredits) {
@@ -123,20 +122,7 @@ export const test = base.extend<object, { backend: Backend }>({
             await post(`${apiUrl}/api/test/clock`, { now }, 'PUT')
           },
           async settle() {
-            if (!adminToken) {
-              const seeded = await post(`${apiUrl}/api/test/members`, {
-                grantsQuarterCredits: [0],
-                isAdmin: true,
-              })
-              const { memberId } = (await seeded.json()) as { memberId: string }
-              const session = await post(`${apiUrl}/api/test/sessions`, { memberId })
-              adminToken = ((await session.json()) as { token: string }).token
-            }
-            const response = await fetch(`${apiUrl}/api/admin/settle`, {
-              method: 'POST',
-              headers: { cookie: `session=${adminToken}`, 'x-requested-with': 'fetch' },
-            })
-            if (!response.ok) throw new Error(`Settle failed: ${response.status}`)
+            await post(`${apiUrl}/api/test/settle`, {})
           },
         })
       } finally {

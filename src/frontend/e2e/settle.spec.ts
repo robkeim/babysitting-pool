@@ -22,14 +22,15 @@ test('Settle pays a Claimed Request out to the Sitter when its start time arrive
   await requester.goto(`${backend.appUrl}/requests/new`)
   await requester.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await requester.getByLabel(/duration/i).fill('120')
-  await requester.getByLabel(/^area/i).fill('Riverside')
+  await requester.getByLabel(/^area/i).fill('Payout Park')
   await requester.getByLabel(/exact address/i).fill('12 River Rd')
   await requester.getByRole('button', { name: /post request/i }).click()
-  await expect(requester.getByRole('row', { name: /riverside/i })).toContainText('Posted')
+  await expect(requester.getByRole('row', { name: /payout park/i })).toContainText('Posted')
 
   await sitter.goto(`${backend.appUrl}/open-requests`)
-  await sitter.getByRole('button', { name: /claim the request in riverside/i }).click()
-  await expect(sitter.getByText(/no open requests/i)).toBeVisible()
+  await sitter.getByRole('button', { name: /claim the request in payout park/i }).click()
+  // Other tests' open Requests share this backend, so check the one row rather than an empty list.
+  await expect(sitter.getByRole('row', { name: /payout park/i })).toHaveCount(0)
 
   // The Escrow stays put until the start time, then Settle releases it to the Sitter.
   await requester.goto(`${backend.appUrl}/credits`)
@@ -45,7 +46,7 @@ test('Settle pays a Claimed Request out to the Sitter when its start time arrive
   await expect(sitter.getByRole('row', { name: /payout/i })).toContainText('2.00')
 
   await requester.goto(`${backend.appUrl}/requests`)
-  await expect(requester.getByRole('row', { name: /riverside/i })).toContainText('Completed')
+  await expect(requester.getByRole('row', { name: /payout park/i })).toContainText('Completed')
 })
 
 test('Settle refunds a Request nobody claimed once its Claim Cutoff passes', async ({
@@ -58,10 +59,10 @@ test('Settle refunds a Request nobody claimed once its Claim Cutoff passes', asy
   await page.goto('/requests/new')
   await page.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await page.getByLabel(/duration/i).fill('120')
-  await page.getByLabel(/^area/i).fill('Riverside')
+  await page.getByLabel(/^area/i).fill('Expiry Heights')
   await page.getByLabel(/exact address/i).fill('12 River Rd')
   await page.getByRole('button', { name: /post request/i }).click()
-  await expect(page.getByRole('row', { name: /riverside/i })).toContainText('Posted')
+  await expect(page.getByRole('row', { name: /expiry heights/i })).toContainText('Posted')
 
   // Claim Cutoff is 3 hours before the 10:00 start.
   await backend.setClock('2026-03-02T07:00:00Z')
@@ -72,5 +73,5 @@ test('Settle refunds a Request nobody claimed once its Claim Cutoff passes', asy
   await expect(page.getByRole('group', { name: 'In escrow' })).toContainText('0.00')
   await expect(page.getByRole('row', { name: /refund/i })).toContainText('2.00')
   await page.goto('/requests')
-  await expect(page.getByRole('row', { name: /riverside/i })).toContainText('Expired')
+  await expect(page.getByRole('row', { name: /expiry heights/i })).toContainText('Expired')
 })
