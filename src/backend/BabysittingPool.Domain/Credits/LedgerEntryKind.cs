@@ -7,4 +7,5 @@ public enum LedgerEntryKind
     Escrow,
     Refund,
     Payout,
+    Demurrage,
 }

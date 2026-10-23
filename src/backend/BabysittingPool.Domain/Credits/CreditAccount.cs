@@ -76,6 +76,19 @@ public sealed class CreditAccount
         sitter.Available += amount;
     }
 
+    /// <summary>
+    /// Burns up to <paramref name="amount"/> from Available (Demurrage, spec §5) and returns what was burned. Never
+    /// drives Available below zero and never touches Escrow.
+    /// </summary>
+    public decimal Burn(decimal amount)
+    {
+        RequirePositive(amount);
+
+        var burned = Math.Min(amount, Available);
+        Available -= burned;
+        return burned;
+    }
+
     private void RequireEscrowed(decimal amount)
     {
         if (Escrowed < amount)

@@ -124,6 +124,7 @@ The total cost of a request is calculated deterministically using the following 
   - Demurrage Credits are burned (recorded as a Ledger entry with no recipient).
   - **Hard Floor Protection:** The charge is min(2.0, Available Balance); penalties stop strictly at **0.0 credits** (never drives an account into negative) and no zero-amount Ledger entry is written.
   - Demurrage keeps applying weekly until the Member has activity again or reaches 0.0.
+  - A boundary is only evaluated after the Member's last credit (Grant, Refund or Payout), so a boundary at which the account was empty is never charged retroactively once credits arrive.
 
 ### Dormant Members (Admin view)
 - A Member is **dormant** when their last activity is older than the dormancy threshold (default 6 weeks, configurable). The Admin is never listed.

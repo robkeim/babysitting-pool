@@ -92,6 +92,8 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
             // Each Request's Escrow, Refund and Payout can be recorded at most once. No foreign key to Requests:
             // adding one would make SQLite rebuild this table and drop its append-only triggers.
             entry.HasIndex(e => new { e.RequestId, e.Kind }).IsUnique().HasFilter("RequestId IS NOT NULL");
+            // A weekly boundary is charged at most once per Member (ADR 0007).
+            entry.HasIndex(e => new { e.MemberId, e.Boundary }).IsUnique().HasFilter("Boundary IS NOT NULL");
         });
     }
 

@@ -437,6 +437,8 @@ export interface components {
             /** Format: int32 */
             completed: number;
             /** Format: int32 */
+            charged: number;
+            /** Format: int32 */
             failed: number;
         };
         SignInLinkRequest: {
