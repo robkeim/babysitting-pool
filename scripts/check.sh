@@ -1,29 +1,54 @@
 #!/usr/bin/env bash
 # The single gate (ADR 0008): git hooks, Claude Code hooks and CI all call this, so "green" means one thing.
 #
-#   scripts/check.sh [backend|frontend|all] [--fast] [--e2e] [--stamped]
+#   scripts/check.sh [backend|frontend|all] [--fast] [--e2e] [--full] [--stamped] [--quiet]
 #
+# Two levels (ADR 0015): the fast gate is for iterating (Stop hook), the full gate runs before anything is pushed.
 #   --fast     skip the slow tests: backend API and Infrastructure tests (the Domain and Application tests still run)
 #   --e2e      also run the Playwright journeys (frontend only; needs `npx playwright install chromium`)
-#   --stamped  exit 0 at once if a passing `all` run is already stamped for this exact tree
+#   --full     the full gate: every test, the Playwright journeys and the generated-contract drift check
+#   --stamped  exit 0 at once if a passing `all` run is already stamped for this exact tree and level
+#   --quiet    print one line when green, or the last 40 lines and the log path when red (keeps agent output small)
 #
-# A passing `all` run writes the tree hash to .git/check-stamp, proving "tested at this exact content".
+# A passing `all` run writes the tree hash to .git/check-stamp-fast, proving "tested at this exact content";
+# a passing --full run also writes .git/check-stamp-full. A full stamp satisfies a fast request, not the reverse.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 scope=all
 fast=0
 e2e=0
+full=0
 stamped=0
+quiet=0
+forward=()
 for arg in "$@"; do
   case "$arg" in
     backend | frontend | all) scope=$arg ;;
     --fast) fast=1 ;;
     --e2e) e2e=1 ;;
+    --full) full=1 ;;
     --stamped) stamped=1 ;;
-    *) echo "usage: scripts/check.sh [backend|frontend|all] [--fast] [--e2e] [--stamped]" >&2; exit 2 ;;
+    --quiet) quiet=1; continue ;;
+    *) echo "usage: scripts/check.sh [backend|frontend|all] [--fast] [--e2e] [--full] [--stamped] [--quiet]" >&2; exit 2 ;;
   esac
+  forward+=("$arg")
 done
+if [[ $full == 1 ]]; then
+  fast=0
+  e2e=1
+fi
+
+if [[ $quiet == 1 ]]; then
+  log=$(git rev-parse --git-path check.log)
+  if "$0" "${forward[@]+"${forward[@]}"}" >"$log" 2>&1; then
+    tail -1 "$log"
+    exit 0
+  fi
+  tail -40 "$log"
+  echo "check: red; full log in $log"
+  exit 1
+fi
 
 # Hash of the working tree (tracked and untracked, not ignored) without touching the real index.
 tree_hash() {
@@ -34,11 +59,20 @@ tree_hash() {
   GIT_INDEX_FILE=$index git write-tree
   rm -f "$index"
 }
-stamp_file=$(git rev-parse --git-path check-stamp)
+stamp_fast=$(git rev-parse --git-path check-stamp-fast)
+stamp_full=$(git rev-parse --git-path check-stamp-full)
+# A full stamp satisfies any request; a fast stamp satisfies only a fast one.
+wanted_stamps=("$stamp_full")
+[[ $full == 1 ]] || wanted_stamps+=("$stamp_fast")
 
-if [[ $stamped == 1 && -f $stamp_file && "$(cat "$stamp_file")" == "$(tree_hash)" ]]; then
-  echo "check: already green for this tree, skipping"
-  exit 0
+if [[ $stamped == 1 ]]; then
+  current=$(tree_hash)
+  for stamp in "${wanted_stamps[@]}"; do
+    if [[ -f $stamp && "$(cat "$stamp")" == "$current" ]]; then
+      echo "check: already green for this tree, skipping"
+      exit 0
+    fi
+  done
 fi
 
 step() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
@@ -71,7 +105,20 @@ frontend() {
   npx vitest run
   if [[ $e2e == 1 ]]; then
     step "frontend: playwright"
-    npx playwright test
+    npx playwright test --reporter=line
+  fi
+  if [[ $full == 1 ]]; then
+    step "frontend: Postman collection is up to date"
+    local collection=../../docs/api/postman_collection.json before
+    before=$(mktemp)
+    cp "$collection" "$before"
+    npm run generate:postman --silent
+    if ! cmp -s "$before" "$collection"; then
+      rm -f "$before"
+      echo "$collection was stale and has been regenerated; commit it" >&2
+      return 1
+    fi
+    rm -f "$before"
   fi
 }
 
@@ -85,6 +132,7 @@ case "$scope" in
 esac
 
 if [[ $scope == all ]]; then
-  tree_hash >"$stamp_file"
+  tree_hash >"$stamp_fast"
+  [[ $full == 1 ]] && tree_hash >"$stamp_full"
 fi
-printf '\n\033[1;32mcheck: green (%s%s%s)\033[0m\n' "$scope" "$([[ $fast == 1 ]] && echo ', fast')" "$([[ $e2e == 1 ]] && echo ', e2e')"
+printf '\n\033[1;32mcheck: green (%s%s%s%s)\033[0m\n' "$scope" "$([[ $fast == 1 ]] && echo ', fast')" "$([[ $e2e == 1 ]] && echo ', e2e')" "$([[ $full == 1 ]] && echo ', full')"

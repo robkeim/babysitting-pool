@@ -1,4 +1,4 @@
-# Fast first line (ADR 0008): format and lint staged files only. CI is authoritative.
+# Fast first line (ADR 0008): format and lint staged files only.
 cd src/frontend && npx lint-staged --cwd . --relative
 cd ../..
 cs_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.cs')
