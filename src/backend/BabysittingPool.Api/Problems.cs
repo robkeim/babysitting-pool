@@ -20,6 +20,9 @@ internal static class Problems
     public static IResult SignInLinkInvalid() =>
         Problem(StatusCodes.Status422UnprocessableEntity, "sign_in_link_invalid", "The sign-in link is unknown, used or expired.");
 
+    public static IResult TooManyRequests() =>
+        Problem(StatusCodes.Status429TooManyRequests, "rate_limited", "Too many requests; try again later.");
+
     public static IResult InvalidRequest(string field, string fieldCode) =>
         Problem(
             StatusCodes.Status400BadRequest,

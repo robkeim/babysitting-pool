@@ -55,6 +55,7 @@ else
 }
 
 builder.Services.AddSessionAuthentication();
+builder.Services.AddApiRateLimiting(builder.Configuration);
 
 if (builder.Configuration.GetValue(SettleHostedService.EnabledSetting, !builder.Environment.IsEnvironment(TestEndpoints.Environment)))
 {
@@ -91,9 +92,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("E2E"))
     app.MapOpenApi();
 }
 
+app.UseConfiguredForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseCsrfHeaderCheck();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));

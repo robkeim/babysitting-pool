@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Identity;
 
@@ -8,11 +9,19 @@ internal static class AuthEndpoints
     public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/api/auth/sign-in-links", async (
-            SignInLinkRequest request, RequestSignInLinkHandler handler, CancellationToken cancellationToken) =>
+            HttpContext context, SignInLinkRequest request, RequestSignInLinkHandler handler,
+            PartitionedRateLimiter<string> emailLimiter, CancellationToken cancellationToken) =>
         {
             if (!EmailAddress.TryParse(request.Email, out var email))
             {
                 return Problems.InvalidRequest("email", "invalid");
+            }
+
+            // Per address, known or not, so the answer reveals nothing about who is a Member (ADR 0012).
+            using var lease = await emailLimiter.AcquireAsync(email.Value, 1, cancellationToken);
+            if (!lease.IsAcquired)
+            {
+                return RateLimiting.Reject(context, lease.TryGetMetadata(MetadataName.RetryAfter, out var delay) ? delay : TimeSpan.FromMinutes(15));
             }
 
             await handler.HandleAsync(email, cancellationToken);
