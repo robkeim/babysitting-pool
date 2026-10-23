@@ -62,6 +62,20 @@ internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReade
         return rows.Select(ToRead).ToList();
     }
 
+    public async Task<IReadOnlyList<Guid>> ListDueForExpiryAsync(DateTime now, CancellationToken cancellationToken) =>
+        await db.Requests.AsNoTracking()
+            .Where(r => r.Status == RequestStatus.Posted && r.ClaimCutoffAt <= now)
+            .OrderBy(r => r.ClaimCutoffAt).ThenBy(r => r.Id)
+            .Select(r => r.Id)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Guid>> ListDueForPayoutAsync(DateTime now, CancellationToken cancellationToken) =>
+        await db.Requests.AsNoTracking()
+            .Where(r => r.Status == RequestStatus.Claimed && r.StartsAt <= now)
+            .OrderBy(r => r.StartsAt).ThenBy(r => r.Id)
+            .Select(r => r.Id)
+            .ToListAsync(cancellationToken);
+
     private static RequestRead ToRead(RequestRecord r) => new(
         r.Id, r.StartsAt, r.DurationMinutes, r.ChildCount, r.Location, r.Transport, r.Meals, r.Area, r.Address,
         r.Cost.QuarterCredits, r.ClaimCutoffAt, r.PostedAt, r.Status);

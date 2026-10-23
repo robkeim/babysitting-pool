@@ -54,6 +54,11 @@ else
     builder.Services.AddEmailOutbox();
 }
 
+if (builder.Configuration.GetValue(SettleHostedService.EnabledSetting, !builder.Environment.IsEnvironment(TestEndpoints.Environment)))
+{
+    builder.Services.AddHostedService<SettleHostedService>();
+}
+
 var app = builder.Build();
 
 await app.Services.MigrateDatabaseAsync();
@@ -91,6 +96,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapRequestEndpoints();
+app.MapAdminEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(TestEndpoints.Environment))
 {
