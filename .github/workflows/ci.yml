@@ -150,6 +150,34 @@ jobs:
           path: src/frontend/test-results
           retention-days: 7
 
+  # A cache saved by a PR run is visible only to that PR, and e2e never runs on main, so without this every
+  # PR downloads Chromium cold. Saving it from main makes it readable by every PR.
+  warm-playwright-cache:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - run: npm ci
+        working-directory: src/frontend
+      - name: Read Playwright version
+        id: playwright
+        working-directory: src/frontend
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        working-directory: src/frontend
+        run: npx playwright install chromium
+
   ci-ok:
     # Always runs, so a path-filtered job that was skipped never leaves a required check pending.
     if: always()
