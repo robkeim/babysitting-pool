@@ -10,3 +10,5 @@ Stamps are per level (`.git/check-stamp-fast`, `.git/check-stamp-full`) and hold
 **Consequences, accepted.** The gate can be bypassed on a machine where the hooks are not installed, and no clean-environment run exists any more. `ci-ok` is no longer a check, and the PR title is no longer linted (Conventional Commits rely on the `pr` skill). The repository has one maintainer on one machine (ADR 0008 amendment), so this is the same trust boundary the hooks already relied on. Revisit with a second contributor or a paid plan.
 
 Supersedes the CI parts of ADR 0008 (the `ci.yml` workflow, `ci-ok`, caches, draft-PR rules and the minutes budget); its single gate command, hooks and agent guardrails stand.
+
+Amendment (2026-10-23): the `commit-msg` hook (`scripts/check-commit-msg.sh`) now lints each commit subject as a Conventional Commit. The squash-merge title on GitHub is the PR title, which nothing checks; the `pr` skill sets it.
