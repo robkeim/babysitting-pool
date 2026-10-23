@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<ListOpenRequestsHandler>();
         services.AddScoped<ListMyClaimsHandler>();
         services.AddScoped<ClaimRequestHandler>();
+        services.AddScoped<SettleHandler>();
         return services;
     }
 }

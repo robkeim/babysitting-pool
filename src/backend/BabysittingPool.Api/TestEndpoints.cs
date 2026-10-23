@@ -36,7 +36,8 @@ internal static class TestEndpoints
 
             var grants = request.GrantsQuarterCredits.Select(Credits.FromQuarterCredits).ToList();
             var email = request.Email ?? $"member-{Guid.NewGuid():N}@example.test";
-            var memberId = await services.SeedMemberAsync(email, request.DisplayName ?? "Test Member", false, grants, cancellationToken);
+            var memberId = await services.SeedMemberAsync(
+                email, request.DisplayName ?? "Test Member", request.IsAdmin ?? false, grants, cancellationToken);
             return Results.Created($"/api/test/members/{memberId}", new SeedMemberResponse(memberId, email));
         });
 
@@ -57,7 +58,7 @@ internal static class TestEndpoints
         });
     }
 
-    private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits, string? Email, string? DisplayName);
+    private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits, string? Email, string? DisplayName, bool? IsAdmin);
 
     private sealed record SeedMemberResponse(Guid MemberId, string Email);
 

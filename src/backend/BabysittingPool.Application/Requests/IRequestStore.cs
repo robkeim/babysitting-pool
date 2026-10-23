@@ -26,6 +26,19 @@ public interface IRequestStore
     /// was read, which is how the loser of a claim race finds out (ADR 0004).
     /// </summary>
     Task SaveClaimedAsync(Request request, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Saves an Expired Request, the Requester's refunded account and the Refund Ledger entry in one transaction.
+    /// Throws <see cref="ConcurrencyConflictException"/> if the Request or account changed since it was read.
+    /// </summary>
+    Task SaveExpiredAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Saves a Completed Request, both accounts and the Payout Ledger entry in one transaction. Throws
+    /// <see cref="ConcurrencyConflictException"/> if the Request or an account changed since it was read.
+    /// </summary>
+    Task SaveCompletedAsync(
+        Request request, CreditAccount requester, CreditAccount sitter, DateTime now, CancellationToken cancellationToken);
 }
 
 /// <summary>Read port: queries project straight from the database (ADR 0002).</summary>
@@ -45,4 +58,10 @@ public interface IRequestReader
     /// <summary>The Requests the Member claimed as Sitter, latest start first, starting after <paramref name="after"/>.</summary>
     Task<IReadOnlyList<RequestRead>> ListClaimedByAsync(
         Guid sitterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
+
+    /// <summary>The Posted Requests whose Claim Cutoff has been reached at <paramref name="now"/>.</summary>
+    Task<IReadOnlyList<Guid>> ListDueForExpiryAsync(DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>The Claimed Requests whose start time has been reached at <paramref name="now"/>.</summary>
+    Task<IReadOnlyList<Guid>> ListDueForPayoutAsync(DateTime now, CancellationToken cancellationToken);
 }
