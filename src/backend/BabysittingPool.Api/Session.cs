@@ -22,10 +22,6 @@ internal static class SessionCookie
 
     public static string? Read(HttpContext context) => context.Request.Cookies[Name];
 
-    /// <summary>The signed-in Member, or null.</summary>
-    public static Task<MemberView?> CurrentMemberAsync(HttpContext context, CancellationToken cancellationToken) =>
-        context.RequestServices.GetRequiredService<ResolveSessionHandler>().HandleAsync(Read(context), cancellationToken);
-
     private static CookieOptions Options(HttpContext context)
     {
         var environment = context.RequestServices.GetRequiredService<IHostEnvironment>();

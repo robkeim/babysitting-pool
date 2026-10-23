@@ -54,6 +54,8 @@ else
     builder.Services.AddEmailOutbox();
 }
 
+builder.Services.AddSessionAuthentication();
+
 var app = builder.Build();
 
 await app.Services.MigrateDatabaseAsync();
@@ -86,11 +88,14 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("E2E"))
 
 app.UseHttpsRedirection();
 app.UseCsrfHeaderCheck();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapRequestEndpoints();
+app.MapAdminEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(TestEndpoints.Environment))
 {

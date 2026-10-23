@@ -13,10 +13,7 @@ internal static class AccountEndpoints
             int? limit,
             CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             try
             {
@@ -28,6 +25,7 @@ internal static class AccountEndpoints
                 return Problems.InvalidRequest("cursor", "invalid");
             }
         })
+        .RequireAuthorization()
         .WithName("GetMyAccount")
         .Produces<AccountView>()
         .ProducesProblem(StatusCodes.Status400BadRequest)

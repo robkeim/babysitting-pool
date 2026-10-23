@@ -14,6 +14,7 @@ internal static class DevEndpoints
             outbox.Messages
                 .Where(m => to is null || string.Equals(m.To, to, StringComparison.OrdinalIgnoreCase))
                 .Select(m => new OutboxMessage(m.To, m.Subject, m.Link.ToString())))
+            .AllowAnonymous()
             .ExcludeFromDescription();
     }
 

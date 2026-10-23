@@ -8,6 +8,9 @@ internal static class Problems
     public static IResult Unauthenticated() =>
         Problem(StatusCodes.Status401Unauthorized, "unauthenticated", "Not signed in.");
 
+    public static IResult NotAdmin() =>
+        Problem(StatusCodes.Status403Forbidden, "forbidden", "Only the Admin may do this.");
+
     public static IResult CsrfHeaderMissing() =>
         Problem(StatusCodes.Status403Forbidden, "csrf_header_missing", "State-changing calls need the X-Requested-With header.");
 

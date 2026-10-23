@@ -12,10 +12,7 @@ internal static class RequestEndpoints
         app.MapPost("/api/requests", async (
             HttpContext context, PostRequestBody body, PostRequestHandler handler, CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             try
             {
@@ -34,6 +31,7 @@ internal static class RequestEndpoints
                 return Problems.Conflict();
             }
         })
+        .RequireAuthorization()
         .WithName("PostRequest")
         .Produces<RequestView>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -48,10 +46,7 @@ internal static class RequestEndpoints
             int? limit,
             CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             try
             {
@@ -62,6 +57,7 @@ internal static class RequestEndpoints
                 return Problems.InvalidRequest("cursor", "invalid");
             }
         })
+        .RequireAuthorization()
         .WithName("ListMyRequests")
         .Produces<Page<RequestView>>()
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -74,10 +70,7 @@ internal static class RequestEndpoints
             int? limit,
             CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             try
             {
@@ -88,6 +81,7 @@ internal static class RequestEndpoints
                 return Problems.InvalidRequest("cursor", "invalid");
             }
         })
+        .RequireAuthorization()
         .WithName("ListOpenRequests")
         .Produces<Page<OpenRequestView>>()
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -100,10 +94,7 @@ internal static class RequestEndpoints
             int? limit,
             CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             try
             {
@@ -114,6 +105,7 @@ internal static class RequestEndpoints
                 return Problems.InvalidRequest("cursor", "invalid");
             }
         })
+        .RequireAuthorization()
         .WithName("ListMyClaims")
         .Produces<Page<RequestView>>()
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -122,10 +114,7 @@ internal static class RequestEndpoints
         app.MapPost("/api/requests/{id:guid}/claim", async (
             Guid id, HttpContext context, ClaimRequestHandler handler, CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             try
             {
@@ -142,6 +131,7 @@ internal static class RequestEndpoints
                 return Problems.Conflict();
             }
         })
+        .RequireAuthorization()
         .WithName("ClaimRequest")
         .Produces<RequestView>()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -149,14 +139,8 @@ internal static class RequestEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
 
-        app.MapGet("/api/requests/quote", async (
-            HttpContext context, [AsParameters] QuoteQuery query, CancellationToken cancellationToken) =>
+        app.MapGet("/api/requests/quote", ([AsParameters] QuoteQuery query) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is null)
-            {
-                return Problems.Unauthenticated();
-            }
-
             try
             {
                 return Results.Ok(QuoteRequest.Handle(query.ToDetails()));
@@ -166,6 +150,7 @@ internal static class RequestEndpoints
                 return Problems.DomainRule(ex);
             }
         })
+        .RequireAuthorization()
         .WithName("QuoteRequest")
         .Produces<CostQuote>()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
