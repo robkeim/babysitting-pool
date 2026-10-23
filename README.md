@@ -9,7 +9,8 @@ A web app for a community babysitting co-op. Members earn and spend time credits
 
 ```sh
 scripts/dev.sh               # API and SPA together
-scripts/check.sh --fast      # lint, build and test (the one definition of green)
+scripts/check.sh --fast      # the fast gate: lint, build and quick tests
+scripts/check.sh --full      # the full gate: every test, Playwright and drift checks (run before pushing)
 ```
 
 Details, configuration and the API contract workflow: [docs/development.md](docs/development.md).

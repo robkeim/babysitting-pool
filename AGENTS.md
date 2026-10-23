@@ -28,7 +28,7 @@ Read only the row that matches your task. Skip files the ticket's **Read first:*
 4. Commit messages are Conventional Commits (`type(scope): description`).
 
 ## Definition of done
-- `scripts/check.sh` is green (`--fast` while iterating, `--e2e` when you touch a user journey). It is the single gate for git hooks, Claude Code hooks and CI ([ADR 0008](docs/adr/0008-enforcement-loop.md)).
+- Fast gate: `scripts/check.sh all --fast` is green while iterating (the Stop hook runs it). Full gate: `scripts/check.sh all --full` is green before you push or open a PR (the push hooks run it). There is no GitHub CI ([ADR 0015](docs/adr/0015-local-two-level-gate-replaces-github-ci.md)).
 - Do not edit lint config, `.editorconfig`, `.claude/`, `.husky/` or workflows to make a failure pass unless the issue says so. Never use `--no-verify` or force-push.
 - Open PRs as drafts; branch `<issue>-<slug>`, Conventional Commit title, body ends in `Closes #n` (use the `pr` skill).
 

@@ -5,4 +5,4 @@ while read -r _ _ remote_ref _; do
     exit 1
   fi
 done
-scripts/check.sh all --fast --stamped
+scripts/check.sh all --full --stamped --quiet

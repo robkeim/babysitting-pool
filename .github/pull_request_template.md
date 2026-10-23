@@ -1,11 +1,10 @@
 ## Summary
 
-<!-- What changed and why. The PR title is a Conventional Commit (linted in CI). -->
+<!-- What changed and why., with the PR title as a Conventional Commit. -->
 
 ## Checklist
 
-- [ ] `scripts/check.sh` is green locally
-- [ ] I touched a user journey and ran `scripts/check.sh all --e2e`
+- [ ] `scripts/check.sh all --full` is green locally (there is no GitHub CI)
 - [ ] I updated the spec, ADRs or glossary if behaviour or a decision changed
 - [ ] I did not edit lint config, `.editorconfig` or workflows to make a failure pass (unless the issue says so)
 
