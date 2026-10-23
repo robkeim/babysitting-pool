@@ -1,8 +1,15 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { MyClaimsPage } from './MyClaimsPage'
-import { myClaimsFailureHandler, myClaimsHandler, sampleRequest } from './mocks'
+import {
+  myClaimsFailureHandler,
+  myClaimsHandler,
+  releaseRequestHandler,
+  releaseRequestRejectedHandler,
+  sampleRequest,
+} from './mocks'
 
 describe('MyClaimsPage', () => {
   it('lists the Member’s claims with state, credits, area and the exact address', async () => {
@@ -42,5 +49,45 @@ describe('MyClaimsPage', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/couldn.t load your claims/i)
     expect(screen.queryByText('Boom')).not.toBeInTheDocument()
+  })
+
+  it('withdraws from a Claimed Request, and offers nothing for completed ones', async () => {
+    const user = userEvent.setup()
+    const withdrawn: string[] = []
+    server.use(
+      myClaimsHandler({
+        items: [
+          { ...sampleRequest, status: 'Claimed' },
+          { ...sampleRequest, id: 'b', status: 'Completed', area: 'Hilltop' },
+        ],
+        nextCursor: null,
+      }),
+      releaseRequestHandler('withdraw', 'Posted', (id) => withdrawn.push(id)),
+    )
+
+    renderWithProviders(<MyClaimsPage />)
+    await user.click(
+      await screen.findByRole('button', { name: /withdraw from the request in riverside/i }),
+    )
+
+    await vi.waitFor(() => {
+      expect(withdrawn).toEqual([sampleRequest.id])
+    })
+    expect(screen.getAllByRole('button', { name: /withdraw from/i })).toHaveLength(1)
+  })
+
+  it('explains a rejected withdraw', async () => {
+    const user = userEvent.setup()
+    server.use(
+      myClaimsHandler({ items: [{ ...sampleRequest, status: 'Claimed' }], nextCursor: null }),
+      releaseRequestRejectedHandler('withdraw', 404, 'request_not_found'),
+    )
+
+    renderWithProviders(<MyClaimsPage />)
+    await user.click(
+      await screen.findByRole('button', { name: /withdraw from the request in riverside/i }),
+    )
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/no longer exists/i)
   })
 })

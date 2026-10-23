@@ -107,3 +107,30 @@ export function useClaimRequest() {
     },
   })
 }
+
+/** Both Cancel and Withdraw move credits or reopen a Request, so every list and the balance are stale afterwards. */
+function useReleaseRequest(action: 'cancel' | 'withdraw') {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (requestId: string) =>
+      apiFetch<RequestView>(`/api/requests/${requestId}/${action}`, { method: 'POST' }),
+    onSettled: async () => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: requestsKeys.mine() }),
+        client.invalidateQueries({ queryKey: requestsKeys.open() }),
+        client.invalidateQueries({ queryKey: requestsKeys.claims() }),
+        client.invalidateQueries({ queryKey: creditsKeys.account() }),
+      ])
+    },
+  })
+}
+
+/** The Requester cancels a Posted or Claimed Request before its start time and is refunded in full (spec §4.5). */
+export function useCancelRequest() {
+  return useReleaseRequest('cancel')
+}
+
+/** The Sitter drops their claim before the start time (spec §4.5). */
+export function useWithdrawClaim() {
+  return useReleaseRequest('withdraw')
+}

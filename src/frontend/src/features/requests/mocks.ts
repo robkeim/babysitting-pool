@@ -127,3 +127,28 @@ export function claimRequestRejectedHandler(status: number, code: string) {
     ),
   )
 }
+
+/** Calls `onRelease` with the Request id, then answers 200 with the Request in `status`. */
+export function releaseRequestHandler(
+  action: 'cancel' | 'withdraw',
+  status: RequestView['status'],
+  onRelease: (requestId: string) => void,
+) {
+  return http.post(`*/api/requests/:id/${action}`, ({ params }) => {
+    onRelease(String(params.id))
+    return HttpResponse.json({ ...sampleRequest, status })
+  })
+}
+
+export function releaseRequestRejectedHandler(
+  action: 'cancel' | 'withdraw',
+  status: number,
+  code: string,
+) {
+  return http.post(`*/api/requests/:id/${action}`, () =>
+    HttpResponse.json(
+      { status, title: code, code },
+      { status, headers: { 'content-type': 'application/problem+json' } },
+    ),
+  )
+}

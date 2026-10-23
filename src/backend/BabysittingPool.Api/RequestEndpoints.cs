@@ -139,6 +139,62 @@ internal static class RequestEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
 
+        app.MapPost("/api/requests/{id:guid}/cancel", async (
+            Guid id, HttpContext context, CancelRequestHandler handler, CancellationToken cancellationToken) =>
+        {
+            var member = context.CurrentMember();
+
+            try
+            {
+                return await handler.HandleAsync(new CancelRequestCommand(id, member.MemberId), cancellationToken) is { } view
+                    ? Results.Ok(view)
+                    : Problems.RequestNotFound();
+            }
+            catch (DomainException ex)
+            {
+                return Problems.DomainRule(ex);
+            }
+            catch (ConcurrencyConflictException)
+            {
+                return Problems.Conflict();
+            }
+        })
+        .RequireAuthorization()
+        .WithName("CancelRequest")
+        .Produces<RequestView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        app.MapPost("/api/requests/{id:guid}/withdraw", async (
+            Guid id, HttpContext context, WithdrawClaimHandler handler, CancellationToken cancellationToken) =>
+        {
+            var member = context.CurrentMember();
+
+            try
+            {
+                return await handler.HandleAsync(new WithdrawClaimCommand(id, member.MemberId), cancellationToken) is { } view
+                    ? Results.Ok(view)
+                    : Problems.RequestNotFound();
+            }
+            catch (DomainException ex)
+            {
+                return Problems.DomainRule(ex);
+            }
+            catch (ConcurrencyConflictException)
+            {
+                return Problems.Conflict();
+            }
+        })
+        .RequireAuthorization()
+        .WithName("WithdrawClaim")
+        .Produces<RequestView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
         app.MapGet("/api/requests/quote", ([AsParameters] QuoteQuery query) =>
         {
             try

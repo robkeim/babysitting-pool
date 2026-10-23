@@ -28,6 +28,13 @@ public interface IRequestStore
     Task SaveClaimedAsync(Request request, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Saves a Request a Requester cancelled or a Sitter withdrew from. When the Request ended Cancelled or Expired
+    /// the Requester's refunded account and the Refund Ledger entry go in the same transaction. Throws
+    /// <see cref="ConcurrencyConflictException"/> if the Request or account changed since it was read.
+    /// </summary>
+    Task SaveReleasedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Saves an Expired Request, the Requester's refunded account and the Refund Ledger entry in one transaction.
     /// Throws <see cref="ConcurrencyConflictException"/> if the Request or account changed since it was read.
     /// </summary>
