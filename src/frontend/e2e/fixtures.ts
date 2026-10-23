@@ -13,6 +13,8 @@ export const BOOTSTRAP_ADMIN_EMAIL = 'root@example.test'
 export interface Backend {
   /** The SPA origin; it proxies `/api` to this worker's API, so the browser sees one origin (ADR 0006). */
   appUrl: string
+  /** The API's own origin, for tests that front it with something other than the dev server. */
+  apiUrl: string
   /** Seeds a Member whose Credit Account holds the given Grants (quarter-credits, ADR 0001). */
   seedMember(grantsQuarterCredits: number[]): Promise<string>
   /** The newest link (Invitation or sign-in) emailed to the address, read from the fake outbox. */
@@ -102,6 +104,7 @@ export const test = base.extend<object, { backend: Backend }>({
         await Promise.all([waitFor(`${apiUrl}/health`, api, 'API'), waitFor(appUrl, spa, 'SPA')])
         await provide({
           appUrl,
+          apiUrl,
           async seedMember(grantsQuarterCredits) {
             const response = await post(`${apiUrl}/api/test/members`, { grantsQuarterCredits })
             return ((await response.json()) as { memberId: string }).memberId
