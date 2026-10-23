@@ -21,6 +21,8 @@ export interface Backend {
   signIn(context: BrowserContext, memberId: string): Promise<void>
   /** Sets the server clock to an absolute instant. */
   setClock(now: string): Promise<void>
+  /** Runs Settle, the way the hosted service does on its tick (switched off in E2E). */
+  settle(): Promise<void>
 }
 
 async function freePort(): Promise<number> {
@@ -118,6 +120,9 @@ export const test = base.extend<object, { backend: Backend }>({
           },
           async setClock(now) {
             await post(`${apiUrl}/api/test/clock`, { now }, 'PUT')
+          },
+          async settle() {
+            await post(`${apiUrl}/api/test/settle`, {})
           },
         })
       } finally {

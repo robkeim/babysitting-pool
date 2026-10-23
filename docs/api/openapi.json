@@ -722,6 +722,46 @@
           }
         }
       }
+    },
+    "/api/admin/settle": {
+      "post": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "Settle",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettleResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1149,6 +1189,28 @@
           },
           "status": {
             "$ref": "#/components/schemas/RequestStatus"
+          }
+        }
+      },
+      "SettleResult": {
+        "required": [
+          "expired",
+          "completed",
+          "failed"
+        ],
+        "type": "object",
+        "properties": {
+          "expired": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

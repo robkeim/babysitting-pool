@@ -2,6 +2,7 @@
   "common.appName": "Babysitting Pool",
   "common.somethingWentWrong": "Something went wrong.",
   "error.unauthenticated": "You're not signed in.",
+  "error.not_admin": "Only the Admin can do that.",
   "error.csrf_header_missing": "That request was blocked. Please reload the page and try again.",
   "error.invitation_invalid": "The invitation is unknown, used or expired.",
   "error.sign_in_link_invalid": "The sign-in link is unknown, used or expired.",
