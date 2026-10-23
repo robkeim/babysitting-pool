@@ -91,6 +91,19 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         }
     }
 
+    public async Task SaveReleasedAsync(
+        Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
+    {
+        await SetRequestStateAsync(request, cancellationToken);
+        if (request.Status is RequestStatus.Cancelled or RequestStatus.Expired)
+        {
+            await SetAccountAsync(request.RequesterId, requester, cancellationToken);
+            AddLedgerEntry(request.RequesterId, request, LedgerEntryKind.Refund, now);
+        }
+
+        await SaveAsync(cancellationToken);
+    }
+
     public async Task AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
     {
         var account = await db.CreditAccounts.FindAsync([request.RequesterId], cancellationToken)

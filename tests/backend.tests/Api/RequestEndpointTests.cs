@@ -207,11 +207,81 @@ public class RequestEndpointTests : IDisposable
         await AssertProblemAsync(response, HttpStatusCode.NotFound, "request_not_found");
     }
 
+    [Fact]
+    public async Task Cancelling_answers_200_refunds_the_requester_and_a_second_cancel_answers_409()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(owner);
+        var posted = await (await client.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+
+        var response = await client.PostAsync($"/api/requests/{id}/cancel", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("status").GetString().Should().Be("Cancelled");
+        var account = await client.GetFromJsonAsync<JsonElement>("/api/me/account");
+        account.GetProperty("availableQuarterCredits").GetInt64().Should().Be(40);
+        account.GetProperty("escrowedQuarterCredits").GetInt64().Should().Be(0);
+        await AssertProblemAsync(await client.PostAsync($"/api/requests/{id}/cancel", null), HttpStatusCode.Conflict, "invalid_state");
+    }
+
+    [Fact]
+    public async Task Cancelling_someone_elses_request_or_an_unknown_one_answers_404()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var otherClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+
+        var others = await otherClient.PostAsync($"/api/requests/{posted.GetProperty("id").GetString()}/cancel", null);
+        var unknown = await otherClient.PostAsync($"/api/requests/{Guid.NewGuid()}/cancel", null);
+
+        await AssertProblemAsync(others, HttpStatusCode.NotFound, "request_not_found");
+        await AssertProblemAsync(unknown, HttpStatusCode.NotFound, "request_not_found");
+    }
+
+    [Fact]
+    public async Task Withdrawing_answers_200_without_the_address_and_reopens_the_request()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        var response = await sitterClient.PostAsync($"/api/requests/{id}/withdraw", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var withdrawn = await response.Content.ReadFromJsonAsync<JsonElement>();
+        withdrawn.GetProperty("status").GetString().Should().Be("Posted");
+        withdrawn.GetProperty("address").GetString().Should().BeEmpty();
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").GetArrayLength().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Withdrawing_a_claim_that_is_not_yours_answers_404()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        using var otherClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        await AssertProblemAsync(await otherClient.PostAsync($"/api/requests/{id}/withdraw", null), HttpStatusCode.NotFound, "request_not_found");
+        await AssertProblemAsync(await ownerClient.PostAsync($"/api/requests/{id}/withdraw", null), HttpStatusCode.NotFound, "request_not_found");
+    }
+
     [Theory]
     [InlineData("GET", "/api/requests/open")]
     [InlineData("GET", "/api/me/claims")]
     [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/claim")]
-    public async Task Browsing_and_claiming_without_a_session_answer_401(string method, string path)
+    [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/cancel")]
+    [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/withdraw")]
+    public async Task Browsing_claiming_cancelling_and_withdrawing_without_a_session_answer_401(string method, string path)
     {
         using var client = _factory.CreateSpaClient();
         using var request = new HttpRequestMessage(new HttpMethod(method), path);
