@@ -33,15 +33,6 @@ internal static class Authorization
     public static MemberView CurrentMember(this HttpContext context) =>
         (MemberView)context.Items[MemberItemKey]!;
 
-    /// <summary>
-    /// <c>/api/admin/*</c> sits behind one group policy, so a new Admin endpoint cannot forget it; a non-Admin gets 403
-    /// (ADR 0006).
-    /// </summary>
-    public static void MapAdminEndpoints(this IEndpointRouteBuilder app)
-    {
-        app.MapGroup("/api/admin").RequireAuthorization(AdminPolicy);
-    }
-
     private sealed class SessionAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,

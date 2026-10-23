@@ -56,6 +56,11 @@ else
 
 builder.Services.AddSessionAuthentication();
 
+if (builder.Configuration.GetValue(SettleHostedService.EnabledSetting, !builder.Environment.IsEnvironment(TestEndpoints.Environment)))
+{
+    builder.Services.AddHostedService<SettleHostedService>();
+}
+
 var app = builder.Build();
 
 await app.Services.MigrateDatabaseAsync();

@@ -44,8 +44,10 @@ jobs:
               - 'scripts/check.sh'
               - '.github/workflows/ci.yml'
 
+  # The ready_for_review run exists only to add e2e (skipped while a PR is a draft); the other jobs already
+  # passed on this SHA, so they are skipped there instead of repeated.
   pr-title:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.action != 'ready_for_review'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -57,7 +59,7 @@ jobs:
 
   backend:
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: github.event.action != 'ready_for_review' && needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -76,7 +78,7 @@ jobs:
 
   frontend:
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: github.event.action != 'ready_for_review' && needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

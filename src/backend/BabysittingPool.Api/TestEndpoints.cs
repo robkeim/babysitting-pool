@@ -1,4 +1,5 @@
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure;
@@ -19,7 +20,7 @@ internal static class TestEndpoints
     /// <summary>E2E runs on a clock the tests control.</summary>
     public static void AddTestClock(this IServiceCollection services)
     {
-        services.AddSingleton(new FakeTimeProvider(InitialClock));
+        services.AddSingleton<FakeTimeProvider>(new SettableClock(InitialClock));
         services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<FakeTimeProvider>());
     }
 
@@ -50,11 +51,36 @@ internal static class TestEndpoints
             return Results.Ok(new CreateSessionResponse(secret));
         });
 
+        // The Admin endpoint is the same use case, but a second Admin would block the bootstrap Admin's Invitation.
+        group.MapPost("/settle", async (SettleHandler handler, CancellationToken cancellationToken) =>
+            Results.Ok(await handler.HandleAsync(cancellationToken)));
+
         group.MapPut("/clock", (SetClockRequest request, FakeTimeProvider clock) =>
         {
-            clock.SetUtcNow(request.Now);
+            if (clock is SettableClock settable)
+            {
+                settable.Set(request.Now);
+            }
+            else
+            {
+                clock.SetUtcNow(request.Now);
+            }
+
             return Results.NoContent();
         });
+    }
+
+    /// <summary>
+    /// A fake clock that can also be set back. A worker's backend outlives its tests, and each test sets an absolute
+    /// time at its start, which <see cref="FakeTimeProvider.SetUtcNow"/> refuses when it is earlier than the last test's.
+    /// </summary>
+    private sealed class SettableClock(DateTimeOffset start) : FakeTimeProvider(start)
+    {
+        private TimeSpan _shift;
+
+        public override DateTimeOffset GetUtcNow() => base.GetUtcNow() + _shift;
+
+        public void Set(DateTimeOffset now) => _shift = now - base.GetUtcNow();
     }
 
     private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits, string? Email, string? DisplayName);

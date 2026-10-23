@@ -3,9 +3,11 @@ using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure;
+using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,6 +28,7 @@ internal sealed class ApiFactory(string environment = "E2E", string? bootstrapAd
         // UseSetting, not ConfigureAppConfiguration: Program reads these while building, before the latter applies.
         builder.UseSetting("ConnectionStrings:Default", $"Data Source={_path}");
         builder.UseSetting("App:BaseUrl", "https://coop.example");
+        builder.UseSetting("Settle:Enabled", "false");
         if (bootstrapAdminEmail is not null)
         {
             builder.UseSetting("Bootstrap:AdminEmail", bootstrapAdminEmail);
@@ -75,6 +78,14 @@ internal sealed class ApiFactory(string environment = "E2E", string? bootstrapAd
         EmailAddress.TryParse(email, out var address).Should().BeTrue();
         await scope.ServiceProvider.GetRequiredService<IssueInvitationHandler>()
             .HandleAsync(new IssueInvitationCommand(address, isAdmin), CancellationToken.None);
+    }
+
+    public async Task MakeAdminAsync(Guid memberId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
+        (await db.Members.SingleAsync(m => m.Id == memberId)).IsAdmin = true;
+        await db.SaveChangesAsync();
     }
 
     public Task<Guid> SeedMemberAsync() => AccountSeeder.SeedMemberAsync(Services, Clock);
