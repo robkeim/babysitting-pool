@@ -6,6 +6,7 @@
   "error.csrf_header_missing": "That request was blocked. Please reload the page and try again.",
   "error.invitation_invalid": "The invitation is unknown, used or expired.",
   "error.sign_in_link_invalid": "The sign-in link is unknown, used or expired.",
+  "error.rate_limited": "Too many attempts. Please wait a few minutes and try again.",
   "error.invalid_request": "Some of what you entered isn't valid.",
   "error.account_not_found": "You don't have a Credit Account yet.",
   "auth.accountMenu.signOut": "Sign out",
