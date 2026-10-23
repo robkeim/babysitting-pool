@@ -88,6 +88,9 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("AmountQuarterCredits");
 
+                    b.Property<DateTime?>("Boundary")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -102,6 +105,10 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MemberId", "Boundary")
+                        .IsUnique()
+                        .HasFilter("Boundary IS NOT NULL");
 
                     b.HasIndex("RequestId", "Kind")
                         .IsUnique()

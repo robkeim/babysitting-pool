@@ -74,7 +74,7 @@ public class SettleHandlerTests : IAsyncLifetime
 
         var result = await SettleAsync();
 
-        result.Should().Be(new SettleResult(1, 0, 0));
+        result.Should().Be(new SettleResult(1, 0, 0, 0));
         (await StatusAsync(posted.Id)).Should().Be(RequestStatus.Expired);
         var account = await AccountAsync(_requester);
         account.Available.Value.Should().Be(10m);
@@ -93,7 +93,7 @@ public class SettleHandlerTests : IAsyncLifetime
 
         var result = await SettleAsync();
 
-        result.Should().Be(new SettleResult(0, 0, 0));
+        result.Should().Be(new SettleResult(0, 0, 0, 0));
         (await StatusAsync(posted.Id)).Should().Be(RequestStatus.Posted);
     }
 
@@ -106,7 +106,7 @@ public class SettleHandlerTests : IAsyncLifetime
 
         var result = await SettleAsync();
 
-        result.Should().Be(new SettleResult(0, 1, 0));
+        result.Should().Be(new SettleResult(0, 1, 0, 0));
         (await StatusAsync(posted.Id)).Should().Be(RequestStatus.Completed);
         var requester = await AccountAsync(_requester);
         requester.Available.Value.Should().Be(8m);
@@ -126,7 +126,7 @@ public class SettleHandlerTests : IAsyncLifetime
 
         var result = await SettleAsync();
 
-        result.Should().Be(new SettleResult(0, 0, 0));
+        result.Should().Be(new SettleResult(0, 0, 0, 0));
         (await StatusAsync(posted.Id)).Should().Be(RequestStatus.Claimed);
         (await AccountAsync(_requester)).Escrowed.Value.Should().Be(2m);
     }
@@ -144,7 +144,7 @@ public class SettleHandlerTests : IAsyncLifetime
 
         var again = await SettleAsync();
 
-        again.Should().Be(new SettleResult(0, 0, 0));
+        again.Should().Be(new SettleResult(0, 0, 0, 0));
         (await AccountAsync(_requester)).Should().BeEquivalentTo(requester);
         (await AccountAsync(_sitter)).Should().BeEquivalentTo(sitter);
         (await LedgerAsync(expiring.Id, LedgerEntryKind.Refund)).Should().HaveCount(1);
@@ -181,7 +181,7 @@ public class SettleHandlerTests : IAsyncLifetime
 
         var result = await SettleAsync();
 
-        result.Should().Be(new SettleResult(1, 0, 1));
+        result.Should().Be(new SettleResult(1, 0, 0, 1));
         (await StatusAsync(healthy.Id)).Should().Be(RequestStatus.Expired);
     }
 }

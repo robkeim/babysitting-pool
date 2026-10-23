@@ -14,4 +14,7 @@ public sealed class LedgerEntryRecord
     public LedgerEntryKind Kind { get; set; }
     public Credits Amount { get; set; }
     public DateTime OccurredAt { get; set; }
+
+    /// <summary>The weekly boundary a Demurrage charge belongs to; null for every other kind.</summary>
+    public DateTime? Boundary { get; set; }
 }

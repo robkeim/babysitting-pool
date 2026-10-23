@@ -1,3 +1,5 @@
+using BabysittingPool.Application.Credits;
+using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,20 +8,25 @@ using Microsoft.Extensions.Logging;
 namespace BabysittingPool.Application.Requests;
 
 /// <summary>What one Settle run changed; failed rows are retried on the next run (ADR 0007).</summary>
-public sealed record SettleResult(int Expired, int Completed, int Failed);
+public sealed record SettleResult(int Expired, int Completed, int Charged, int Failed);
 
 /// <summary>
-/// Applies the time-driven changes that have become due: Expiry, then Payout (spec §6, ADR 0007). Idempotent, because
+/// Applies the time-driven changes that have become due: Expiry, then Payout, then Demurrage (spec §5, §6, ADR 0007). Idempotent, because
 /// only Requests still Posted or Claimed past their trigger are selected, and each Request is settled in its own
-/// transaction so one bad row never blocks the rest.
+/// transaction so one bad row never blocks the rest. Demurrage is idempotent per (Member, boundary) by a unique index.
 /// </summary>
 public sealed partial class SettleHandler(
-    IRequestReader reader, IServiceScopeFactory scopes, TimeProvider clock, ILogger<SettleHandler> logger)
+    IRequestReader reader,
+    IDemurrageReader demurrageReader,
+    IServiceScopeFactory scopes,
+    CoopSettings settings,
+    TimeProvider clock,
+    ILogger<SettleHandler> logger)
 {
     public async Task<SettleResult> HandleAsync(CancellationToken cancellationToken)
     {
         var now = clock.GetUtcNow().UtcDateTime;
-        int expired = 0, completed = 0, failed = 0;
+        int expired = 0, completed = 0, charged = 0, failed = 0;
 
         foreach (var id in await reader.ListDueForExpiryAsync(now, cancellationToken))
         {
@@ -45,8 +52,21 @@ public sealed partial class SettleHandler(
             }
         }
 
-        var result = new SettleResult(expired, completed, failed);
-        LogRan(result.Expired, result.Completed, result.Failed);
+        foreach (var memberId in await demurrageReader.ListChargeableAsync(cancellationToken))
+        {
+            var outcome = await ChargeAsync(memberId, cancellationToken);
+            if (outcome is null)
+            {
+                failed++;
+            }
+            else if (outcome.Value)
+            {
+                charged++;
+            }
+        }
+
+        var result = new SettleResult(expired, completed, charged, failed);
+        LogRan(result.Expired, result.Completed, result.Charged, result.Failed);
         return result;
     }
 
@@ -74,6 +94,50 @@ public sealed partial class SettleHandler(
         {
             LogFailed(ex, step, requestId);
             return false;
+        }
+    }
+
+    /// <summary>Whether the Member was charged, or null if the attempt failed and is left for the next run.</summary>
+    private async Task<bool?> ChargeAsync(Guid memberId, CancellationToken cancellationToken)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        var store = scope.ServiceProvider.GetRequiredService<IDemurrageStore>();
+        try
+        {
+            var now = clock.GetUtcNow().UtcDateTime;
+            var candidate = await store.FindAsync(memberId, cancellationToken);
+            if (candidate is null)
+            {
+                return false;
+            }
+
+            // Boundaries from the account's creation, or from its last credit if later: a boundary at which the
+            // account was empty is never charged retroactively once credits arrive.
+            var since = candidate.LastCreditAt is { } credited && credited > candidate.MemberSince
+                ? credited
+                : candidate.MemberSince;
+            var schedule = new DemurrageSchedule(settings.DemurrageDay, settings.DemurrageTime, settings.TimeZone);
+            var boundaries = schedule.BoundariesBetween(since, now).Except(candidate.ChargedBoundaries);
+
+            var charges = Demurrage.Apply(candidate.Account, candidate.MemberSince, candidate.CompletedStartTimes, boundaries);
+            if (charges.Count == 0)
+            {
+                return false;
+            }
+
+            await store.SaveChargedAsync(memberId, candidate.Account, charges, now, cancellationToken);
+            LogSettled("Demurrage", memberId);
+            return true;
+        }
+        catch (ConcurrencyConflictException)
+        {
+            LogConflicted("Demurrage", memberId);
+            return null;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LogFailed(ex, "Demurrage", memberId);
+            return null;
         }
     }
 
@@ -105,15 +169,15 @@ public sealed partial class SettleHandler(
     private static async Task<CreditAccount> FindAccountAsync(IRequestStore store, Guid memberId, CancellationToken cancellationToken) =>
         await store.FindAccountAsync(memberId, cancellationToken) ?? throw new InvalidOperationException("The Member has no Credit Account.");
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "SettleRan {Expired} {Completed} {Failed}")]
-    private partial void LogRan(int expired, int completed, int failed);
+    [LoggerMessage(Level = LogLevel.Information, Message = "SettleRan {Expired} {Completed} {Charged} {Failed}")]
+    private partial void LogRan(int expired, int completed, int charged, int failed);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "RequestSettled {Step} {RequestId}")]
-    private partial void LogSettled(string step, Guid requestId);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Settled {Step} {Id}")]
+    private partial void LogSettled(string step, Guid id);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "SettleConflicted {Step} {RequestId}")]
-    private partial void LogConflicted(string step, Guid requestId);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SettleConflicted {Step} {Id}")]
+    private partial void LogConflicted(string step, Guid id);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SettleFailed {Step} {RequestId}")]
-    private partial void LogFailed(Exception exception, string step, Guid requestId);
+    [LoggerMessage(Level = LogLevel.Error, Message = "SettleFailed {Step} {Id}")]
+    private partial void LogFailed(Exception exception, string step, Guid id);
 }
