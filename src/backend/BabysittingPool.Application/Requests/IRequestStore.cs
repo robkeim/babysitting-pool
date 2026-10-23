@@ -26,6 +26,13 @@ public interface IRequestStore
     /// was read, which is how the loser of a claim race finds out (ADR 0004).
     /// </summary>
     Task SaveClaimedAsync(Request request, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Saves a Request a Requester cancelled or a Sitter withdrew from. When the Request ended Cancelled or Expired
+    /// the Requester's refunded account and the Refund Ledger entry go in the same transaction. Throws
+    /// <see cref="ConcurrencyConflictException"/> if the Request or account changed since it was read.
+    /// </summary>
+    Task SaveReleasedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
 }
 
 /// <summary>Read port: queries project straight from the database (ADR 0002).</summary>

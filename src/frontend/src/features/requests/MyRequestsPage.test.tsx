@@ -1,8 +1,15 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { MyRequestsPage } from './MyRequestsPage'
-import { myRequestsFailureHandler, myRequestsHandler, sampleRequest } from './mocks'
+import {
+  myRequestsFailureHandler,
+  myRequestsHandler,
+  releaseRequestHandler,
+  releaseRequestRejectedHandler,
+  sampleRequest,
+} from './mocks'
 
 describe('MyRequestsPage', () => {
   it('lists the Member’s Requests with state, cost, area and their own address', async () => {
@@ -40,5 +47,44 @@ describe('MyRequestsPage', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/couldn.t load your requests/i)
     expect(screen.queryByText('Boom')).not.toBeInTheDocument()
+  })
+
+  it('cancels a Posted or Claimed Request, and offers nothing for ended ones', async () => {
+    const user = userEvent.setup()
+    const cancelled: string[] = []
+    server.use(
+      myRequestsHandler({
+        items: [
+          sampleRequest,
+          { ...sampleRequest, id: 'b', status: 'Claimed', area: 'Hilltop' },
+          { ...sampleRequest, id: 'c', status: 'Expired', area: 'Lakeside' },
+        ],
+        nextCursor: null,
+      }),
+      releaseRequestHandler('cancel', 'Cancelled', (id) => cancelled.push(id)),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+    await user.click(await screen.findByRole('button', { name: /cancel the request in hilltop/i }))
+
+    await vi.waitFor(() => {
+      expect(cancelled).toEqual(['b'])
+    })
+    expect(screen.getAllByRole('button', { name: /cancel the request/i })).toHaveLength(2)
+  })
+
+  it('explains a rejected cancel without exposing the server message', async () => {
+    const user = userEvent.setup()
+    server.use(
+      myRequestsHandler({ items: [sampleRequest], nextCursor: null }),
+      releaseRequestRejectedHandler('cancel', 422, 'start_passed'),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+    await user.click(
+      await screen.findByRole('button', { name: /cancel the request in riverside/i }),
+    )
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/start time has passed/i)
   })
 })

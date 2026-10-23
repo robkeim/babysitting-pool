@@ -43,6 +43,43 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         }
     }
 
+    public async Task SaveReleasedAsync(
+        Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
+    {
+        var record = await db.Requests.FindAsync([request.Id], cancellationToken)
+            ?? throw new InvalidOperationException("The Request must be read before it is saved.");
+        record.Status = request.Status;
+        record.SitterId = request.SitterId;
+        record.Version++;
+
+        if (request.Status is RequestStatus.Cancelled or RequestStatus.Expired)
+        {
+            var account = await db.CreditAccounts.FindAsync([request.RequesterId], cancellationToken)
+                ?? throw new InvalidOperationException("The Requester's account must be read before it is saved.");
+            account.Available = Credits.FromDecimal(requester.Available);
+            account.Escrowed = Credits.FromDecimal(requester.Escrowed);
+            account.Version++;
+            db.LedgerEntries.Add(new LedgerEntryRecord
+            {
+                Id = Guid.NewGuid(),
+                MemberId = request.RequesterId,
+                RequestId = request.Id,
+                Kind = LedgerEntryKind.Refund,
+                Amount = request.Cost,
+                OccurredAt = now,
+            });
+        }
+
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyConflictException(ex);
+        }
+    }
+
     public async Task AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
     {
         var account = await db.CreditAccounts.FindAsync([request.RequesterId], cancellationToken)

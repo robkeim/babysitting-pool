@@ -50,6 +50,9 @@
   "requests.myRequests.state": "State",
   "requests.myRequests.credits": "Credits",
   "requests.myRequests.loadMore": "Load more",
+  "requests.myRequests.cancel": "Cancel",
+  "requests.myRequests.cancelAria": "Cancel the request in {area} starting {starts}",
+  "requests.myRequests.cancelFailed.title": "We couldn't cancel that request",
   "requests.status.Posted": "Posted",
   "requests.status.Claimed": "Claimed",
   "requests.status.Completed": "Completed",
@@ -85,6 +88,7 @@
   "error.invalid_state": "That request is no longer available.",
   "error.own_request": "You can't claim your own request.",
   "error.claim_cutoff_passed": "It's too late to claim that request.",
+  "error.start_passed": "The start time has passed, so that can't be changed any more.",
   "requests.open.title": "Open Requests",
   "requests.open.loadFailed.title": "We couldn't load the open requests",
   "requests.open.loadFailed.body": "Please try again in a moment.",
@@ -106,5 +110,8 @@
   "requests.claims.state": "State",
   "requests.claims.credits": "Credits",
   "requests.claims.loadMore": "Load more",
+  "requests.claims.withdraw": "Withdraw",
+  "requests.claims.withdrawAria": "Withdraw from the request in {area} starting {starts}",
+  "requests.claims.withdrawFailed.title": "We couldn't withdraw that claim",
   "requests.open.claimAria": "Claim the request in {area} starting {starts}"
 }
