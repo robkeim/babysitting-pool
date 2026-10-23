@@ -18,6 +18,7 @@ internal static class AuthEndpoints
             await handler.HandleAsync(email, cancellationToken);
             return Results.Accepted();
         })
+        .AllowAnonymous()
         .WithName("RequestSignInLink")
         .Produces(StatusCodes.Status202Accepted)
         .ProducesProblem(StatusCodes.Status400BadRequest);
@@ -33,6 +34,7 @@ internal static class AuthEndpoints
             SessionCookie.Set(context, signedIn.SessionSecret);
             return Results.NoContent();
         })
+        .AllowAnonymous()
         .WithName("StartSession")
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
@@ -48,6 +50,7 @@ internal static class AuthEndpoints
             SessionCookie.Clear(context);
             return Results.NoContent();
         })
+        .AllowAnonymous()
         .WithName("EndSession")
         .Produces(StatusCodes.Status204NoContent);
 
@@ -57,6 +60,7 @@ internal static class AuthEndpoints
             var email = string.IsNullOrWhiteSpace(request.Token) ? null : await handler.HandleAsync(request.Token, cancellationToken);
             return email is null ? Problems.InvitationInvalid() : Results.Ok(new InvitationPreview(email));
         })
+        .AllowAnonymous()
         .WithName("PreviewInvitation")
         .Produces<InvitationPreview>()
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
@@ -78,15 +82,14 @@ internal static class AuthEndpoints
             SessionCookie.Set(context, signedIn.SessionSecret);
             return Results.NoContent();
         })
+        .AllowAnonymous()
         .WithName("AcceptInvitation")
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
 
-        app.MapGet("/api/me", async (HttpContext context, CancellationToken cancellationToken) =>
-            await SessionCookie.CurrentMemberAsync(context, cancellationToken) is { } member
-                ? Results.Ok(member)
-                : Problems.Unauthenticated())
+        app.MapGet("/api/me", (HttpContext context) => Results.Ok(context.CurrentMember()))
+        .RequireAuthorization()
         .WithName("GetMe")
         .Produces<MemberView>()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
@@ -95,10 +98,7 @@ internal static class AuthEndpoints
             HttpContext context, LanguageRequest request, ChangeLanguageHandler handler, IHostEnvironment environment,
             CancellationToken cancellationToken) =>
         {
-            if (await SessionCookie.CurrentMemberAsync(context, cancellationToken) is not { } member)
-            {
-                return Problems.Unauthenticated();
-            }
+            var member = context.CurrentMember();
 
             // Ünïcödé Tëst is a test aid, never offered in production (GLOSSARY: Ünïcödé Tëst).
             if (!Language.TryParse(request.Language, includeTest: !environment.IsProduction(), out var language))
@@ -109,6 +109,7 @@ internal static class AuthEndpoints
             await handler.HandleAsync(member.MemberId, language, cancellationToken);
             return Results.NoContent();
         })
+        .RequireAuthorization()
         .WithName("ChangeMyLanguage")
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)

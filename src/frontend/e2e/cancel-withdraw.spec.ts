@@ -29,6 +29,8 @@ test('a Sitter withdraws and the Request reopens, then the Requester cancels and
 
   await sitter.goto(`${backend.appUrl}/open-requests`)
   await sitter.getByRole('button', { name: /claim the request in riverside/i }).click()
+  // Navigating before the claim lands would abort it, so wait for the list to refresh.
+  await expect(sitter.getByText(/no open requests/i)).toBeVisible()
   await sitter.goto(`${backend.appUrl}/claims`)
   await expect(sitter.getByRole('row', { name: /riverside/i })).toContainText('12 River Rd')
 

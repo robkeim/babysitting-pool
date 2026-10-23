@@ -26,7 +26,7 @@ internal static class TestEndpoints
 
     public static void MapTestEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/test").ExcludeFromDescription();
+        var group = app.MapGroup("/api/test").AllowAnonymous().ExcludeFromDescription();
 
         group.MapPost("/members", async (SeedMemberRequest request, IServiceProvider services, CancellationToken cancellationToken) =>
         {

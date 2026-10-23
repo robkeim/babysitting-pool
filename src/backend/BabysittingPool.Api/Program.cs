@@ -54,6 +54,8 @@ else
     builder.Services.AddEmailOutbox();
 }
 
+builder.Services.AddSessionAuthentication();
+
 if (builder.Configuration.GetValue(SettleHostedService.EnabledSetting, !builder.Environment.IsEnvironment(TestEndpoints.Environment)))
 {
     builder.Services.AddHostedService<SettleHostedService>();
@@ -91,6 +93,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("E2E"))
 
 app.UseHttpsRedirection();
 app.UseCsrfHeaderCheck();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
