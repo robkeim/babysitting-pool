@@ -46,6 +46,9 @@ internal static class Problems
     public static IResult AccountNotFound() =>
         Problem(StatusCodes.Status404NotFound, "account_not_found", "The Member has no Credit Account.");
 
+    public static IResult MemberNotFound() =>
+        Problem(StatusCodes.Status404NotFound, "member_not_found", "There is no such Member.");
+
     public static IResult RequestNotFound() =>
         Problem(StatusCodes.Status404NotFound, "request_not_found", "There is no such Request.");
 

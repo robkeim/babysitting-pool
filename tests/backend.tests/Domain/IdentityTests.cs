@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 
 namespace backend.tests.Domain;
@@ -83,5 +84,46 @@ public class IdentityTests
 
         session.IsActiveAt(Now.AddDays(30).AddTicks(-1), TimeSpan.FromDays(30)).Should().BeTrue();
         session.IsActiveAt(Now.AddDays(30), TimeSpan.FromDays(30)).Should().BeFalse();
+    }
+
+    private static Member NewMember(bool isAdmin)
+    {
+        EmailAddress.TryParse("ada@example.com", out var email).Should().BeTrue();
+        DisplayName.TryCreate("Ada", out var name).Should().BeTrue();
+        return Member.Join(email, name, isAdmin, Now);
+    }
+
+    [Fact]
+    public void Closing_a_member_records_when()
+    {
+        var member = NewMember(isAdmin: false);
+
+        member.Close(Now.AddDays(1));
+
+        member.IsClosed.Should().BeTrue();
+        member.ClosedAt.Should().Be(Now.AddDays(1));
+    }
+
+    [Fact]
+    public void The_admin_cannot_be_closed()
+    {
+        var member = NewMember(isAdmin: true);
+
+        var act = () => member.Close(Now);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("cannot_offboard_admin");
+        member.IsClosed.Should().BeFalse();
+    }
+
+    [Fact]
+    public void A_closed_member_cannot_be_closed_again()
+    {
+        var member = NewMember(isAdmin: false);
+        member.Close(Now);
+
+        var act = () => member.Close(Now.AddDays(1));
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("invalid_state");
+        member.ClosedAt.Should().Be(Now);
     }
 }

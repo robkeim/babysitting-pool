@@ -50,6 +50,21 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         await SaveAsync(cancellationToken);
     }
 
+    public async Task SaveBurnedAsync(
+        Guid memberId, CreditAccount account, decimal burned, DateTime now, CancellationToken cancellationToken)
+    {
+        await SetAccountAsync(memberId, account, cancellationToken);
+        db.LedgerEntries.Add(new LedgerEntryRecord
+        {
+            Id = Guid.NewGuid(),
+            MemberId = memberId,
+            Kind = LedgerEntryKind.Burn,
+            Amount = Credits.FromDecimal(burned),
+            OccurredAt = now,
+        });
+        await SaveAsync(cancellationToken);
+    }
+
     private async Task SetRequestStateAsync(Request request, CancellationToken cancellationToken)
     {
         var record = await db.Requests.FindAsync([request.Id], cancellationToken)

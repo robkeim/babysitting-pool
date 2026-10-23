@@ -118,4 +118,26 @@ public class CreditAccountTests
 
         act.Should().Throw<DomainException>();
     }
+
+    [Fact]
+    public void BurnAll_empties_the_available_balance_and_reports_it()
+    {
+        var account = CreditAccount.Restore(7.25m, 0m);
+
+        var burned = account.BurnAll();
+
+        burned.Should().Be(7.25m);
+        account.Available.Should().Be(0m);
+    }
+
+    [Fact]
+    public void BurnAll_is_blocked_while_credits_are_escrowed()
+    {
+        var account = CreditAccount.Restore(7.25m, 2m);
+
+        var act = () => account.BurnAll();
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("escrow_outstanding");
+        account.Available.Should().Be(7.25m);
+    }
 }

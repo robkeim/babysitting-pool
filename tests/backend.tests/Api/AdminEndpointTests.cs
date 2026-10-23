@@ -80,4 +80,85 @@ public class AdminEndpointTests : IDisposable
         var sitterAccount = await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/account");
         sitterAccount.GetProperty("availableQuarterCredits").GetInt64().Should().Be(48);
     }
+
+    [Fact]
+    public async Task Offboard_needs_a_session()
+    {
+        using var client = _factory.CreateSpaClient();
+
+        var response = await client.PostAsync($"/api/admin/members/{Guid.NewGuid()}/offboard", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Offboard_is_forbidden_to_a_member_who_is_not_the_admin()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var victim = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.PostAsync($"/api/admin/members/{victim}/offboard", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Offboard_closes_the_member_burns_their_balance_and_locks_them_out()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        var leaver = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var adminClient = _factory.CreateMemberClient(admin);
+        using var leaverClient = _factory.CreateMemberClient(leaver);
+        var body = new
+        {
+            startsAt = _factory.Clock.GetUtcNow().AddHours(10),
+            durationMinutes = 120,
+            childCount = 1,
+            location = "SittersHouse",
+            transport = "None",
+            lunchOrDinner = false,
+            snack = false,
+            area = "Riverside",
+            address = "12 River Rd",
+        };
+        (await leaverClient.PostAsJsonAsync("/api/requests", body)).EnsureSuccessStatusCode();
+
+        var response = await adminClient.PostAsync($"/api/admin/members/{leaver}/offboard", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("cancelled").GetInt32().Should().Be(1);
+        result.GetProperty("withdrawn").GetInt32().Should().Be(0);
+        result.GetProperty("burnedQuarterCredits").GetInt64().Should().Be(40);
+        (await leaverClient.GetAsync("/api/me/account")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Offboard_refuses_the_admin()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        using var adminClient = _factory.CreateMemberClient(admin);
+
+        var response = await adminClient.PostAsync($"/api/admin/members/{admin}/offboard", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be("cannot_offboard_admin");
+        (await adminClient.GetAsync("/api/me/account")).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Offboard_of_an_unknown_member_is_not_found()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        using var adminClient = _factory.CreateMemberClient(admin);
+
+        var response = await adminClient.PostAsync($"/api/admin/members/{Guid.NewGuid()}/offboard", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be("member_not_found");
+    }
 }

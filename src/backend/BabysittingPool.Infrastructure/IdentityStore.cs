@@ -27,6 +27,15 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         return record is null ? null : ToDomain(record);
     }
 
+    public async Task CloseMemberAsync(Guid memberId, DateTime now, CancellationToken cancellationToken)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        await db.Members.Where(m => m.Id == memberId && m.ClosedAt == null)
+            .ExecuteUpdateAsync(m => m.SetProperty(x => x.ClosedAt, now), cancellationToken);
+        await db.Sessions.Where(s => s.MemberId == memberId).ExecuteDeleteAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+    }
+
     public async Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken) =>
         await db.Members.Where(m => m.Id == memberId)
             .ExecuteUpdateAsync(m => m.SetProperty(x => x.Language, language.Tag), cancellationToken);

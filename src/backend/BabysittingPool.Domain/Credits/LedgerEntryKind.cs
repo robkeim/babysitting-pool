@@ -8,4 +8,5 @@ public enum LedgerEntryKind
     Refund,
     Payout,
     Demurrage,
+    Burn,
 }
