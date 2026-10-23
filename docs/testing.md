@@ -25,7 +25,7 @@ Rules:
 
 Time-dependent frontend code is display formatting only (countdown labels, co-op time zone). The backend is the authority on every time rule. Component tests use Vitest fake timers with an injectable "now".
 
-## End-to-end (Playwright, Chromium, required check on PRs)
+## End-to-end (Playwright, Chromium, part of the full gate)
 
 - Real API plus SPA, no API mocks. A worker-scoped fixture starts one backend per Playwright worker (own port, temp-file SQLite, own `FakeTimeProvider`, `E2E` environment).
 - Test-only endpoints, registered only in `E2E` (an API test asserts 404 in Production): set the server clock, read the email outbox, seed state through application code.

@@ -1338,6 +1338,7 @@
         "required": [
           "expired",
           "completed",
+          "charged",
           "failed"
         ],
         "type": "object",
@@ -1347,6 +1348,10 @@
             "format": "int32"
           },
           "completed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "charged": {
             "type": "integer",
             "format": "int32"
           },

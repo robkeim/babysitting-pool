@@ -3448,7 +3448,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"expired\": \"<integer>\",\n  \"completed\": \"<integer>\",\n  \"failed\": \"<integer>\"\n}",
+                      "body": "{\n  \"expired\": \"<integer>\",\n  \"completed\": \"<integer>\",\n  \"charged\": \"<integer>\",\n  \"failed\": \"<integer>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },

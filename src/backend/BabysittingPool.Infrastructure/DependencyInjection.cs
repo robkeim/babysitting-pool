@@ -18,6 +18,8 @@ public static class DependencyInjection
         services.AddScoped<IIdentityStore, IdentityStore>();
         services.AddScoped<IRequestStore, RequestStore>();
         services.AddScoped<IRequestReader, RequestReader>();
+        services.AddScoped<IDemurrageStore, DemurrageStore>();
+        services.AddScoped<IDemurrageReader, DemurrageStore>();
         return services;
     }
 

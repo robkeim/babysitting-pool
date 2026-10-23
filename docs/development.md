@@ -22,10 +22,12 @@ cd src/frontend && npm run dev                                               # S
 ## Checks
 
 ```sh
-scripts/check.sh [backend|frontend|all] [--fast] [--e2e]
+scripts/check.sh [backend|frontend|all] [--fast] [--e2e] [--full] [--stamped] [--quiet]
 ```
 
-The one definition of green (ADR 0008): backend `dotnet format --verify-no-changes`, build, tests; frontend `eslint --max-warnings 0`, `prettier --check`, `tsc -b`, `vitest run`. `--fast` skips the backend API and Infrastructure tests, `--e2e` adds Playwright. A passing `all` run stamps the tree in `.git/check-stamp`; the pre-push hook and the Claude Code push gate skip the re-run when the stamp matches. Husky hooks install on `npm install` in `src/frontend`; pre-commit formats staged files, pre-push runs `scripts/check.sh all --fast --stamped`.
+The one definition of green, at two levels (ADR 0015). The **fast gate** (`all --fast`) is for iterating: docs hygiene, backend `dotnet format --verify-no-changes`, build and the Domain and Application tests, frontend `eslint --max-warnings 0`, `prettier --check`, `tsc -b` and `vitest run`. The **full gate** (`all --full`) adds the backend API and Infrastructure tests, the Playwright journeys and a check that `docs/api/postman_collection.json` is current (it is regenerated in place when stale). A passing `all` run stamps the tree in `.git/check-stamp-fast`, a passing `--full` run also in `.git/check-stamp-full`; `--stamped` skips the re-run when the stamp for that level matches. `--quiet` prints one line when green, or the last 40 lines and the log path (`.git/check.log`) when red.
+
+Husky hooks install on `npm install` in `src/frontend`: pre-commit formats staged files; pre-push runs `scripts/check.sh all --full --stamped --quiet`. Claude Code runs the fast gate on `Stop` and the full gate before `git push` and `gh pr create`. Nothing runs on GitHub.
 
 ## Postman
 

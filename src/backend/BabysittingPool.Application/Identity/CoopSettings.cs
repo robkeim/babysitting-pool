@@ -17,4 +17,13 @@ public sealed record CoopSettings
 
     /// <summary>A Posted Request can no longer be claimed this long before its start time (spec §4.2).</summary>
     public TimeSpan ClaimCutoff { get; init; } = TimeSpan.FromHours(3);
+
+    /// <summary>The weekday Demurrage is charged on (spec §5).</summary>
+    public DayOfWeek DemurrageDay { get; init; } = DayOfWeek.Monday;
+
+    /// <summary>The time of day, in <see cref="TimeZone"/>, Demurrage is charged at.</summary>
+    public TimeOnly DemurrageTime { get; init; } = TimeOnly.MinValue;
+
+    /// <summary>The one co-op time zone that drives the weekly Demurrage run (spec §2A).</summary>
+    public TimeZoneInfo TimeZone { get; init; } = TimeZoneInfo.Utc;
 }
