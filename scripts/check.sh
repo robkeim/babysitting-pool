@@ -5,8 +5,9 @@
 #
 # Two levels (ADR 0015): the fast gate is for iterating (Stop hook), the full gate runs before anything is pushed.
 #   --fast     skip the slow tests: backend API and Infrastructure tests (the Domain and Application tests still run)
+#              and the slow scans (git history, Semgrep, dependency audits)
 #   --e2e      also run the Playwright journeys (frontend only; needs `npx playwright install chromium`)
-#   --full     the full gate: every test, the Playwright journeys and the generated-contract drift check
+#   --full     the full gate: every test, the Playwright journeys, the generated-contract drift check and the scans
 #   --stamped  exit 0 at once if a passing `all` run is already stamped for this exact tree and level
 #   --quiet    print one line when green, or the last 40 lines and the log path when red (keeps agent output small)
 #
@@ -77,6 +78,36 @@ fi
 
 step() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 
+need() {
+  command -v "$1" >/dev/null || { echo "check: $1 is not installed; run: $2" >&2; return 1; }
+}
+
+# Local security scanning (ADR 0014): GitHub's secret scanning and CodeQL need a paid plan on a private repo.
+scan_secrets() {
+  need gitleaks "brew install gitleaks"
+  step "secrets: gitleaks (working tree)"
+  gitleaks dir . --config .gitleaks.toml --no-banner --redact
+  if [[ $fast == 0 ]]; then
+    step "secrets: gitleaks (git history)"
+    gitleaks git . --config .gitleaks.toml --no-banner --redact
+  fi
+}
+
+scan_code() {
+  need semgrep "brew install semgrep"
+  step "code: semgrep"
+  semgrep scan --config .semgrep --error --quiet --metrics off --disable-version-check \
+    --exclude node_modules --exclude bin --exclude obj --exclude dist --exclude '*.gen.ts' \
+    --exclude Migrations src
+  step "dependencies: dotnet vulnerable packages"
+  local out
+  out=$(dotnet list src/backend/BabysittingPool.sln package --vulnerable --include-transitive 2>&1)
+  echo "$out"
+  if grep -q "has the following vulnerable packages" <<<"$out"; then return 1; fi
+  step "dependencies: npm audit"
+  (cd src/frontend && npm audit --audit-level=high)
+}
+
 backend() {
   cd src/backend
   step "backend: dotnet format"
@@ -124,6 +155,9 @@ frontend() {
 
 step "docs"
 scripts/check-docs.sh
+
+scan_secrets
+[[ $fast == 1 ]] || scan_code
 
 case "$scope" in
   backend) (backend) ;;
