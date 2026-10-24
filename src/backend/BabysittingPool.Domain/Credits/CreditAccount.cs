@@ -89,6 +89,22 @@ public sealed class CreditAccount
         return burned;
     }
 
+    /// <summary>
+    /// Takes the whole Available balance out of circulation when a member is offboarded (spec §2A) and returns the
+    /// amount burned. Escrow must already have been released.
+    /// </summary>
+    public decimal BurnAll()
+    {
+        if (Escrowed != 0m)
+        {
+            throw new DomainException($"{Escrowed} is still escrowed; release it before burning.", "escrow_outstanding");
+        }
+
+        var burned = Available;
+        Available = 0m;
+        return burned;
+    }
+
     private void RequireEscrowed(decimal amount)
     {
         if (Escrowed < amount)

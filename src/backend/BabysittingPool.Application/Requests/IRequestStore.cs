@@ -41,6 +41,12 @@ public interface IRequestStore
     Task SaveExpiredAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Saves the account emptied by Offboarding and the Burn Ledger entry for <paramref name="burned"/> in one
+    /// transaction. Throws <see cref="ConcurrencyConflictException"/> if the account changed since it was read.
+    /// </summary>
+    Task SaveBurnedAsync(Guid memberId, CreditAccount account, decimal burned, DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Saves a Completed Request, both accounts and the Payout Ledger entry in one transaction. Throws
     /// <see cref="ConcurrencyConflictException"/> if the Request or an account changed since it was read.
     /// </summary>
@@ -71,4 +77,7 @@ public interface IRequestReader
 
     /// <summary>The Claimed Requests whose start time has been reached at <paramref name="now"/>.</summary>
     Task<IReadOnlyList<Guid>> ListDueForPayoutAsync(DateTime now, CancellationToken cancellationToken);
+
+    /// <summary>The Posted or Claimed Requests the Member posted or claimed, for Offboarding.</summary>
+    Task<IReadOnlyList<Guid>> ListOpenInvolvingAsync(Guid memberId, CancellationToken cancellationToken);
 }

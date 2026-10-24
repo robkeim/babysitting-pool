@@ -14,6 +14,9 @@ public interface IIdentityStore
 
     Task<Member?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken);
 
+    /// <summary>Closes the Member and ends all their Sessions. Does nothing if they are already closed.</summary>
+    Task CloseMemberAsync(Guid memberId, DateTime now, CancellationToken cancellationToken);
+
     Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken);
 
     Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken);

@@ -1,4 +1,6 @@
+using BabysittingPool.Application.Offboarding;
 using BabysittingPool.Application.Requests;
+using BabysittingPool.Domain.Credits;
 
 namespace BabysittingPool.Api;
 
@@ -16,5 +18,33 @@ internal static class AdminEndpoints
         .Produces<SettleResult>()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        // Closes the account, releases the Member's open Requests and burns their balance; repeating it finishes
+        // anything an earlier failed run left (spec §2A).
+        group.MapPost("/members/{id:guid}/offboard", async (
+            Guid id, OffboardMemberHandler handler, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                return await handler.HandleAsync(new OffboardMemberCommand(id), cancellationToken) is { } result
+                    ? Results.Ok(result)
+                    : Problems.MemberNotFound();
+            }
+            catch (DomainException ex)
+            {
+                return Problems.DomainRule(ex);
+            }
+            catch (ConcurrencyConflictException)
+            {
+                return Problems.Conflict();
+            }
+        })
+        .WithName("OffboardMember")
+        .Produces<OffboardMemberResult>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
     }
 }

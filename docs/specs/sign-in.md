@@ -39,4 +39,4 @@ State-changing calls need the `X-Requested-With` header (ADR 0006).
 
 - Development and E2E: the fake outbox logs each message, including the link, and is readable at `GET /api/dev/outbox`; the Admin's sign-in link is logged at startup. Development seeds one Admin and three Members (balances 10.0, 0.0, 25.5) through the application layer, idempotently.
 - E2E only: `POST /api/test/sessions { memberId }` returns a session token for the cookie.
-- Not in v1: Admin UI to invite others and re-send (#45), Offboarding itself (#43), a production email provider (#23).
+- Not in v1: Admin UI to invite others and re-send (#45), Offboarding UI (#45; the API is `POST /api/admin/members/{id}/offboard`), a production email provider (#23).

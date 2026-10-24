@@ -1,5 +1,6 @@
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Offboarding;
 using BabysittingPool.Application.Requests;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<CancelRequestHandler>();
         services.AddScoped<WithdrawClaimHandler>();
         services.AddScoped<SettleHandler>();
+        services.AddScoped<OffboardMemberHandler>();
         return services;
     }
 }
