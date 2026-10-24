@@ -16,6 +16,12 @@ updates:
     groups:
       npm-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # Blocked on eslint-plugin-jsx-a11y supporting ESLint 10 (#86).
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@eslint/js"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
