@@ -93,7 +93,13 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("E2E"))
 }
 
 app.UseConfiguredForwardedHeaders();
+if (app.Environment.IsProduction())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
+app.UseSecurityHeaders();
 app.UseCsrfHeaderCheck();
 app.UseAuthentication();
 app.UseRateLimiter();
