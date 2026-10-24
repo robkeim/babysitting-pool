@@ -1,0 +1,10 @@
+# Secret scanning (ADR 0014), run by scripts/check.sh. `gitleaks dir` ignores .gitignore, so skip build output.
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)(bin|obj|dist)/''',
+  '''(^|/)package-lock\.json$''',
+]
