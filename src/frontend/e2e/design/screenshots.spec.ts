@@ -99,16 +99,29 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
     }
   }
 
+  // The co-op's first Admin joins through the bootstrap Invitation, so the Admin screens can be shown.
+  const joining = await browser.newContext({ timezoneId: 'UTC' })
+  const joiningPage = await joining.newPage()
+  await joiningPage.goto(invitation)
+  await joiningPage.locator('#displayName').fill('Ada Admin')
+  await joiningPage.getByRole('button').click()
+  await expect(joiningPage.getByRole('heading', { level: 2 })).toBeVisible()
+  const adminCookies = await joining.cookies()
+  await joining.close()
+
   for (const language of LANGUAGES) {
-    const setup = await browser.newContext({ timezoneId: 'UTC' })
-    await backend.signIn(setup, viewerId)
-    const setupPage = await setup.newPage()
-    await setupPage.goto(`${backend.appUrl}/credits`)
-    await setupPage
-      .getByRole('combobox', { name: 'Language' })
-      .selectOption({ label: language.label })
-    await expect(setupPage.getByRole('heading', { level: 1 })).toHaveText(language.heading)
-    await setup.close()
+    for (const who of ['member', 'admin']) {
+      const setup = await browser.newContext({ timezoneId: 'UTC' })
+      if (who === 'admin') await setup.addCookies(adminCookies)
+      else await backend.signIn(setup, viewerId)
+      const setupPage = await setup.newPage()
+      await setupPage.goto(`${backend.appUrl}/credits`)
+      await setupPage
+        .getByRole('combobox', { name: 'Language' })
+        .selectOption({ label: language.label })
+      await expect(setupPage.getByRole('heading', { level: 1 })).toHaveText(language.heading)
+      await setup.close()
+    }
 
     for (const scheme of SCHEMES) {
       for (const viewport of VIEWPORTS) {
@@ -129,6 +142,18 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
           await capture(page, screen.name, `${language.tag}-${scheme}-${viewport.name}`)
         }
         await context.close()
+
+        const adminContext = await browser.newContext({
+          colorScheme: scheme,
+          viewport,
+          timezoneId: 'UTC',
+        })
+        await adminContext.addCookies(adminCookies)
+        const adminPage = await adminContext.newPage()
+        await adminPage.goto(`${backend.appUrl}/admin/feature-flags`)
+        await expect(adminPage.getByRole('heading', { level: 2 })).toBeVisible()
+        await capture(adminPage, 'feature-flags', `${language.tag}-${scheme}-${viewport.name}`)
+        await adminContext.close()
       }
     }
   }

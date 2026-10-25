@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api/client'
 import { useFeatureFlagOverrides } from './overrides'
-import type { FeatureFlags } from './types'
+import type { FeatureFlags, FeatureFlagView, Page, UpdateFeatureFlagRequest } from './types'
 
 export const flagKeys = {
   all: () => ['feature-flags'] as const,
@@ -26,4 +26,31 @@ export function useFeatureFlag(name: string): boolean {
   const overrides = useFeatureFlagOverrides()
   const flags = useFeatureFlags(overrides === undefined)
   return (overrides ?? flags.data)?.[name] ?? false
+}
+
+export const adminFlagKeys = {
+  all: () => ['admin', 'feature-flags'] as const,
+}
+
+/** Every declared flag with its stored settings; Admin only (ADR 0016). */
+export function useAdminFeatureFlags() {
+  return useQuery({
+    queryKey: adminFlagKeys.all(),
+    queryFn: () => apiFetch<Page<FeatureFlagView>>('/api/admin/feature-flags'),
+  })
+}
+
+/** Replaces one flag's settings whole; the caller's own resolved flags are refetched. */
+export function useUpdateFeatureFlag() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (request: UpdateFeatureFlagRequest) =>
+      apiFetch<FeatureFlagView>('/api/admin/feature-flags', { method: 'PUT', body: request }),
+    onSuccess: async () => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: adminFlagKeys.all() }),
+        client.invalidateQueries({ queryKey: flagKeys.all() }),
+      ])
+    },
+  })
 }
