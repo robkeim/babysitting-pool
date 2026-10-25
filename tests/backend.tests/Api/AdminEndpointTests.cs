@@ -161,4 +161,55 @@ public class AdminEndpointTests : IDisposable
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be("member_not_found");
     }
+
+    [Fact]
+    public async Task Erase_is_forbidden_to_a_member_who_is_not_the_admin()
+    {
+        var member = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(member);
+
+        var response = await client.PostAsync($"/api/admin/members/{member}/erase", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Erase_refuses_an_open_member()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        var member = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var adminClient = _factory.CreateMemberClient(admin);
+
+        var response = await adminClient.PostAsync($"/api/admin/members/{member}/erase", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be("member_not_closed");
+    }
+
+    [Fact]
+    public async Task Erase_of_an_offboarded_member_succeeds_with_no_content()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        var leaver = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var adminClient = _factory.CreateMemberClient(admin);
+        (await adminClient.PostAsync($"/api/admin/members/{leaver}/offboard", null)).EnsureSuccessStatusCode();
+
+        var response = await adminClient.PostAsync($"/api/admin/members/{leaver}/erase", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task Erase_of_an_unknown_member_is_not_found()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        using var adminClient = _factory.CreateMemberClient(admin);
+
+        var response = await adminClient.PostAsync($"/api/admin/members/{Guid.NewGuid()}/erase", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

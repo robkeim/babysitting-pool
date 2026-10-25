@@ -46,5 +46,27 @@ internal static class AdminEndpoints
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        // Irreversible, and only for a closed Member; repeating it changes nothing (spec §2A, ADR 0014).
+        group.MapPost("/members/{id:guid}/erase", async (
+            Guid id, EraseMemberHandler handler, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                return await handler.HandleAsync(new EraseMemberCommand(id), cancellationToken)
+                    ? Results.NoContent()
+                    : Problems.MemberNotFound();
+            }
+            catch (DomainException ex)
+            {
+                return Problems.DomainRule(ex);
+            }
+        })
+        .WithName("EraseMember")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
     }
 }

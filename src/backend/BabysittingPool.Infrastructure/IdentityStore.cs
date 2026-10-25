@@ -36,6 +36,23 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         await transaction.CommitAsync(cancellationToken);
     }
 
+    public async Task EraseMemberAsync(Member member, EmailAddress formerEmail, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(member);
+        ArgumentNullException.ThrowIfNull(formerEmail);
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        await db.Members.Where(m => m.Id == member.Id && m.ClosedAt != null)
+            .ExecuteUpdateAsync(
+                m => m.SetProperty(x => x.Email, member.Email.Value).SetProperty(x => x.DisplayName, member.DisplayName.Value),
+                cancellationToken);
+        await db.Requests.Where(r => r.RequesterId == member.Id)
+            .ExecuteUpdateAsync(r => r.SetProperty(x => x.Address, ""), cancellationToken);
+        await db.Invitations.Where(i => i.Email == formerEmail.Value && i.ConsumedAt == null)
+            .ExecuteDeleteAsync(cancellationToken);
+        await db.SignInLinks.Where(l => l.MemberId == member.Id).ExecuteDeleteAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+    }
+
     public async Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken) =>
         await db.Members.Where(m => m.Id == memberId)
             .ExecuteUpdateAsync(m => m.SetProperty(x => x.Language, language.Tag), cancellationToken);

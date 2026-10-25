@@ -17,6 +17,13 @@ public interface IIdentityStore
     /// <summary>Closes the Member and ends all their Sessions. Does nothing if they are already closed.</summary>
     Task CloseMemberAsync(Guid memberId, DateTime now, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// In one transaction: saves the erased Member's name and email, clears the address of every Request they
+    /// posted, and deletes the Invitations sent to <paramref name="formerEmail"/> that are still unused and the
+    /// sign-in links issued to the Member. The Ledger is untouched (ADR 0014).
+    /// </summary>
+    Task EraseMemberAsync(Member member, EmailAddress formerEmail, CancellationToken cancellationToken);
+
     Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken);
 
     Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken);

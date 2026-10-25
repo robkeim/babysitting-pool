@@ -126,4 +126,28 @@ public class IdentityTests
         act.Should().Throw<DomainException>().Which.Code.Should().Be("invalid_state");
         member.ClosedAt.Should().Be(Now);
     }
+
+    [Fact]
+    public void Erasing_a_closed_member_leaves_only_the_tombstone()
+    {
+        var member = NewMember(isAdmin: false);
+        member.Close(Now);
+
+        member.Erase();
+
+        member.Email.Value.Should().Be("Former member");
+        member.DisplayName.Value.Should().Be("Former member");
+        member.IsClosed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void An_open_member_cannot_be_erased()
+    {
+        var member = NewMember(isAdmin: false);
+
+        var act = member.Erase;
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("member_not_closed");
+        member.Email.Value.Should().Be("ada@example.com");
+    }
 }
