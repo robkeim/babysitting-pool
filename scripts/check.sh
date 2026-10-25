@@ -162,7 +162,9 @@ scan_secrets
 case "$scope" in
   backend) (backend) ;;
   frontend) (frontend) ;;
-  all) (backend) && (frontend) ;;
+  # Not `(backend) && (frontend)`: in an && list `set -e` is off inside the subshell, so a failure there
+  # was swallowed and the run stamped green.
+  all) (backend); (frontend) ;;
 esac
 
 if [[ $scope == all ]]; then
