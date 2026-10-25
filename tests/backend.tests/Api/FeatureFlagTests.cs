@@ -150,6 +150,54 @@ public class FeatureFlagTests : IDisposable
     }
 
     [Fact]
+    public async Task The_caller_gets_their_flags_resolved_and_an_anonymous_caller_only_the_fully_on_ones()
+    {
+        var admin = await _factory.SeedMemberAsync();
+        await _factory.MakeAdminAsync(admin);
+        var member = await _factory.SeedMemberAsync();
+        using var adminClient = _factory.CreateMemberClient(admin);
+        using var memberClient = _factory.CreateMemberClient(member);
+        using var anonymous = _factory.CreateSpaClient();
+        await adminClient.PutAsJsonAsync("/api/admin/feature-flags", Body("alpha", enabled: true, deny: [member]));
+        await adminClient.PutAsJsonAsync("/api/admin/feature-flags", Body("beta", enabled: true, rollout: 50));
+
+        var forAdmin = await adminClient.GetFromJsonAsync<Dictionary<string, bool>>("/api/feature-flags");
+        var forMember = await memberClient.GetFromJsonAsync<Dictionary<string, bool>>("/api/feature-flags");
+        var forAnonymous = await anonymous.GetFromJsonAsync<Dictionary<string, bool>>("/api/feature-flags");
+
+        forAdmin!["alpha"].Should().BeTrue();
+        forMember!["alpha"].Should().BeFalse("the deny list");
+        forMember.Keys.Should().Equal("alpha", "beta", "seeded");
+        forAnonymous.Should().Equal(new Dictionary<string, bool> { ["alpha"] = true, ["beta"] = false, ["seeded"] = true });
+    }
+
+    [Fact]
+    public async Task The_flags_answer_carries_an_ETag_that_turns_a_repeat_into_304_until_a_flag_changes()
+    {
+        var admin = await _factory.SeedMemberAsync();
+        await _factory.MakeAdminAsync(admin);
+        using var client = _factory.CreateMemberClient(admin);
+
+        var first = await client.GetAsync("/api/feature-flags");
+        var etag = first.Headers.ETag!.ToString();
+        var repeat = await Conditional(client, etag);
+        await client.PutAsJsonAsync("/api/admin/feature-flags", Body("alpha", enabled: true));
+        var afterChange = await Conditional(client, etag);
+
+        first.StatusCode.Should().Be(HttpStatusCode.OK);
+        repeat.StatusCode.Should().Be(HttpStatusCode.NotModified);
+        afterChange.StatusCode.Should().Be(HttpStatusCode.OK);
+        afterChange.Headers.ETag!.ToString().Should().NotBe(etag);
+    }
+
+    private static async Task<HttpResponseMessage> Conditional(HttpClient client, string etag)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/feature-flags");
+        request.Headers.TryAddWithoutValidation("If-None-Match", etag);
+        return await client.SendAsync(request);
+    }
+
+    [Fact]
     public void A_configured_flag_that_is_not_declared_stops_the_API_starting()
     {
         using var broken = new ApiFactory(flags: [Alpha], features: new Dictionary<string, string> { ["typo"] = "true" });
