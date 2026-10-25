@@ -38,7 +38,7 @@ public sealed class IssueInvitationHandler(
             new EmailMessage(
                 command.Email.Value,
                 "You're invited to the babysitting co-op",
-                $"You've been invited to join the babysitting co-op. Create your account here (the link works once and expires in {settings.InvitationLifetime.TotalDays:0} days): {link}",
+                $"You've been invited to join the babysitting co-op. Use this link to create your account (it works once and expires in {settings.InvitationLifetime.TotalDays:0} days):\n\n{link}",
                 link),
             cancellationToken);
         return IssueInvitationResult.Issued;

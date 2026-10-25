@@ -27,7 +27,7 @@ public sealed class RequestSignInLinkHandler(
             new EmailMessage(
                 member.Email.Value,
                 "Your sign-in link for the babysitting co-op",
-                $"Sign in to the babysitting co-op here (the link works once and expires in {settings.SignInLinkLifetime.TotalHours:0} hours): {link}",
+                $"Use this link to sign in to the babysitting co-op (it works once and expires in {settings.SignInLinkLifetime.TotalHours:0} hours):\n\n{link}",
                 link),
             cancellationToken);
     }
