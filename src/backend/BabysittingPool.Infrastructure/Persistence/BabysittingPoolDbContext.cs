@@ -14,6 +14,7 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
     public DbSet<InvitationRecord> Invitations => Set<InvitationRecord>();
     public DbSet<SignInLinkRecord> SignInLinks => Set<SignInLinkRecord>();
     public DbSet<SessionRecord> Sessions => Set<SessionRecord>();
+    public DbSet<FeatureFlagRecord> FeatureFlags => Set<FeatureFlagRecord>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -69,6 +70,12 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
             session.HasKey(s => s.Id);
             session.HasIndex(s => s.SecretHash).IsUnique();
             session.HasOne<MemberRecord>().WithMany().HasForeignKey(s => s.MemberId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<FeatureFlagRecord>(flag =>
+        {
+            flag.ToTable("FeatureFlags");
+            flag.HasKey(f => f.Name);
         });
 
         modelBuilder.Entity<RequestRecord>(request =>

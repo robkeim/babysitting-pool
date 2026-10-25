@@ -40,6 +40,34 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.ToTable("CreditAccounts", (string)null);
                 });
 
+            modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.FeatureFlagRecord", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AllowedMemberIds")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeniedMemberIds")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RoleRollouts")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RolloutPercent")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("FeatureFlags", (string)null);
+                });
+
             modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.InvitationRecord", b =>
                 {
                     b.Property<Guid>("Id")

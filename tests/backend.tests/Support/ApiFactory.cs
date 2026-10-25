@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
@@ -16,7 +17,11 @@ using Microsoft.Extensions.Time.Testing;
 namespace backend.tests.Support;
 
 /// <summary>The real API over HTTP on a throwaway SQLite file and a fake clock.</summary>
-internal sealed class ApiFactory(string environment = "E2E", string? bootstrapAdminEmail = null) : WebApplicationFactory<Program>
+internal sealed class ApiFactory(
+    string environment = "E2E",
+    string? bootstrapAdminEmail = null,
+    FeatureFlag[]? flags = null,
+    Dictionary<string, string>? features = null) : WebApplicationFactory<Program>
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-api-{Guid.NewGuid():N}.db");
 
@@ -34,8 +39,19 @@ internal sealed class ApiFactory(string environment = "E2E", string? bootstrapAd
             builder.UseSetting("Bootstrap:AdminEmail", bootstrapAdminEmail);
         }
 
+        foreach (var (name, value) in features ?? [])
+        {
+            builder.UseSetting($"Features:{name}", value);
+        }
+
         builder.ConfigureServices(services =>
         {
+            if (flags is not null)
+            {
+                // The production registry is empty; tests declare their own (the E2E host gates an endpoint on each).
+                services.Replace(ServiceDescriptor.Singleton(new FeatureFlagRegistry(flags)));
+            }
+
             if (environment == "Production")
             {
                 // Production has no email provider yet; tests stand in the outbox so the API can start.

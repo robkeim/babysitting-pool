@@ -1,3 +1,4 @@
+using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
@@ -27,6 +28,12 @@ internal static class TestEndpoints
     public static void MapTestEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/test").AllowAnonymous().ExcludeFromDescription();
+
+        // An endpoint gated on each declared flag, so tests can see a flag take effect (ADR 0016).
+        foreach (var flag in app.ServiceProvider.GetRequiredService<FeatureFlagRegistry>().All)
+        {
+            group.MapGet($"/gated/{flag.Name}", () => Results.Ok()).RequireFeature(flag.Name);
+        }
 
         group.MapPost("/members", async (SeedMemberRequest request, IServiceProvider services, CancellationToken cancellationToken) =>
         {
