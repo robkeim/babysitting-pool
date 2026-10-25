@@ -6,7 +6,9 @@ namespace BabysittingPool.Infrastructure.Persistence;
 public sealed class CreditAccountRecord
 {
     public Guid MemberId { get; set; }
+
     public Credits Available { get; set; }
+
     public Credits Escrowed { get; set; }
 
     /// <summary>Optimistic concurrency token (ADR 0004).</summary>

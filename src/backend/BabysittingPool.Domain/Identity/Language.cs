@@ -19,6 +19,7 @@ public sealed record Language
     }
 
     public string Tag { get; }
+
     public bool IsTest { get; }
 
     /// <summary>Parses a tag; test Languages are accepted only when <paramref name="includeTest"/> is set.</summary>

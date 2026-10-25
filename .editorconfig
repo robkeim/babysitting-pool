@@ -30,6 +30,24 @@ dotnet_diagnostic.IDE0161.severity = warning
 dotnet_diagnostic.IDE0040.severity = warning
 dotnet_diagnostic.IDE0011.severity = warning
 
+# StyleCop.Analyzers: layout only. Every category is off, then the blank-line rules are switched on by id.
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.LayoutRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.MaintainabilityRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.NamingRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.OrderingRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.ReadabilityRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpacingRules.severity = none
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpecialRules.severity = none
+dotnet_diagnostic.SA0001.severity = none
+dotnet_diagnostic.SA1505.severity = warning
+dotnet_diagnostic.SA1507.severity = warning
+dotnet_diagnostic.SA1508.severity = warning
+dotnet_diagnostic.SA1509.severity = warning
+dotnet_diagnostic.SA1513.severity = warning
+dotnet_diagnostic.SA1516.severity = warning
+dotnet_diagnostic.SA1517.severity = warning
+
 # Analyzer noise that does not fit an application (no library consumers, no localisation yet).
 dotnet_diagnostic.CA1303.severity = none
 dotnet_diagnostic.CA1848.severity = none
