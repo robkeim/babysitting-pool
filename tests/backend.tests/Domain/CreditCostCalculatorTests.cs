@@ -35,11 +35,22 @@ public class CreditCostCalculatorTests
         Cost(60, children).Should().Be((decimal)expectedRate);
     }
 
+    [Theory]
+    [InlineData(15, 3, 0.5)] // 0.4375 rounds to the nearest quarter
+    [InlineData(15, 5, 0.5)] // 0.5625 rounds down to 0.5
+    [InlineData(15, 6, 0.75)] // 0.625 is a midpoint and rounds up
+    [InlineData(45, 3, 1.25)] // 1.3125 rounds down
+    public void Time_cost_is_rounded_to_the_nearest_quarter_with_midpoints_up(int minutes, int children, double expected)
+    {
+        Cost(minutes, children).Should().Be((decimal)expected);
+        Credits.FromDecimal(Cost(minutes, children)).Value.Should().Be((decimal)expected);
+    }
+
     [Fact]
     public void Child_scaling_applies_per_hour()
     {
-        // 2.5 hours * (1.0 + 0.5 + 0.25)
-        Cost(150, children: 3).Should().Be(4.375m);
+        // 2.5 hours * (1.0 + 0.5 + 0.25) = 4.375, rounded to 4.5
+        Cost(150, children: 3).Should().Be(4.5m);
     }
 
     [Fact]
@@ -96,18 +107,18 @@ public class CreditCostCalculatorTests
     [Fact]
     public void All_components_combine()
     {
-        // 90 min, 3 children: 1.5h * 1.75 = 2.625; family house +0.5; meals+snack 3 * 0.75 = 2.25
+        // 90 min, 3 children: 1.5h * 1.75 = 2.625, rounded to 2.75; family house +0.5; meals+snack 3 * 0.75 = 2.25
         var breakdown = CreditCostCalculator.Calculate(new CreditRequestDetails(
             90, 3, BabysittingLocation.RequestingFamilysHouse, TransportOption.None,
             MealOption.Lunch | MealOption.Snack));
 
         breakdown.Hours.Should().Be(1.5m);
         breakdown.HourlyRate.Should().Be(1.75m);
-        breakdown.TimeCost.Should().Be(2.625m);
+        breakdown.TimeCost.Should().Be(2.75m);
         breakdown.LocationPremium.Should().Be(0.5m);
         breakdown.TransportFee.Should().Be(0m);
         breakdown.MealFee.Should().Be(2.25m);
-        breakdown.Total.Should().Be(5.375m);
+        breakdown.Total.Should().Be(5.5m);
     }
 
     [Fact]

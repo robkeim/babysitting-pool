@@ -33,8 +33,10 @@ The total cost of a request is calculated deterministically using the following 
 
 ### A. Base Duration
 - Calculated in minutes, converted to fractional hours (e.g., 75 minutes = 1.25 hours).
-- Duration must be a positive multiple of **15 minutes** (15, 30, 45, 60, 75, ...). Any other value (e.g., 82 minutes) is rejected. This keeps every cost an exact decimal, so no rounding rule is needed.
+- Duration must be a positive multiple of **15 minutes** (15, 30, 45, 60, 75, ...). Any other value (e.g., 82 minutes) is rejected.
 - Rate: 1.0 credit / hour for the 1st child.
+
+- **Rounding:** Hours × hourly rate can fall between quarters (15 minutes with 3 children = 0.25 × 1.75 = 0.4375). The time cost is rounded to the nearest 0.25 credit, a midpoint going up (0.4375 → 0.50, 0.625 → 0.75). Rounding applies once, to the time cost only, before the fees in C–E, which are already multiples of 0.25. So every total is a whole number of quarter-credits (ADR 0001).
 
 ### B. Additional Children Scaling (Per Hour)
 - A request must include **at least 1 child**.
