@@ -10,7 +10,7 @@ test('a Member switches Language, the visible text changes and the choice outliv
   await page.goto('/credits')
   await expect(page.getByRole('heading', { name: 'Babysitting Pool' })).toBeVisible()
 
-  await page.getByRole('combobox', { name: 'Language' }).selectOption({ label: 'Ünïcödé Tëst' })
+  await page.getByRole('combobox', { name: 'Language' }).selectOption({ label: '🏴‍☠️ Ünïcödé Tëst' })
   await expect(page.getByRole('heading', { name: /^⏩/u })).toBeVisible()
   await expect(page.getByRole('group', { name: /⏩/u }).first()).toBeVisible()
 
@@ -18,7 +18,7 @@ test('a Member switches Language, the visible text changes and the choice outliv
   await page.reload()
   await expect(page.getByRole('heading', { name: /^⏩/u })).toBeVisible()
 
-  await page.getByRole('combobox').selectOption({ label: 'English (US)' })
+  await page.getByRole('combobox').selectOption({ label: '🇺🇸 English' })
   await expect(page.getByRole('heading', { name: 'Babysitting Pool' })).toBeVisible()
   await expect(page.getByRole('group', { name: 'Available' })).toContainText('10.00')
 })
