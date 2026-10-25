@@ -27,7 +27,7 @@ public class GetMyAccountHandlerTests : IAsyncLifetime
         account!.AvailableQuarterCredits.Should().Be(41);
         account.EscrowedQuarterCredits.Should().Be(8);
         account.Ledger.Items.Select(e => e.AmountQuarterCredits).Should().Equal(1, 40);
-        account.Ledger.Items.Should().OnlyContain(e => e.Kind == "Grant");
+        account.Ledger.Items.Should().OnlyContain(e => e.Kind == LedgerEntryKind.Grant);
         account.Ledger.Items[0].OccurredAt.Should().Be(new DateTime(2026, 3, 1, 10, 0, 0, DateTimeKind.Utc));
         account.Ledger.NextCursor.Should().BeNull();
     }

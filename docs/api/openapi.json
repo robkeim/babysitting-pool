@@ -1074,6 +1074,16 @@
           }
         }
       },
+      "LedgerEntryKind": {
+        "enum": [
+          "Grant",
+          "Escrow",
+          "Refund",
+          "Payout",
+          "Demurrage",
+          "Burn"
+        ]
+      },
       "LedgerEntryView": {
         "required": [
           "id",
@@ -1088,7 +1098,7 @@
             "format": "uuid"
           },
           "kind": {
-            "type": "string"
+            "$ref": "#/components/schemas/LedgerEntryKind"
           },
           "amountQuarterCredits": {
             "type": "integer",

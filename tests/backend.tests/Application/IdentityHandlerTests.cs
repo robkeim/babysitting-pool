@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using backend.tests.Support;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,7 +69,7 @@ public class IdentityHandlerTests : IAsyncLifetime
         var account = await RunAsync(sp => sp.GetRequiredService<GetMyAccountHandler>()
             .HandleAsync(new GetMyAccountQuery(me.MemberId), CancellationToken.None));
         account!.AvailableQuarterCredits.Should().Be(40);
-        account.Ledger.Items.Should().ContainSingle().Which.Kind.Should().Be("Grant");
+        account.Ledger.Items.Should().ContainSingle().Which.Kind.Should().Be(LedgerEntryKind.Grant);
     }
 
     [Fact]

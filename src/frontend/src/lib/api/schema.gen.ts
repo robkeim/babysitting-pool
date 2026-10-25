@@ -352,10 +352,12 @@ export interface components {
         LanguageRequest: {
             language: null | string;
         };
+        /** @enum {unknown} */
+        LedgerEntryKind: "Grant" | "Escrow" | "Refund" | "Payout" | "Demurrage" | "Burn";
         LedgerEntryView: {
             /** Format: uuid */
             id: string;
-            kind: string;
+            kind: components["schemas"]["LedgerEntryKind"];
             /** Format: int64 */
             amountQuarterCredits: number;
             /** Format: date-time */

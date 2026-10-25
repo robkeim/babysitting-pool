@@ -3,9 +3,46 @@ import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { CreditsPage } from './CreditsPage'
+import { type LedgerEntryKind } from './types'
 import { accountFailureHandler, accountHandler, accountPagesHandler } from './mocks'
 
 describe('CreditsPage', () => {
+  it('shows a readable label for every Ledger entry kind', async () => {
+    // Exhaustive over the generated API enum: a new backend kind fails the typecheck here.
+    const labels: Record<LedgerEntryKind, string> = {
+      Grant: 'Grant',
+      Escrow: 'Escrow',
+      Refund: 'Refund',
+      Payout: 'Payout',
+      Demurrage: 'Demurrage',
+      Burn: 'Burn',
+    }
+    const kinds = Object.keys(labels) as LedgerEntryKind[]
+    server.use(
+      accountHandler({
+        availableQuarterCredits: 0,
+        escrowedQuarterCredits: 0,
+        ledger: {
+          items: kinds.map((kind, index) => ({
+            id: `2f6c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e${String(index).padStart(2, '0')}`,
+            kind,
+            amountQuarterCredits: 1,
+            occurredAt: '2026-03-01T09:00:00Z',
+          })),
+          nextCursor: null,
+        },
+      }),
+    )
+
+    renderWithProviders(<CreditsPage />)
+
+    await screen.findByRole('table')
+    const rows = screen.getAllByRole('row').slice(1)
+    for (const [index, kind] of kinds.entries()) {
+      expect(rows[index]).toHaveTextContent(labels[kind])
+    }
+  })
+
   it('shows the balance and Ledger entries as credits', async () => {
     server.use(
       accountHandler({
@@ -49,7 +86,7 @@ describe('CreditsPage', () => {
   it('loads the next page of Ledger entries on request', async () => {
     const entry = (id: string, amountQuarterCredits: number) => ({
       id,
-      kind: 'Grant',
+      kind: 'Grant' as const,
       amountQuarterCredits,
       occurredAt: '2026-03-01T09:00:00Z',
     })
