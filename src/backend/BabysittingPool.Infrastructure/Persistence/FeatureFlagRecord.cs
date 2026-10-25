@@ -4,9 +4,14 @@ namespace BabysittingPool.Infrastructure.Persistence;
 public sealed class FeatureFlagRecord
 {
     public string Name { get; set; } = "";
+
     public bool Enabled { get; set; }
+
     public int RolloutPercent { get; set; }
+
     public string AllowedMemberIds { get; set; } = "[]";
+
     public string DeniedMemberIds { get; set; } = "[]";
+
     public string RoleRollouts { get; set; } = "[]";
 }
