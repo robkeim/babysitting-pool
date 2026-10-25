@@ -8,6 +8,7 @@ import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 import { boundaryConfigs } from './eslint.boundaries.js'
+import { colorTokenConfigs } from './eslint.colors.js'
 
 export default defineConfig(
   {
@@ -17,6 +18,7 @@ export default defineConfig(
       'playwright-report',
       'src/routeTree.gen.ts',
       'src/**/*.gen.ts',
+      'design-screenshots',
       'src/components/ui',
     ],
   },
@@ -28,7 +30,9 @@ export default defineConfig(
     languageOptions: {
       globals: { ...globals.browser },
       parserOptions: {
-        projectService: { allowDefaultProject: ['eslint.config.js', 'eslint.boundaries.js'] },
+        projectService: {
+          allowDefaultProject: ['eslint.config.js', 'eslint.boundaries.js', 'eslint.colors.js'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -40,6 +44,7 @@ export default defineConfig(
     },
   },
   ...boundaryConfigs,
+  ...colorTokenConfigs,
   {
     // User-visible text lives in the catalogs (ADR 0009).
     files: ['src/**/*.{ts,tsx}'],

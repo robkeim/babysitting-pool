@@ -24,9 +24,12 @@
   "include": [
     "vite.config.ts",
     "playwright.config.ts",
+    "playwright.design.config.ts",
     "eslint.config.js",
     "eslint.boundaries.js",
     "eslint.boundaries.d.ts",
+    "eslint.colors.js",
+    "eslint.colors.d.ts",
     "e2e"
   ]
 }

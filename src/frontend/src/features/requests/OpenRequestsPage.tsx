@@ -1,18 +1,13 @@
+import { HandHeart } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
+import { EmptyState } from '@/components/EmptyState'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { formatCredits, formatInstant } from '@/features/credits'
+import { formatInstant } from '@/features/credits'
 import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useClaimRequest, useOpenRequests } from './api'
+import { RequestCard } from './RequestCard'
 
 const CLAIM_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   invalid_state: 'error.invalid_state',
@@ -62,45 +57,18 @@ export function OpenRequestsPage() {
         </Alert>
       )}
       {items.length === 0 ? (
-        <p>
+        <EmptyState icon={HandHeart}>
           <FormattedMessage id="requests.open.empty" />
-        </p>
+        </EmptyState>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <FormattedMessage id="requests.open.starts" />
-              </TableHead>
-              <TableHead>
-                <FormattedMessage id="requests.open.area" />
-              </TableHead>
-              <TableHead>
-                <FormattedMessage id="requests.open.details" />
-              </TableHead>
-              <TableHead className="text-right">
-                <FormattedMessage id="requests.open.credits" />
-              </TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((request) => (
-              <TableRow key={request.id}>
-                <TableCell>{formatInstant(request.startsAt)}</TableCell>
-                <TableCell>{request.area}</TableCell>
-                <TableCell>
-                  <FormattedMessage
-                    id="requests.details"
-                    values={{ minutes: request.durationMinutes, children: request.childCount }}
-                  />
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatCredits(request.costQuarterCredits)}
-                </TableCell>
-                <TableCell className="text-right">
+        <ul className="space-y-3">
+          {items.map((request) => (
+            <li key={request.id}>
+              <RequestCard
+                {...request}
+                action={
                   <Button
-                    size="sm"
+                    className="h-11 lg:h-8"
                     disabled={claim.isPending}
                     aria-label={intl.formatMessage(
                       { id: 'requests.open.claimAria' },
@@ -112,15 +80,16 @@ export function OpenRequestsPage() {
                   >
                     <FormattedMessage id="requests.open.claim" />
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                }
+              />
+            </li>
+          ))}
+        </ul>
       )}
       {requests.hasNextPage && (
         <Button
           variant="outline"
+          className="h-11 w-full lg:h-8 lg:w-auto"
           onClick={() => void requests.fetchNextPage()}
           disabled={requests.isFetchingNextPage}
         >

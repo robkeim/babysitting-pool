@@ -1,5 +1,7 @@
 import { useState, type SyntheticEvent } from 'react'
+import { Flag } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
+import { EmptyState } from '@/components/EmptyState'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -93,9 +95,10 @@ function FlagCard({ flag }: { flag: FeatureFlagView }) {
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium">
+            <label className="flex min-h-11 items-center gap-3 text-sm font-medium lg:min-h-0 lg:gap-2">
               <input
                 type="checkbox"
+                className="size-5 accent-primary lg:size-4"
                 checked={enabled}
                 onChange={(event) => {
                   setEnabled(event.target.checked)
@@ -204,9 +207,10 @@ function FlagCard({ flag }: { flag: FeatureFlagView }) {
               </AlertDescription>
             </Alert>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <Button
               type="submit"
+              className="h-11 w-full lg:h-8 lg:w-auto"
               disabled={update.isPending || !valid}
               aria-label={intl.formatMessage({ id: 'flags.admin.saveAria' }, { name: flag.name })}
             >
@@ -243,9 +247,9 @@ export function FeatureFlagsAdminPage() {
   if (!flags.data) return null
   if (flags.data.items.length === 0) {
     return (
-      <p>
+      <EmptyState icon={Flag}>
         <FormattedMessage id="flags.admin.empty" />
-      </p>
+      </EmptyState>
     )
   }
 

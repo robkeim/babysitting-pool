@@ -25,13 +25,13 @@ describe('MyClaimsPage', () => {
 
     renderWithProviders(<MyClaimsPage />)
 
-    const claimed = await screen.findByRole('row', { name: /riverside/i })
+    const [claimed, other] = await screen.findAllByRole('listitem')
+    if (!claimed || !other) throw new Error('expected two Requests')
+    expect(claimed).toHaveTextContent(/riverside/i)
     expect(within(claimed).getByText('Claimed')).toBeInTheDocument()
     expect(within(claimed).getByText('2.00')).toBeInTheDocument()
     expect(within(claimed).getByText('12 River Rd')).toBeInTheDocument()
-    expect(
-      within(screen.getByRole('row', { name: /hilltop/i })).getByText('Completed'),
-    ).toBeInTheDocument()
+    expect(within(other).getByText('Completed')).toBeInTheDocument()
   })
 
   it('says so when nothing has been claimed', async () => {

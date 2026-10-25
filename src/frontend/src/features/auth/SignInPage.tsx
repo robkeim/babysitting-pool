@@ -17,11 +17,14 @@ export function SignInPage() {
   }
 
   return (
-    <Card>
+    <Card className="mx-auto w-full max-w-sm lg:mt-10">
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="text-xl font-semibold">
           <FormattedMessage id="auth.signIn.title" />
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          <FormattedMessage id="auth.signIn.tagline" />
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {request.isSuccess ? (
@@ -41,6 +44,7 @@ export function SignInPage() {
               </label>
               <Input
                 id="email"
+                className="h-11 lg:h-9"
                 type="email"
                 autoComplete="email"
                 required
@@ -60,7 +64,7 @@ export function SignInPage() {
                 </AlertDescription>
               </Alert>
             )}
-            <Button type="submit" disabled={request.isPending}>
+            <Button type="submit" className="h-11 w-full lg:h-9" disabled={request.isPending}>
               <FormattedMessage id="auth.signIn.submit" />
             </Button>
           </form>

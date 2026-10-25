@@ -8,17 +8,17 @@ test('a Member switches Language, the visible text changes and the choice outliv
   await backend.signIn(page.context(), await backend.seedMember([40]))
 
   await page.goto('/credits')
-  await expect(page.getByRole('heading', { name: 'Babysitting Pool' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Babysitting Pool' })).toBeVisible()
 
   await page.getByRole('combobox', { name: 'Language' }).selectOption({ label: '🏴‍☠️ Ünïcödé Tëst' })
-  await expect(page.getByRole('heading', { name: /^⏩/u })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: /^⏩/u })).toBeVisible()
   await expect(page.getByRole('group', { name: /⏩/u }).first()).toBeVisible()
 
   // The Language is kept on the Member, not in the browser tab.
   await page.reload()
-  await expect(page.getByRole('heading', { name: /^⏩/u })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: /^⏩/u })).toBeVisible()
 
   await page.getByRole('combobox').selectOption({ label: '🇺🇸 English' })
-  await expect(page.getByRole('heading', { name: 'Babysitting Pool' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Babysitting Pool' })).toBeVisible()
   await expect(page.getByRole('group', { name: 'Available' })).toContainText('10.00')
 })

@@ -1,3 +1,4 @@
+import { LogOut } from 'lucide-react'
 import { useIntl } from 'react-intl'
 import { Button } from '@/components/ui/button'
 import { choosableLanguages } from '@/lib/i18n'
@@ -16,11 +17,18 @@ export function AccountMenu({ onSignedOut }: AccountMenuProps) {
   if (!me.data) return null
 
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <span>{me.data.displayName}</span>
+    <div className="flex items-center gap-2 text-sm">
+      <span
+        aria-hidden
+        title={me.data.displayName}
+        className="hidden size-8 shrink-0 place-items-center rounded-full bg-accent font-semibold text-accent-foreground uppercase sm:grid"
+      >
+        {Array.from(me.data.displayName)[0]}
+      </span>
+      <span className="sr-only">{me.data.displayName}</span>
       <select
         aria-label={intl.formatMessage({ id: 'auth.accountMenu.language' })}
-        className="h-8 rounded-lg border border-input bg-background px-2"
+        className="h-9 max-w-32 rounded-lg border border-input bg-card px-2 text-base lg:max-w-none lg:text-sm"
         value={me.data.language}
         disabled={changeLanguage.isPending}
         onChange={(event) => {
@@ -34,13 +42,15 @@ export function AccountMenu({ onSignedOut }: AccountMenuProps) {
         ))}
       </select>
       <Button
-        variant="outline"
+        variant="ghost"
+        size="icon-lg"
+        aria-label={intl.formatMessage({ id: 'auth.accountMenu.signOut' })}
         disabled={signOut.isPending}
         onClick={() => {
           signOut.mutate(undefined, { onSuccess: onSignedOut })
         }}
       >
-        {intl.formatMessage({ id: 'auth.accountMenu.signOut' })}
+        <LogOut />
       </Button>
     </div>
   )

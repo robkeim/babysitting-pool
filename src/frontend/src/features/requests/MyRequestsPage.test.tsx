@@ -22,14 +22,14 @@ describe('MyRequestsPage', () => {
 
     renderWithProviders(<MyRequestsPage />)
 
-    const posted = await screen.findByRole('row', { name: /riverside/i })
+    const [posted, other] = await screen.findAllByRole('listitem')
+    if (!posted || !other) throw new Error('expected two Requests')
+    expect(posted).toHaveTextContent(/riverside/i)
     expect(within(posted).getByText('Posted')).toBeInTheDocument()
     expect(within(posted).getByText('2.00')).toBeInTheDocument()
     expect(within(posted).getByText('12 River Rd')).toBeInTheDocument()
     expect(within(posted).getByText(/Mar 2, 2026, 10:00 AM UTC/)).toBeInTheDocument()
-    expect(
-      within(screen.getByRole('row', { name: /hilltop/i })).getByText('Expired'),
-    ).toBeInTheDocument()
+    expect(within(other).getByText('Expired')).toBeInTheDocument()
   })
 
   it('says so when nothing has been posted', async () => {
