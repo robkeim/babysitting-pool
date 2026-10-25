@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
+    "design:screenshots": "playwright test -c playwright.design.config.ts",
     "generate:api": "npx --yes openapi-typescript@7.13.0 ../../docs/api/openapi.json -o src/lib/api/schema.gen.ts",
     "generate:postman": "node scripts/generate-postman.mjs",
     "format": "prettier --write .",

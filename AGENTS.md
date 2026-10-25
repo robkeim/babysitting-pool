@@ -15,6 +15,7 @@ Read only the row that matches your task. Skip files the ticket's **Read first:*
 | Backend structure, persistence | [ADR index](docs/adr/README.md), then the ADRs tagged `backend` |
 | API change | [ADR 0006](docs/adr/0006-rest-contract.md), [`docs/development.md`](docs/development.md) (regenerating the contract) |
 | Frontend | ADRs tagged `frontend` in the [ADR index](docs/adr/README.md) |
+| UI look, layout, colours, dark mode | [`docs/design.md`](docs/design.md) |
 | Tests | [`docs/testing.md`](docs/testing.md) |
 | Run or configure locally | [`docs/development.md`](docs/development.md) |
 | Issues, labels, PRs | [`docs/agents/`](docs/agents/issue-tracker.md) |

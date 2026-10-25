@@ -22,11 +22,13 @@ describe('OpenRequestsPage', () => {
 
     renderWithProviders(<OpenRequestsPage />)
 
-    const row = await screen.findByRole('row', { name: /riverside/i })
+    const [row, other] = await screen.findAllByRole('listitem')
+    if (!row || !other) throw new Error('expected two Requests')
+    expect(row).toHaveTextContent(/riverside/i)
     expect(within(row).getByText(/Mar 2, 2026, 10:00 AM UTC/)).toBeInTheDocument()
     expect(within(row).getByText('120 minutes, 2 children')).toBeInTheDocument()
     expect(within(row).getByText('3.00')).toBeInTheDocument()
-    expect(screen.getByRole('row', { name: /hilltop/i })).toBeInTheDocument()
+    expect(other).toHaveTextContent(/hilltop/i)
   })
 
   it('says so when nothing is open', async () => {

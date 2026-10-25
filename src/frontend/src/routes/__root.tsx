@@ -1,7 +1,20 @@
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router'
+import { ClipboardList, HandHeart, HeartHandshake, Wallet } from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
+import { AppShell, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
 import { I18nProvider } from '@/lib/i18n'
+
+const MEMBER_TABS: readonly ShellTab[] = [
+  { to: '/credits', label: <FormattedMessage id="common.nav.credits" />, icon: Wallet },
+  {
+    to: '/requests',
+    label: <FormattedMessage id="requests.myRequests.title" />,
+    icon: ClipboardList,
+  },
+  { to: '/open-requests', label: <FormattedMessage id="requests.open.title" />, icon: HandHeart },
+  { to: '/claims', label: <FormattedMessage id="requests.claims.title" />, icon: HeartHandshake },
+]
 
 export const Route = createRootRoute({
   component: function Root() {
@@ -9,15 +22,12 @@ export const Route = createRootRoute({
     const me = useMe()
     return (
       <I18nProvider language={me.data?.language}>
-        <main className="mx-auto max-w-2xl space-y-6 p-8">
-          <header className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">
-              <FormattedMessage id="common.appName" />
-            </h1>
-            <AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />
-          </header>
+        <AppShell
+          tabs={me.data ? MEMBER_TABS : undefined}
+          account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
+        >
           <Outlet />
-        </main>
+        </AppShell>
       </I18nProvider>
     )
   },

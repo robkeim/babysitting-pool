@@ -4,6 +4,7 @@ import { defineConfig } from '@playwright/test'
 // e2e/fixtures.ts, so there is no `webServer` here.
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: 'design/**',
   globalSetup: './e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

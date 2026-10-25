@@ -38,7 +38,9 @@ test('a Sitter withdraws and the Request reopens, then the Requester cancels and
   await sitter.getByRole('button', { name: /withdraw from the request in riverside/i }).click()
   await expect(sitter.getByText(/haven.t claimed any requests/i)).toBeVisible()
   await sitter.goto(`${backend.appUrl}/open-requests`)
-  await expect(sitter.getByRole('row', { name: /riverside/i })).not.toContainText('12 River Rd')
+  await expect(sitter.getByRole('listitem').filter({ hasText: /riverside/i })).not.toContainText(
+    '12 River Rd',
+  )
   await requester.goto(`${backend.appUrl}/requests`)
   await expect(requester.getByRole('row', { name: /riverside/i })).toContainText('Posted')
 

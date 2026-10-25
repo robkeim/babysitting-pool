@@ -36,8 +36,8 @@ describe('CreditsPage', () => {
 
     renderWithProviders(<CreditsPage />)
 
-    await screen.findByRole('table')
-    const rows = screen.getAllByRole('row').slice(1)
+    await screen.findByRole('list')
+    const rows = screen.getAllByRole('listitem')
     for (const [index, kind] of kinds.entries()) {
       expect(rows[index]).toHaveTextContent(labels[kind])
     }
@@ -69,7 +69,7 @@ describe('CreditsPage', () => {
     expect(
       within(screen.getByRole('group', { name: 'In escrow' })).getByText('2.00'),
     ).toBeInTheDocument()
-    const row = screen.getByRole('row', { name: /grant/i })
+    const row = screen.getByRole('listitem')
     expect(within(row).getByText('10.25')).toBeInTheDocument()
     expect(within(row).getByText(/Mar 1, 2026/)).toBeInTheDocument()
   })
@@ -108,8 +108,10 @@ describe('CreditsPage', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: /load more/i }))
 
-    expect(await screen.findByRole('row', { name: /1\.00/ })).toBeInTheDocument()
-    expect(screen.getByRole('row', { name: /0\.25/ })).toBeInTheDocument()
+    const rows = await screen.findAllByRole('listitem')
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveTextContent('0.25')
+    expect(rows[1]).toHaveTextContent('1.00')
     expect(screen.queryByRole('button', { name: /load more/i })).not.toBeInTheDocument()
   })
 })

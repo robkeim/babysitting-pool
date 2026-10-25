@@ -28,9 +28,12 @@ test('a Member posts a Request, the cost goes into Escrow and it shows in My Req
   await page.goto('/credits')
   await expect(page.getByRole('group', { name: 'Available' })).toContainText('8.00')
   await expect(page.getByRole('group', { name: 'In escrow' })).toContainText('2.00')
-  await expect(page.getByRole('row', { name: /escrow/i }).filter({ hasText: '2.00' })).toHaveCount(
-    1,
-  )
+  await expect(
+    page
+      .getByRole('listitem')
+      .filter({ hasText: /escrow/i })
+      .filter({ hasText: '2.00' }),
+  ).toHaveCount(1)
 })
 
 test('a Member cannot post inside the Minimum Lead Time', async ({ page, backend }) => {

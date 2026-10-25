@@ -125,5 +125,7 @@
   "requests.claims.withdraw": "Withdraw",
   "requests.claims.withdrawAria": "Withdraw from the request in {area} starting {starts}",
   "requests.claims.withdrawFailed.title": "We couldn't withdraw that claim",
-  "requests.open.claimAria": "Claim the request in {area} starting {starts}"
+  "requests.open.claimAria": "Claim the request in {area} starting {starts}",
+  "auth.signIn.tagline": "Trade babysitting with neighbors you trust.",
+  "credits.ledger.title": "Ledger"
 }

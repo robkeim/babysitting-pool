@@ -31,8 +31,10 @@ test('a Sitter claims an open Request, and the loser of a race is told it is gon
   // Both Sitters see it with the rough area only; the requester does not see their own.
   await winner.goto(`${backend.appUrl}/open-requests`)
   await loser.goto(`${backend.appUrl}/open-requests`)
-  await expect(winner.getByRole('row', { name: /riverside/i })).not.toContainText('12 River Rd')
-  await expect(loser.getByRole('row', { name: /riverside/i })).toBeVisible()
+  await expect(winner.getByRole('listitem').filter({ hasText: /riverside/i })).not.toContainText(
+    '12 River Rd',
+  )
+  await expect(loser.getByRole('listitem').filter({ hasText: /riverside/i })).toBeVisible()
   await requester.goto(`${backend.appUrl}/open-requests`)
   await expect(requester.getByText(/no open requests/i)).toBeVisible()
 
@@ -69,7 +71,7 @@ test('a Request past its Claim Cutoff is no longer open', async ({ browser, page
   await expect(requesterPage.getByRole('row', { name: /riverside/i })).toBeVisible()
   await backend.signIn(page.context(), sitterId)
   await page.goto('/open-requests')
-  await expect(page.getByRole('row', { name: /riverside/i })).toBeVisible()
+  await expect(page.getByRole('listitem').filter({ hasText: /riverside/i })).toBeVisible()
 
   // Claim Cutoff is 3 hours before the 20:00 start.
   await backend.setClock('2026-03-01T17:00:00Z')
