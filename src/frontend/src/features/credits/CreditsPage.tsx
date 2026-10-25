@@ -14,9 +14,14 @@ import { type MessageId } from '@/lib/i18n'
 import { useMyAccount } from './api'
 import { formatCredits, formatInstant } from './format'
 
-/** One message per Ledger entry kind; a kind with no message yet shows as its name. */
+/** One message per Ledger entry kind; the backend enum is checked against it in CreditsPage.test.tsx. */
 const KIND_MESSAGES: Partial<Record<string, MessageId>> = {
   Grant: 'credits.ledger.kind.Grant',
+  Escrow: 'credits.ledger.kind.Escrow',
+  Refund: 'credits.ledger.kind.Refund',
+  Payout: 'credits.ledger.kind.Payout',
+  Demurrage: 'credits.ledger.kind.Demurrage',
+  Burn: 'credits.ledger.kind.Burn',
 }
 
 export function CreditsPage() {

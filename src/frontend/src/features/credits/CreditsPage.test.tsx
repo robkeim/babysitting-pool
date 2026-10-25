@@ -1,11 +1,53 @@
+import { readFileSync } from 'node:fs'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
+import { enUS } from '@/lib/i18n/messages'
 import { CreditsPage } from './CreditsPage'
 import { accountFailureHandler, accountHandler, accountPagesHandler } from './mocks'
 
+// Vitest runs from src/frontend, next to src/backend. The OpenAPI schema types `kind` as a plain string.
+const ledgerEntryKinds = [
+  ...readFileSync('../backend/BabysittingPool.Domain/Credits/LedgerEntryKind.cs', 'utf8').matchAll(
+    /^\s+(\w+),?\s*$/gm,
+  ),
+].map((match) => match[1] ?? '')
+
 describe('CreditsPage', () => {
+  it('labels every backend Ledger entry kind', async () => {
+    expect(ledgerEntryKinds.length).toBeGreaterThan(0)
+    server.use(
+      accountHandler({
+        availableQuarterCredits: 0,
+        escrowedQuarterCredits: 0,
+        ledger: {
+          items: ledgerEntryKinds.map((kind, index) => ({
+            id: `2f6c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e${String(index).padStart(2, '0')}`,
+            kind,
+            amountQuarterCredits: 1,
+            occurredAt: '2026-03-01T09:00:00Z',
+          })),
+          nextCursor: null,
+        },
+      }),
+    )
+
+    renderWithProviders(<CreditsPage />)
+
+    await screen.findByRole('table')
+    const cells = screen
+      .getAllByRole('row')
+      .slice(1)
+      .map((row) => within(row).getAllByRole('cell')[1])
+    for (const [index, kind] of ledgerEntryKinds.entries()) {
+      expect(enUS, kind).toHaveProperty(`credits.ledger.kind.${kind}`)
+      expect(cells[index]).toHaveTextContent(
+        enUS[`credits.ledger.kind.${kind}` as keyof typeof enUS],
+      )
+    }
+  })
+
   it('shows the balance and Ledger entries as credits', async () => {
     server.use(
       accountHandler({
