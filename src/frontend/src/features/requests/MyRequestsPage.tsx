@@ -1,17 +1,12 @@
+import { ClipboardList } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
+import { EmptyState } from '@/components/EmptyState'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { formatCredits, formatInstant } from '@/features/credits'
+import { formatInstant } from '@/features/credits'
 import { useCancelRequest, useMyRequests } from './api'
 import { releaseFailure } from './releaseFailure'
+import { RequestCard } from './RequestCard'
 
 /** "My Requests": everything the Member posted, with its state. Only the owner sees the exact address. */
 export function MyRequestsPage() {
@@ -36,9 +31,9 @@ export function MyRequestsPage() {
   const items = requests.data.pages.flatMap((page) => page.items)
   if (items.length === 0)
     return (
-      <p>
+      <EmptyState icon={ClipboardList}>
         <FormattedMessage id="requests.myRequests.empty" />
-      </p>
+      </EmptyState>
     )
 
   return (
@@ -53,44 +48,16 @@ export function MyRequestsPage() {
           </AlertDescription>
         </Alert>
       )}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <FormattedMessage id="requests.myRequests.starts" />
-            </TableHead>
-            <TableHead>
-              <FormattedMessage id="requests.myRequests.areaAndAddress" />
-            </TableHead>
-            <TableHead>
-              <FormattedMessage id="requests.myRequests.state" />
-            </TableHead>
-            <TableHead className="text-right">
-              <FormattedMessage id="requests.myRequests.credits" />
-            </TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((request) => (
-            <TableRow key={request.id}>
-              <TableCell>{formatInstant(request.startsAt)}</TableCell>
-              <TableCell>
-                {request.area}
-                <br />
-                <span className="text-muted-foreground">{request.address}</span>
-              </TableCell>
-              <TableCell>
-                <FormattedMessage id={`requests.status.${request.status}`} />
-              </TableCell>
-              <TableCell className="text-right">
-                {formatCredits(request.costQuarterCredits)}
-              </TableCell>
-              <TableCell className="text-right">
-                {(request.status === 'Posted' || request.status === 'Claimed') && (
+      <ul className="space-y-3">
+        {items.map((request) => (
+          <li key={request.id}>
+            <RequestCard
+              {...request}
+              action={
+                (request.status === 'Posted' || request.status === 'Claimed') && (
                   <Button
-                    size="sm"
                     variant="outline"
+                    className="h-11 lg:h-8"
                     disabled={release.isPending}
                     aria-label={intl.formatMessage(
                       { id: 'requests.myRequests.cancelAria' },
@@ -102,15 +69,16 @@ export function MyRequestsPage() {
                   >
                     <FormattedMessage id="requests.myRequests.cancel" />
                   </Button>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                )
+              }
+            />
+          </li>
+        ))}
+      </ul>
       {requests.hasNextPage && (
         <Button
           variant="outline"
+          className="h-11 w-full lg:h-8 lg:w-auto"
           onClick={() => void requests.fetchNextPage()}
           disabled={requests.isFetchingNextPage}
         >

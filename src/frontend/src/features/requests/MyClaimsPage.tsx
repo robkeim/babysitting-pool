@@ -1,17 +1,12 @@
+import { HeartHandshake } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
+import { EmptyState } from '@/components/EmptyState'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { formatCredits, formatInstant } from '@/features/credits'
+import { formatInstant } from '@/features/credits'
 import { useWithdrawClaim, useMyClaims } from './api'
 import { releaseFailure } from './releaseFailure'
+import { RequestCard } from './RequestCard'
 
 /** "My Claims": the Requests the Member took as Sitter. They see the exact address once it is theirs (spec §4.6). */
 export function MyClaimsPage() {
@@ -36,9 +31,9 @@ export function MyClaimsPage() {
   const items = claims.data.pages.flatMap((page) => page.items)
   if (items.length === 0)
     return (
-      <p>
+      <EmptyState icon={HeartHandshake}>
         <FormattedMessage id="requests.claims.empty" />
-      </p>
+      </EmptyState>
     )
 
   return (
@@ -53,44 +48,16 @@ export function MyClaimsPage() {
           </AlertDescription>
         </Alert>
       )}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <FormattedMessage id="requests.claims.starts" />
-            </TableHead>
-            <TableHead>
-              <FormattedMessage id="requests.claims.areaAndAddress" />
-            </TableHead>
-            <TableHead>
-              <FormattedMessage id="requests.claims.state" />
-            </TableHead>
-            <TableHead className="text-right">
-              <FormattedMessage id="requests.claims.credits" />
-            </TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((request) => (
-            <TableRow key={request.id}>
-              <TableCell>{formatInstant(request.startsAt)}</TableCell>
-              <TableCell>
-                {request.area}
-                <br />
-                <span className="text-muted-foreground">{request.address}</span>
-              </TableCell>
-              <TableCell>
-                <FormattedMessage id={`requests.status.${request.status}`} />
-              </TableCell>
-              <TableCell className="text-right">
-                {formatCredits(request.costQuarterCredits)}
-              </TableCell>
-              <TableCell className="text-right">
-                {request.status === 'Claimed' && (
+      <ul className="space-y-3">
+        {items.map((request) => (
+          <li key={request.id}>
+            <RequestCard
+              {...request}
+              action={
+                request.status === 'Claimed' && (
                   <Button
-                    size="sm"
                     variant="outline"
+                    className="h-11 lg:h-8"
                     disabled={release.isPending}
                     aria-label={intl.formatMessage(
                       { id: 'requests.claims.withdrawAria' },
@@ -102,15 +69,16 @@ export function MyClaimsPage() {
                   >
                     <FormattedMessage id="requests.claims.withdraw" />
                   </Button>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                )
+              }
+            />
+          </li>
+        ))}
+      </ul>
       {claims.hasNextPage && (
         <Button
           variant="outline"
+          className="h-11 w-full lg:h-8 lg:w-auto"
           onClick={() => void claims.fetchNextPage()}
           disabled={claims.isFetchingNextPage}
         >

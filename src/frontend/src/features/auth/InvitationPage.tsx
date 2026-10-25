@@ -37,7 +37,7 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
   if (!preview.data) return null
 
   return (
-    <Card>
+    <Card className="mx-auto w-full max-w-sm lg:mt-10">
       <CardHeader>
         <CardTitle>
           <FormattedMessage id="auth.invitation.title" />
@@ -45,7 +45,7 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
-          <p>
+          <p className="[overflow-wrap:anywhere]">
             <FormattedMessage
               id="auth.invitation.joiningAs"
               values={{
@@ -60,6 +60,7 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
             </label>
             <Input
               id="displayName"
+              className="h-11 lg:h-9"
               autoComplete="name"
               required
               maxLength={60}
@@ -79,7 +80,7 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
               </AlertDescription>
             </Alert>
           )}
-          <Button type="submit" disabled={accept.isPending}>
+          <Button type="submit" className="h-11 w-full lg:h-9" disabled={accept.isPending}>
             <FormattedMessage id="auth.invitation.submit" />
           </Button>
         </form>

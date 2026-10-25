@@ -18,7 +18,7 @@ const DURATION_STEP_MINUTES = 15
 const START_STEP_SECONDS = 5 * 60
 
 const selectClass =
-  'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30'
+  'h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 lg:h-8 lg:text-sm dark:bg-input/30'
 
 const POST_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   below_minimum_lead_time: 'error.below_minimum_lead_time',
@@ -97,6 +97,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             </label>
             <Input
               id="startsAt"
+              className="h-11 lg:h-8"
               type="datetime-local"
               step={START_STEP_SECONDS}
               required
@@ -113,6 +114,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               </label>
               <Input
                 id="duration"
+                className="h-11 lg:h-8"
                 type="number"
                 required
                 min={DURATION_STEP_MINUTES}
@@ -129,6 +131,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               </label>
               <Input
                 id="children"
+                className="h-11 lg:h-8"
                 type="number"
                 required
                 min={1}
@@ -190,9 +193,10 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             <legend className="text-sm font-medium">
               <FormattedMessage id="requests.post.meals" />
             </legend>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex min-h-11 items-center gap-3 text-sm lg:min-h-0 lg:gap-2">
               <input
                 type="checkbox"
+                className="size-5 accent-primary lg:size-4"
                 checked={lunch}
                 onChange={(event) => {
                   setLunch(event.target.checked)
@@ -200,9 +204,10 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               />
               <FormattedMessage id="requests.post.meals.lunch" />
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex min-h-11 items-center gap-3 text-sm lg:min-h-0 lg:gap-2">
               <input
                 type="checkbox"
+                className="size-5 accent-primary lg:size-4"
                 checked={snack}
                 onChange={(event) => {
                   setSnack(event.target.checked)
@@ -210,9 +215,10 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               />
               <FormattedMessage id="requests.post.meals.snack" />
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex min-h-11 items-center gap-3 text-sm lg:min-h-0 lg:gap-2">
               <input
                 type="checkbox"
+                className="size-5 accent-primary lg:size-4"
                 checked={dinner}
                 onChange={(event) => {
                   setDinner(event.target.checked)
@@ -227,6 +233,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             </label>
             <Input
               id="area"
+              className="h-11 lg:h-8"
               required
               maxLength={100}
               value={area}
@@ -241,6 +248,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             </label>
             <Input
               id="address"
+              className="h-11 lg:h-8"
               required
               maxLength={200}
               value={address}
@@ -249,7 +257,10 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               }}
             />
           </div>
-          <p aria-live="polite" className="text-sm">
+          <p
+            aria-live="polite"
+            className="rounded-lg bg-accent px-3 py-2 text-sm text-accent-foreground"
+          >
             {cost === undefined ? (
               <FormattedMessage
                 id="requests.post.costUnknown"
@@ -294,7 +305,11 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               </AlertDescription>
             </Alert>
           )}
-          <Button type="submit" disabled={post.isPending || !detailsValid || cannotAfford}>
+          <Button
+            type="submit"
+            className="h-11 w-full lg:h-8 lg:w-auto"
+            disabled={post.isPending || !detailsValid || cannotAfford}
+          >
             <FormattedMessage id="requests.post.submit" />
           </Button>
         </form>

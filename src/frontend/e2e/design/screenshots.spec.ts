@@ -1,7 +1,7 @@
 import { mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { type Page } from '@playwright/test'
-import { expect, test } from '../fixtures.ts'
+import { BOOTSTRAP_ADMIN_EMAIL, expect, test } from '../fixtures.ts'
 import { FRONTEND_ROOT } from '../paths.ts'
 
 // The design check for agents (docs/design.md): every key screen in each Language, colour scheme and width,
@@ -21,6 +21,9 @@ const VIEWPORTS = [
 const SCREENS = [
   { name: 'credits', path: '/credits' },
   { name: 'open-requests', path: '/open-requests' },
+  { name: 'my-requests', path: '/requests' },
+  { name: 'my-claims', path: '/claims' },
+  { name: 'post-request', path: '/requests/new' },
 ]
 
 test.use({ timezoneId: 'UTC' })
@@ -36,37 +39,63 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   const requester = await browser.newContext({ timezoneId: 'UTC' })
   await backend.signIn(requester, requesterId)
   const requesterPage = await requester.newPage()
-  const requests = [
+  for (const request of [
     { start: '2026-03-02T10:00', minutes: '120', area: 'Riverside' },
     { start: '2026-03-03T18:30', minutes: '240', area: 'Hilltop Meadows' },
     { start: '2026-03-04T08:15', minutes: '90', area: 'Old Mill District' },
-  ]
-  for (const request of requests) {
-    await requesterPage.goto(`${backend.appUrl}/requests/new`)
-    await requesterPage.getByLabel(/start time/i).fill(request.start)
-    await requesterPage.getByLabel(/duration/i).fill(request.minutes)
-    await requesterPage.getByLabel(/^area/i).fill(request.area)
-    await requesterPage.getByLabel(/exact address/i).fill('12 River Rd')
-    await requesterPage.getByRole('button', { name: /post request/i }).click()
-    await expect(
-      requesterPage.getByRole('row', { name: new RegExp(request.area, 'i') }),
-    ).toBeVisible()
+  ]) {
+    await postRequest(requesterPage, backend.appUrl, request)
   }
   await requester.close()
 
+  // The viewer has posted one Request and cancelled another, and claimed one, so every list has some states.
+  const setupViewer = await browser.newContext({ timezoneId: 'UTC' })
+  await backend.signIn(setupViewer, viewerId)
+  const viewerPage = await setupViewer.newPage()
+  await postRequest(viewerPage, backend.appUrl, {
+    start: '2026-03-05T09:00',
+    minutes: '180',
+    area: 'Maple Court',
+  })
+  await postRequest(viewerPage, backend.appUrl, {
+    start: '2026-03-06T17:00',
+    minutes: '60',
+    area: 'Cedar Lane',
+  })
+  await viewerPage.getByRole('button', { name: /cancel the request in cedar lane/i }).click()
+  await expect(
+    viewerPage.getByRole('button', { name: /cancel the request in cedar lane/i }),
+  ).toHaveCount(0)
+  await viewerPage.goto(`${backend.appUrl}/open-requests`)
+  await viewerPage.getByRole('button', { name: /claim the request in riverside/i }).click()
+  await expect(
+    viewerPage.getByRole('button', { name: /claim the request in riverside/i }),
+  ).toHaveCount(0)
+  await setupViewer.close()
+
   // Signed out, so only in the default Language (the Language is kept on the Member).
-  for (const scheme of SCHEMES) {
-    for (const viewport of VIEWPORTS) {
-      const context = await browser.newContext({
-        colorScheme: scheme,
-        viewport,
-        timezoneId: 'UTC',
-      })
-      const page = await context.newPage()
-      await page.goto(`${backend.appUrl}/sign-in`)
-      await expect(page.getByLabel(/email address/i)).toBeVisible()
-      await capture(page, 'sign-in', `en-US-${scheme}-${viewport.name}`)
-      await context.close()
+  const invitation = await backend.latestLink(BOOTSTRAP_ADMIN_EMAIL)
+  const SIGNED_OUT = [
+    { name: 'sign-in', url: `${backend.appUrl}/sign-in`, ready: '#email' },
+    { name: 'invitation', url: invitation, ready: '#displayName' },
+    { name: 'invitation-unusable', url: `${backend.appUrl}/invitation?token=nope`, ready: null },
+    { name: 'sign-in-link-unusable', url: `${backend.appUrl}/sign-in/verify`, ready: null },
+  ]
+  for (const screen of SIGNED_OUT) {
+    for (const scheme of SCHEMES) {
+      for (const viewport of VIEWPORTS) {
+        const context = await browser.newContext({
+          colorScheme: scheme,
+          viewport,
+          timezoneId: 'UTC',
+        })
+        const page = await context.newPage()
+        await page.goto(screen.url)
+        if (screen.ready) await expect(page.locator(screen.ready)).toBeVisible()
+        else await expect(page.getByRole('alert')).toBeVisible()
+        await capture(page, screen.name, `en-US-${scheme}-${viewport.name}`)
+        await context.close()
+      }
     }
   }
 
@@ -92,8 +121,11 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
         const page = await context.newPage()
         for (const screen of SCREENS) {
           await page.goto(`${backend.appUrl}${screen.path}`)
-          await expect(page.getByRole('heading', { level: 2 })).toBeVisible()
-          await expect(page.getByRole('listitem').first()).toBeVisible()
+          await expect(
+            screen.name === 'post-request'
+              ? page.locator('#startsAt')
+              : page.getByRole('listitem').first(),
+          ).toBeVisible()
           await capture(page, screen.name, `${language.tag}-${scheme}-${viewport.name}`)
         }
         await context.close()
@@ -124,4 +156,20 @@ async function capture(page: Page, screen: string, variant: string) {
   await mkdir(path.join(OUTPUT, screen), { recursive: true })
   await page.screenshot({ path: path.join(OUTPUT, screen, `${variant}.png`) })
   await page.setViewportSize({ width, height })
+}
+
+async function postRequest(
+  page: Page,
+  appUrl: string,
+  request: { start: string; minutes: string; area: string },
+) {
+  await page.goto(`${appUrl}/requests/new`)
+  await page.getByLabel(/start time/i).fill(request.start)
+  await page.getByLabel(/duration/i).fill(request.minutes)
+  await page.getByLabel(/^area/i).fill(request.area)
+  await page.getByLabel(/exact address/i).fill('12 River Rd')
+  await page.getByRole('button', { name: /post request/i }).click()
+  await expect(
+    page.getByRole('listitem').filter({ hasText: new RegExp(request.area, 'i') }),
+  ).toBeVisible()
 }

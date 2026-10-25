@@ -19,7 +19,7 @@ test('a Member posts a Request, the cost goes into Escrow and it shows in My Req
   await expect(page.getByText('2.00 credits')).toBeVisible()
   await page.getByRole('button', { name: /post request/i }).click()
 
-  const row = page.getByRole('row', { name: /riverside/i })
+  const row = page.getByRole('listitem').filter({ hasText: /riverside/i })
   await expect(row).toContainText('Posted')
   await expect(row).toContainText('2.00')
   await expect(row).toContainText('12 River Rd')

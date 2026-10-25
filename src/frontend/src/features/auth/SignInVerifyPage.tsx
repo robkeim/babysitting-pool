@@ -36,7 +36,7 @@ export function SignInVerifyPage({ token, onSignedIn }: SignInVerifyPageProps) {
     )
   }
   return (
-    <p>
+    <p className="py-8 text-center text-muted-foreground">
       <FormattedMessage id="auth.verify.signingIn" />
     </p>
   )

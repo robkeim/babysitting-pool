@@ -8,11 +8,11 @@ export const Route = createFileRoute('/_authed/requests/')({
   component: function MyRequests() {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <PageHeader>
             <FormattedMessage id="requests.myRequests.title" />
           </PageHeader>
-          <Link to="/requests/new" className={buttonVariants()}>
+          <Link to="/requests/new" className={buttonVariants({ className: 'h-10 lg:h-8' })}>
             <FormattedMessage id="requests.myRequests.post" />
           </Link>
         </div>
