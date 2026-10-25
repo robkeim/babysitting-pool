@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Requests;
@@ -15,6 +17,8 @@ namespace BabysittingPool.Api;
 internal static class TestEndpoints
 {
     public const string Environment = "E2E";
+    public const string TokenSetting = "E2E:Token";
+    public const string TokenHeader = "X-E2E-Token";
 
     private static readonly DateTimeOffset InitialClock = new(2026, 3, 1, 9, 0, 0, TimeSpan.Zero);
 
@@ -23,6 +27,31 @@ internal static class TestEndpoints
     {
         services.AddSingleton<FakeTimeProvider>(new SettableClock(InitialClock));
         services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<FakeTimeProvider>());
+    }
+
+    /// <summary>
+    /// Production must not carry anything that can change who sees what: it stops if the E2E token is configured or
+    /// the host was pointed at the E2E environment through the other environment variable (ADR 0016).
+    /// </summary>
+    public static void RefuseE2EInProduction(this WebApplicationBuilder builder)
+    {
+        if (!builder.Environment.IsProduction())
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(builder.Configuration[TokenSetting]))
+        {
+            throw new InvalidOperationException($"{TokenSetting} must not be set in Production.");
+        }
+
+        foreach (var variable in new[] { "ASPNETCORE_ENVIRONMENT", "DOTNET_ENVIRONMENT" })
+        {
+            if (string.Equals(System.Environment.GetEnvironmentVariable(variable), Environment, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"{variable}={Environment} must not be present in Production.");
+            }
+        }
     }
 
     public static void MapTestEndpoints(this IEndpointRouteBuilder app)
@@ -34,6 +63,28 @@ internal static class TestEndpoints
         {
             group.MapGet($"/gated/{flag.Name}", () => Results.Ok()).RequireFeature(flag.Name);
         }
+
+        // Changes who sees what, so unlike the endpoints below it needs the token; without it the answer is 404.
+        group.MapPost("/feature-flags", async (
+            SetFeatureFlagRequest request, UpdateFeatureFlagHandler handler, CancellationToken cancellationToken) =>
+        {
+            var settings = new FeatureFlagSettings(
+                request.Enabled,
+                request.RolloutPercent ?? (request.Enabled ? 100 : 0),
+                request.AllowedMemberIds ?? [],
+                request.DeniedMemberIds ?? [],
+                request.RoleRollouts ?? []);
+            if (settings.InvalidField() is { } field)
+            {
+                return Problems.InvalidRequest(char.ToLowerInvariant(field[0]) + field[1..], "out_of_range");
+            }
+
+            return await handler.HandleAsync(new UpdateFeatureFlagCommand(request.Name, settings), cancellationToken) is { } view
+                ? Results.Ok(view)
+                : Problems.FeatureFlagNotFound();
+        })
+        .AddEndpointFilter(async (context, next) =>
+            HasToken(context.HttpContext) ? await next(context) : Results.NotFound());
 
         group.MapPost("/members", async (SeedMemberRequest request, IServiceProvider services, CancellationToken cancellationToken) =>
         {
@@ -77,6 +128,20 @@ internal static class TestEndpoints
         });
     }
 
+    private static bool HasToken(HttpContext context)
+    {
+        var expected = context.RequestServices.GetRequiredService<IConfiguration>()[TokenSetting];
+        var supplied = context.Request.Headers[TokenHeader].ToString();
+        if (string.IsNullOrEmpty(expected) || string.IsNullOrEmpty(supplied))
+        {
+            return false;
+        }
+
+        // Hashing first gives both sides the same length, which FixedTimeEquals needs and which hides the token's.
+        return CryptographicOperations.FixedTimeEquals(
+            SHA256.HashData(Encoding.UTF8.GetBytes(expected)), SHA256.HashData(Encoding.UTF8.GetBytes(supplied)));
+    }
+
     /// <summary>
     /// A fake clock that can also be set back. A worker's backend outlives its tests, and each test sets an absolute
     /// time at its start, which <see cref="FakeTimeProvider.SetUtcNow"/> refuses when it is earlier than the last test's.
@@ -89,6 +154,14 @@ internal static class TestEndpoints
 
         public void Set(DateTimeOffset now) => _shift = now - base.GetUtcNow();
     }
+
+    private sealed record SetFeatureFlagRequest(
+        string Name,
+        bool Enabled,
+        int? RolloutPercent,
+        List<Guid>? AllowedMemberIds,
+        List<Guid>? DeniedMemberIds,
+        List<RoleRollout>? RoleRollouts);
 
     private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits, string? Email, string? DisplayName);
 
