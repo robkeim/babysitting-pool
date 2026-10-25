@@ -17,6 +17,7 @@ import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as AuthedOpenRequestsRouteImport } from './routes/_authed/open-requests'
 import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
+import { Route as AuthedAdminFeatureFlagsRouteImport } from './routes/_authed/admin.feature-flags'
 import { Route as AuthedRequestsIndexRouteImport } from './routes/_authed/requests/index'
 import { Route as AuthedRequestsNewRouteImport } from './routes/_authed/requests/new'
 
@@ -59,6 +60,11 @@ const SignInVerifyRoute = SignInVerifyRouteImport.update({
   path: '/sign-in/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedAdminFeatureFlagsRoute = AuthedAdminFeatureFlagsRouteImport.update({
+  id: '/admin/feature-flags',
+  path: '/admin/feature-flags',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedRequestsIndexRoute = AuthedRequestsIndexRouteImport.update({
   id: '/requests/',
   path: '/requests/',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
+  '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
   '/requests/new': typeof AuthedRequestsNewRoute
   '/requests/': typeof AuthedRequestsIndexRoute
 }
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in': typeof SignInIndexRoute
+  '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
   '/requests/new': typeof AuthedRequestsNewRoute
   '/requests': typeof AuthedRequestsIndexRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authed/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
+  '/_authed/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
   '/_authed/requests/new': typeof AuthedRequestsNewRoute
   '/_authed/requests/': typeof AuthedRequestsIndexRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/open-requests'
     | '/sign-in/verify'
     | '/sign-in/'
+    | '/admin/feature-flags'
     | '/requests/new'
     | '/requests/'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/open-requests'
     | '/sign-in/verify'
     | '/sign-in'
+    | '/admin/feature-flags'
     | '/requests/new'
     | '/requests'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authed/open-requests'
     | '/sign-in/verify'
     | '/sign-in/'
+    | '/_authed/admin/feature-flags'
     | '/_authed/requests/new'
     | '/_authed/requests/'
   fileRoutesById: FileRoutesById
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/admin/feature-flags': {
+      id: '/_authed/admin/feature-flags'
+      path: '/admin/feature-flags'
+      fullPath: '/admin/feature-flags'
+      preLoaderRoute: typeof AuthedAdminFeatureFlagsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/requests/': {
       id: '/_authed/requests/'
       path: '/requests'
@@ -229,6 +248,7 @@ interface AuthedRouteChildren {
   AuthedClaimsRoute: typeof AuthedClaimsRoute
   AuthedCreditsRoute: typeof AuthedCreditsRoute
   AuthedOpenRequestsRoute: typeof AuthedOpenRequestsRoute
+  AuthedAdminFeatureFlagsRoute: typeof AuthedAdminFeatureFlagsRoute
   AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
   AuthedRequestsIndexRoute: typeof AuthedRequestsIndexRoute
 }
@@ -237,6 +257,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedClaimsRoute: AuthedClaimsRoute,
   AuthedCreditsRoute: AuthedCreditsRoute,
   AuthedOpenRequestsRoute: AuthedOpenRequestsRoute,
+  AuthedAdminFeatureFlagsRoute: AuthedAdminFeatureFlagsRoute,
   AuthedRequestsNewRoute: AuthedRequestsNewRoute,
   AuthedRequestsIndexRoute: AuthedRequestsIndexRoute,
 }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet } from '@tanstack/react-router'
 import { FormattedMessage, useIntl } from 'react-intl'
-import { RequireMember } from '@/features/auth'
+import { RequireMember, useMe } from '@/features/auth'
 
 export const Route = createFileRoute('/_authed')({
   component: AuthedLayout,
@@ -8,6 +8,7 @@ export const Route = createFileRoute('/_authed')({
 
 function AuthedLayout() {
   const intl = useIntl()
+  const me = useMe()
   return (
     <RequireMember signedOut={<Navigate to="/sign-in" />}>
       <nav
@@ -26,6 +27,11 @@ function AuthedLayout() {
         <Link to="/claims" activeProps={{ className: 'underline' }}>
           <FormattedMessage id="requests.claims.title" />
         </Link>
+        {me.data?.isAdmin && (
+          <Link to="/admin/feature-flags" activeProps={{ className: 'underline' }}>
+            <FormattedMessage id="common.nav.flags" />
+          </Link>
+        )}
       </nav>
       <Outlet />
     </RequireMember>
