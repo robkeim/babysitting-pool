@@ -31,5 +31,5 @@ Time-dependent frontend code is display formatting only (countdown labels, co-op
 - Test-only endpoints, registered only in `E2E` (an API test asserts 404 in Production): set the server clock, read the email outbox, seed state through application code.
 - Each test sets the clock to an absolute time at its start and creates uniquely named Members. Browser time uses `page.clock`, kept in step with the server clock.
 - Sign-in flows read the magic link from the fake outbox.
-- Journeys, one file each: Invitation to account (10.0 Credits); post, claim and complete a Request with balances on both sides; cancel with refund; claim race (two browser contexts); Demurrage after a time jump.
+- Journeys, one file each: Invitation to account (10.0 Credits); Admin invites, re-sends and the person joins (own stack via the `ownBackend` fixture, because it consumes the bootstrap Admin Invitation that the shared stack keeps for the sign-in journey); post, claim and complete a Request with balances on both sides; cancel with refund; claim race (two browser contexts); Demurrage after a time jump.
 - Traces kept on failure. If the suite exceeds about 5 minutes, move slow journeys to nightly.

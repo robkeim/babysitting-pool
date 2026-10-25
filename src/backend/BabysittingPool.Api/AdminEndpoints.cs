@@ -1,9 +1,11 @@
 using BabysittingPool.Application;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Flags;
+using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Offboarding;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Identity;
 
 namespace BabysittingPool.Api;
 
@@ -72,6 +74,57 @@ internal static class AdminEndpoints
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
 
+        group.MapGet("/invitations", async (ListInvitationsHandler handler, CancellationToken cancellationToken) =>
+            Results.Ok(new Page<InvitationView>(await handler.HandleAsync(cancellationToken), null)))
+        .WithName("ListInvitations")
+        .Produces<Page<InvitationView>>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        // Emails the new Member's Invitation link (spec §2A).
+        group.MapPost("/invitations", async (
+            InviteMemberRequest request, InviteMemberHandler handler, CancellationToken cancellationToken) =>
+        {
+            if (!EmailAddress.TryParse(request.Email, out var email))
+            {
+                return Problems.InvalidRequest("email", "invalid");
+            }
+
+            var result = await handler.HandleAsync(new InviteMemberCommand(email), cancellationToken);
+            return result.Outcome switch
+            {
+                InviteMemberOutcome.AlreadyAMember => Problems.AlreadyAMember(),
+                InviteMemberOutcome.AlreadyInvited => Problems.InvitationAlreadySent(),
+                _ => Results.Created($"/api/admin/invitations/{result.Invitation!.Id}", result.Invitation),
+            };
+        })
+        .WithName("InviteMember")
+        .Produces<InvitationView>(StatusCodes.Status201Created)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        // A new link and a fresh validity for a pending or expired Invitation; the old link stops working.
+        group.MapPost("/invitations/{id:guid}/resend", async (
+            Guid id, ResendInvitationHandler handler, CancellationToken cancellationToken) =>
+        {
+            var result = await handler.HandleAsync(new ResendInvitationCommand(id), cancellationToken);
+            return result.Outcome switch
+            {
+                ResendInvitationOutcome.NotFound => Problems.InvitationNotFound(),
+                ResendInvitationOutcome.AlreadyAccepted => Problems.InvitationAlreadyAccepted(),
+                ResendInvitationOutcome.AlreadyAMember => Problems.AlreadyAMember(),
+                _ => Results.Ok(result.Invitation),
+            };
+        })
+        .WithName("ResendInvitation")
+        .Produces<InvitationView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
         group.MapGet("/feature-flags", async (ListFeatureFlagsHandler handler, CancellationToken cancellationToken) =>
             Results.Ok(new Page<FeatureFlagView>(await handler.HandleAsync(cancellationToken), null)))
         .WithName("ListFeatureFlags")
@@ -105,6 +158,8 @@ internal static class AdminEndpoints
         .ProducesProblem(StatusCodes.Status403Forbidden)
         .ProducesProblem(StatusCodes.Status404NotFound);
     }
+
+    private sealed record InviteMemberRequest(string? Email);
 
     private sealed record UpdateFeatureFlagRequest(
         string Name,

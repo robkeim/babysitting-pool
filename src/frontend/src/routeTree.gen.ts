@@ -18,6 +18,7 @@ import { Route as AuthedOpenRequestsRouteImport } from './routes/_authed/open-re
 import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
 import { Route as AuthedAdminFeatureFlagsRouteImport } from './routes/_authed/admin.feature-flags'
+import { Route as AuthedAdminInvitationsRouteImport } from './routes/_authed/admin.invitations'
 import { Route as AuthedRequestsIndexRouteImport } from './routes/_authed/requests/index'
 import { Route as AuthedRequestsNewRouteImport } from './routes/_authed/requests/new'
 
@@ -65,6 +66,11 @@ const AuthedAdminFeatureFlagsRoute = AuthedAdminFeatureFlagsRouteImport.update({
   path: '/admin/feature-flags',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminInvitationsRoute = AuthedAdminInvitationsRouteImport.update({
+  id: '/admin/invitations',
+  path: '/admin/invitations',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedRequestsIndexRoute = AuthedRequestsIndexRouteImport.update({
   id: '/requests/',
   path: '/requests/',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
   '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
+  '/admin/invitations': typeof AuthedAdminInvitationsRoute
   '/requests/new': typeof AuthedRequestsNewRoute
   '/requests/': typeof AuthedRequestsIndexRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in': typeof SignInIndexRoute
   '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
+  '/admin/invitations': typeof AuthedAdminInvitationsRoute
   '/requests/new': typeof AuthedRequestsNewRoute
   '/requests': typeof AuthedRequestsIndexRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
   '/_authed/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
+  '/_authed/admin/invitations': typeof AuthedAdminInvitationsRoute
   '/_authed/requests/new': typeof AuthedRequestsNewRoute
   '/_authed/requests/': typeof AuthedRequestsIndexRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/sign-in/verify'
     | '/sign-in/'
     | '/admin/feature-flags'
+    | '/admin/invitations'
     | '/requests/new'
     | '/requests/'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/sign-in/verify'
     | '/sign-in'
     | '/admin/feature-flags'
+    | '/admin/invitations'
     | '/requests/new'
     | '/requests'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/sign-in/verify'
     | '/sign-in/'
     | '/_authed/admin/feature-flags'
+    | '/_authed/admin/invitations'
     | '/_authed/requests/new'
     | '/_authed/requests/'
   fileRoutesById: FileRoutesById
@@ -227,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAdminFeatureFlagsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/invitations': {
+      id: '/_authed/admin/invitations'
+      path: '/admin/invitations'
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AuthedAdminInvitationsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/requests/': {
       id: '/_authed/requests/'
       path: '/requests'
@@ -249,6 +268,7 @@ interface AuthedRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRoute
   AuthedOpenRequestsRoute: typeof AuthedOpenRequestsRoute
   AuthedAdminFeatureFlagsRoute: typeof AuthedAdminFeatureFlagsRoute
+  AuthedAdminInvitationsRoute: typeof AuthedAdminInvitationsRoute
   AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
   AuthedRequestsIndexRoute: typeof AuthedRequestsIndexRoute
 }
@@ -258,6 +278,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRoute,
   AuthedOpenRequestsRoute: AuthedOpenRequestsRoute,
   AuthedAdminFeatureFlagsRoute: AuthedAdminFeatureFlagsRoute,
+  AuthedAdminInvitationsRoute: AuthedAdminInvitationsRoute,
   AuthedRequestsNewRoute: AuthedRequestsNewRoute,
   AuthedRequestsIndexRoute: AuthedRequestsIndexRoute,
 }

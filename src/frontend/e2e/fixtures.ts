@@ -72,68 +72,97 @@ async function post(url: string, body: unknown, method = 'POST'): Promise<Respon
   return response
 }
 
-export const test = base.extend<object, { backend: Backend }>({
+/** Starts a private stack and returns it with the function that stops it and removes its data. */
+async function launchBackend(): Promise<{ backend: Backend; dispose: () => Promise<void> }> {
+  const dataDirectory = await mkdtemp(path.join(tmpdir(), 'babysitting-e2e-'))
+  const apiPort = await freePort()
+  const appPort = await freePort()
+  const apiUrl = `http://127.0.0.1:${apiPort}`
+  const appUrl = `http://127.0.0.1:${appPort}`
+
+  const api = spawn('dotnet', [API_DLL], {
+    cwd: API_PROJECT,
+    stdio: ['ignore', 'ignore', 'inherit'],
+    env: {
+      ...process.env,
+      ASPNETCORE_ENVIRONMENT: 'E2E',
+      ASPNETCORE_URLS: apiUrl,
+      App__BaseUrl: appUrl,
+      Bootstrap__AdminEmail: BOOTSTRAP_ADMIN_EMAIL,
+      ConnectionStrings__Default: `Data Source=${path.join(dataDirectory, 'babysitting.db')}`,
+    },
+  })
+  const spa = spawn(
+    path.join(FRONTEND_ROOT, 'node_modules/.bin/vite'),
+    ['--host', '127.0.0.1', '--port', String(appPort), '--strictPort'],
+    { cwd: FRONTEND_ROOT, stdio: 'inherit', env: { ...process.env, E2E_API_URL: apiUrl } },
+  )
+  const dispose = async () => {
+    await Promise.all([stop(api), stop(spa)])
+    await rm(dataDirectory, { recursive: true, force: true })
+  }
+
+  try {
+    await Promise.all([waitFor(`${apiUrl}/health`, api, 'API'), waitFor(appUrl, spa, 'SPA')])
+  } catch (error) {
+    await dispose()
+    throw error
+  }
+  const backend: Backend = {
+    appUrl,
+    apiUrl,
+    async seedMember(grantsQuarterCredits) {
+      const response = await post(`${apiUrl}/api/test/members`, { grantsQuarterCredits })
+      return ((await response.json()) as { memberId: string }).memberId
+    },
+    async latestLink(email) {
+      const response = await fetch(`${apiUrl}/api/dev/outbox?to=${encodeURIComponent(email)}`)
+      const messages = (await response.json()) as { link: string }[]
+      const latest = messages.at(-1)
+      if (!latest) throw new Error(`No email was sent to ${email}`)
+      return latest.link
+    },
+    async signIn(context, memberId) {
+      const response = await post(`${apiUrl}/api/test/sessions`, { memberId })
+      const { token } = (await response.json()) as { token: string }
+      await context.addCookies([{ name: 'session', value: token, url: appUrl }])
+    },
+    async setClock(now) {
+      await post(`${apiUrl}/api/test/clock`, { now }, 'PUT')
+    },
+    async settle() {
+      await post(`${apiUrl}/api/test/settle`, {})
+    },
+  }
+  return { backend, dispose }
+}
+
+export const test = base.extend<{ ownBackend: Backend }, { backend: Backend }>({
   backend: [
     // eslint-disable-next-line no-empty-pattern -- Playwright requires a destructuring pattern here
     async ({}, provide) => {
-      const dataDirectory = await mkdtemp(path.join(tmpdir(), 'babysitting-e2e-'))
-      const apiPort = await freePort()
-      const appPort = await freePort()
-      const apiUrl = `http://127.0.0.1:${apiPort}`
-      const appUrl = `http://127.0.0.1:${appPort}`
-
-      const api = spawn('dotnet', [API_DLL], {
-        cwd: API_PROJECT,
-        stdio: ['ignore', 'ignore', 'inherit'],
-        env: {
-          ...process.env,
-          ASPNETCORE_ENVIRONMENT: 'E2E',
-          ASPNETCORE_URLS: apiUrl,
-          App__BaseUrl: appUrl,
-          Bootstrap__AdminEmail: BOOTSTRAP_ADMIN_EMAIL,
-          ConnectionStrings__Default: `Data Source=${path.join(dataDirectory, 'babysitting.db')}`,
-        },
-      })
-      const spa = spawn(
-        path.join(FRONTEND_ROOT, 'node_modules/.bin/vite'),
-        ['--host', '127.0.0.1', '--port', String(appPort), '--strictPort'],
-        { cwd: FRONTEND_ROOT, stdio: 'inherit', env: { ...process.env, E2E_API_URL: apiUrl } },
-      )
-
+      const { backend, dispose } = await launchBackend()
       try {
-        await Promise.all([waitFor(`${apiUrl}/health`, api, 'API'), waitFor(appUrl, spa, 'SPA')])
-        await provide({
-          appUrl,
-          apiUrl,
-          async seedMember(grantsQuarterCredits) {
-            const response = await post(`${apiUrl}/api/test/members`, { grantsQuarterCredits })
-            return ((await response.json()) as { memberId: string }).memberId
-          },
-          async latestLink(email) {
-            const response = await fetch(`${apiUrl}/api/dev/outbox?to=${encodeURIComponent(email)}`)
-            const messages = (await response.json()) as { link: string }[]
-            const latest = messages.at(-1)
-            if (!latest) throw new Error(`No email was sent to ${email}`)
-            return latest.link
-          },
-          async signIn(context, memberId) {
-            const response = await post(`${apiUrl}/api/test/sessions`, { memberId })
-            const { token } = (await response.json()) as { token: string }
-            await context.addCookies([{ name: 'session', value: token, url: appUrl }])
-          },
-          async setClock(now) {
-            await post(`${apiUrl}/api/test/clock`, { now }, 'PUT')
-          },
-          async settle() {
-            await post(`${apiUrl}/api/test/settle`, {})
-          },
-        })
+        await provide(backend)
       } finally {
-        await Promise.all([stop(api), stop(spa)])
-        await rm(dataDirectory, { recursive: true, force: true })
+        await dispose()
       }
     },
     { scope: 'worker', timeout: 90_000 },
+  ],
+
+  // For a journey that consumes the bootstrap Admin Invitation, which the worker's shared stack must keep.
+  ownBackend: [
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a destructuring pattern here
+    async ({}, provide) => {
+      const { backend, dispose } = await launchBackend()
+      try {
+        await provide(backend)
+      } finally {
+        await dispose()
+      }
+    },
+    { timeout: 90_000 },
   ],
 
   baseURL: async ({ backend }, provide) => {

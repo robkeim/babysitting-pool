@@ -1,3 +1,5 @@
+using BabysittingPool.Domain.Credits;
+
 namespace BabysittingPool.Domain.Identity;
 
 /// <summary>
@@ -40,4 +42,23 @@ public sealed class Invitation
         new(id, email, isAdmin, secretHash, issuedAt, expiresAt, consumedAt);
 
     public bool IsUsableAt(DateTime now) => ConsumedAt is null && now < ExpiresAt;
+
+    public InvitationStatus StatusAt(DateTime now) =>
+        ConsumedAt is not null ? InvitationStatus.Accepted : now < ExpiresAt ? InvitationStatus.Pending : InvitationStatus.Expired;
+
+    /// <summary>
+    /// The same Invitation with a fresh secret and validity, for the Admin to re-send. The old link stops working.
+    /// Throws if the Invitation was already accepted.
+    /// </summary>
+    public Invitation Reissue(string secretHash, DateTime now, TimeSpan lifetime) =>
+        ConsumedAt is null
+            ? new(Id, Email, IsAdmin, secretHash, now, now + lifetime, null)
+            : throw new DomainException("The Invitation was already accepted.", "invitation_already_accepted");
+}
+
+public enum InvitationStatus
+{
+    Pending,
+    Accepted,
+    Expired,
 }

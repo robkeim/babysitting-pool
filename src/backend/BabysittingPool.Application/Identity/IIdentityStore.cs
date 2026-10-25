@@ -30,6 +30,20 @@ public interface IIdentityStore
 
     Task<Invitation?> FindInvitationAsync(string secretHash, CancellationToken cancellationToken);
 
+    Task<Invitation?> FindInvitationByIdAsync(Guid invitationId, CancellationToken cancellationToken);
+
+    /// <summary>An Invitation to this address that was never accepted, whether still valid or expired.</summary>
+    Task<Invitation?> FindUnacceptedInvitationAsync(EmailAddress email, CancellationToken cancellationToken);
+
+    /// <summary>Every Invitation, newest first.</summary>
+    Task<IReadOnlyList<Invitation>> ListInvitationsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Replaces the secret and validity of an Invitation that has not been accepted. Returns false, changing
+    /// nothing, if it was accepted meanwhile.
+    /// </summary>
+    Task<bool> TryReissueInvitationAsync(Invitation reissued, CancellationToken cancellationToken);
+
     /// <summary>
     /// In one transaction: consumes the Invitation, adds the Member with a Credit Account holding the Starting
     /// Balance, and adds the Session. Returns false, changing nothing, if the Invitation was consumed meanwhile

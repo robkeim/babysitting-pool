@@ -214,4 +214,58 @@ public class AdminEndpointTests : IDisposable
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task Invitations_are_forbidden_to_a_member_who_is_not_the_admin()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        (await client.GetAsync("/api/admin/invitations")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await client.PostAsJsonAsync("/api/admin/invitations", new { email = "ada@example.com" }))
+            .StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await client.PostAsync($"/api/admin/invitations/{Guid.NewGuid()}/resend", null))
+            .StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task The_admin_invites_lists_and_resends()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        using var client = _factory.CreateMemberClient(admin);
+
+        var invited = await client.PostAsJsonAsync("/api/admin/invitations", new { email = " Ada@Example.com " });
+
+        invited.StatusCode.Should().Be(HttpStatusCode.Created);
+        var invitation = await invited.Content.ReadFromJsonAsync<JsonElement>();
+        invitation.GetProperty("email").GetString().Should().Be("ada@example.com");
+        invitation.GetProperty("status").GetString().Should().Be("Pending");
+        var id = invitation.GetProperty("id").GetGuid();
+
+        var list = await client.GetFromJsonAsync<JsonElement>("/api/admin/invitations");
+        list.GetProperty("items").EnumerateArray().Select(i => i.GetProperty("id").GetGuid()).Should().Equal(id);
+
+        var resent = await client.PostAsync($"/api/admin/invitations/{id}/resend", null);
+
+        resent.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Inviting_rejects_a_bad_address_a_duplicate_and_resending_an_unknown_invitation()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        using var client = _factory.CreateMemberClient(admin);
+
+        (await client.PostAsJsonAsync("/api/admin/invitations", new { email = "nope" }))
+            .StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await client.PostAsJsonAsync("/api/admin/invitations", new { email = "ada@example.com" })).EnsureSuccessStatusCode();
+        var duplicate = await client.PostAsJsonAsync("/api/admin/invitations", new { email = "ada@example.com" });
+        duplicate.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await duplicate.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString()
+            .Should().Be("invitation_already_sent");
+        (await client.PostAsync($"/api/admin/invitations/{Guid.NewGuid()}/resend", null))
+            .StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

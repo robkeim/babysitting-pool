@@ -1,0 +1,1 @@
+export { InvitationsAdminPage } from './InvitationsAdminPage'
