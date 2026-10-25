@@ -18,7 +18,8 @@ Extends credit-engine.md §2A (read it first). Decisions and rationale: [ADR 001
 
 1. **Invited person:** opens `/invitation?token=…` → sees "Join the co-op as <email>" and a display name field → submits → lands on their credits page with 10.0 credits, signed in. An invalid, used or expired link shows a message offering no way forward other than asking the Admin for a new Invitation.
 2. **Returning Member:** opens `/sign-in` → enters their email → sees "If that address belongs to a Member, we've sent a link" (always) → opens `/sign-in/verify?token=…` from the email → is signed in and lands on their credits page. An invalid, used or expired link shows a message with a link back to `/sign-in`.
-3. **Signed-out visitor** opening any page that needs a Member is sent to `/sign-in`. A signed-in Member can sign out from the header.
+3. **Admin invites:** opens Invitations (Admin only) → sees every Invitation, newest first, as pending, accepted or expired → enters an email address to send a new Invitation, or re-sends a pending or expired one. A re-send gives the same Invitation a new link and a fresh 7 days, and the old link stops working. An accepted Invitation cannot be re-sent. An address that is already a Member, or that has an Invitation not yet accepted, cannot be invited again (re-send that one instead).
+4. **Signed-out visitor** opening any page that needs a Member is sent to `/sign-in`. A signed-in Member can sign out from the header.
 
 The link pages only submit the token when the page loads or the form is submitted (a POST), so email scanners that fetch URLs do not consume a link.
 
@@ -31,6 +32,9 @@ The link pages only submit the token when the page loads or the form is submitte
 | `DELETE /api/auth/sessions/current` | `204`, cookie cleared |
 | `POST /api/invitations/preview` `{ token }` | `200 { email }`; `422 invitation_invalid` |
 | `POST /api/invitations/accept` `{ token, displayName }` | `204` + session cookie; `400` bad display name; `422 invitation_invalid` |
+| `GET /api/admin/invitations` (Admin) | `200 { items, nextCursor }`, each `{ id, email, isAdmin, status: Pending\|Accepted\|Expired, issuedAt, expiresAt, acceptedAt }`, newest first; `nextCursor` is always null |
+| `POST /api/admin/invitations` `{ email }` (Admin) | `201` with the Invitation, link emailed; `400` bad email; `422 already_a_member`, `422 invitation_already_sent` |
+| `POST /api/admin/invitations/{id}/resend` (Admin) | `200` with the Invitation; `404 invitation_not_found`; `422 invitation_already_accepted`, `422 already_a_member` |
 | `GET /api/me` | `200 { memberId, email, displayName, isAdmin }`; `401 unauthenticated` |
 
 State-changing calls need the `X-Requested-With` header (ADR 0006).
@@ -39,4 +43,4 @@ State-changing calls need the `X-Requested-With` header (ADR 0006).
 
 - Development and E2E: the fake outbox logs each message, including the link, and is readable at `GET /api/dev/outbox`; the Admin's sign-in link is logged at startup. Development seeds one Admin and three Members (balances 10.0, 0.0, 25.5) through the application layer, idempotently.
 - E2E only: `POST /api/test/sessions { memberId }` returns a session token for the cookie.
-- Not in v1: Admin UI to invite others and re-send (#45), Offboarding UI (#45; the API is `POST /api/admin/members/{id}/offboard`), a production email provider (#23).
+- Not in v1: Offboarding UI (#45; the API is `POST /api/admin/members/{id}/offboard`), a production email provider (#23).

@@ -71,12 +71,40 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Invitation?> FindInvitationAsync(string secretHash, CancellationToken cancellationToken)
+    public async Task<Invitation?> FindInvitationAsync(string secretHash, CancellationToken cancellationToken) =>
+        ToDomain(await db.Invitations.AsNoTracking().SingleOrDefaultAsync(i => i.SecretHash == secretHash, cancellationToken));
+
+    public async Task<Invitation?> FindInvitationByIdAsync(Guid invitationId, CancellationToken cancellationToken) =>
+        ToDomain(await db.Invitations.AsNoTracking().SingleOrDefaultAsync(i => i.Id == invitationId, cancellationToken));
+
+    public async Task<Invitation?> FindUnacceptedInvitationAsync(EmailAddress email, CancellationToken cancellationToken) =>
+        ToDomain(await db.Invitations.AsNoTracking()
+            .Where(i => i.Email == email.Value && i.ConsumedAt == null)
+            .OrderByDescending(i => i.IssuedAt)
+            .FirstOrDefaultAsync(cancellationToken));
+
+    public async Task<IReadOnlyList<Invitation>> ListInvitationsAsync(CancellationToken cancellationToken)
     {
-        var r = await db.Invitations.AsNoTracking().SingleOrDefaultAsync(i => i.SecretHash == secretHash, cancellationToken);
-        return r is null
-            ? null
-            : Invitation.Restore(r.Id, EmailAddress.Restore(r.Email), r.IsAdmin, r.SecretHash, r.IssuedAt, r.ExpiresAt, r.ConsumedAt);
+        var records = await db.Invitations.AsNoTracking()
+            .OrderByDescending(i => i.IssuedAt).ThenBy(i => i.Id)
+            .ToListAsync(cancellationToken);
+        return records.Select(r => ToDomain(r)!).ToList();
+    }
+
+    public async Task<bool> TryReissueInvitationAsync(Invitation reissued, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(reissued);
+        var record = await db.Invitations.SingleAsync(i => i.Id == reissued.Id, cancellationToken);
+        if (record.ConsumedAt is not null)
+        {
+            return false;
+        }
+
+        record.SecretHash = reissued.SecretHash;
+        record.IssuedAt = reissued.IssuedAt;
+        record.ExpiresAt = reissued.ExpiresAt;
+        record.Version++;
+        return await TrySaveAsync(cancellationToken);
     }
 
     public async Task<bool> TryAcceptInvitationAsync(
@@ -189,6 +217,10 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
             return false;
         }
     }
+
+    private static Invitation? ToDomain(InvitationRecord? r) => r is null
+        ? null
+        : Invitation.Restore(r.Id, EmailAddress.Restore(r.Email), r.IsAdmin, r.SecretHash, r.IssuedAt, r.ExpiresAt, r.ConsumedAt);
 
     private static Member ToDomain(MemberRecord r) => Member.Restore(
         r.Id, EmailAddress.Restore(r.Email), DisplayName.Restore(r.DisplayName), Language.Restore(r.Language), r.IsAdmin, r.CreatedAt, r.ClosedAt);

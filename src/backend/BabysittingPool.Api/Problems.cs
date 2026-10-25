@@ -17,6 +17,21 @@ internal static class Problems
     public static IResult InvitationInvalid() =>
         Problem(StatusCodes.Status422UnprocessableEntity, "invitation_invalid", "The Invitation is unknown, used or expired.");
 
+    public static IResult InvitationNotFound() =>
+        Problem(StatusCodes.Status404NotFound, "invitation_not_found", "There is no such Invitation.");
+
+    public static IResult InvitationAlreadyAccepted() =>
+        Problem(StatusCodes.Status422UnprocessableEntity, "invitation_already_accepted", "The Invitation was already accepted.");
+
+    public static IResult InvitationAlreadySent() =>
+        Problem(
+            StatusCodes.Status422UnprocessableEntity,
+            "invitation_already_sent",
+            "This address already has an Invitation that was not accepted; re-send it instead.");
+
+    public static IResult AlreadyAMember() =>
+        Problem(StatusCodes.Status422UnprocessableEntity, "already_a_member", "This address already belongs to a Member.");
+
     public static IResult SignInLinkInvalid() =>
         Problem(StatusCodes.Status422UnprocessableEntity, "sign_in_link_invalid", "The sign-in link is unknown, used or expired.");
 
