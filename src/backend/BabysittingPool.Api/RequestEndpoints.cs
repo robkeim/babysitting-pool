@@ -1,3 +1,4 @@
+using BabysittingPool.Application;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
@@ -41,7 +42,8 @@ internal static class RequestEndpoints
 
         app.MapGet("/api/me/requests", async (
             HttpContext context,
-            ListMyRequestsHandler handler,
+            IRequestReader reader,
+            TimeProvider clock,
             string? cursor,
             int? limit,
             CancellationToken cancellationToken) =>
@@ -50,7 +52,7 @@ internal static class RequestEndpoints
 
             try
             {
-                return Results.Ok(await handler.HandleAsync(new ListMyRequestsQuery(member.MemberId, cursor, limit), cancellationToken));
+                return Results.Ok(await reader.ListByRequesterAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
             }
             catch (InvalidCursorException)
             {
@@ -65,7 +67,8 @@ internal static class RequestEndpoints
 
         app.MapGet("/api/requests/open", async (
             HttpContext context,
-            ListOpenRequestsHandler handler,
+            IRequestReader reader,
+            TimeProvider clock,
             string? cursor,
             int? limit,
             CancellationToken cancellationToken) =>
@@ -74,7 +77,7 @@ internal static class RequestEndpoints
 
             try
             {
-                return Results.Ok(await handler.HandleAsync(new ListOpenRequestsQuery(member.MemberId, cursor, limit), cancellationToken));
+                return Results.Ok(await reader.ListOpenAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
             }
             catch (InvalidCursorException)
             {
@@ -89,7 +92,8 @@ internal static class RequestEndpoints
 
         app.MapGet("/api/me/claims", async (
             HttpContext context,
-            ListMyClaimsHandler handler,
+            IRequestReader reader,
+            TimeProvider clock,
             string? cursor,
             int? limit,
             CancellationToken cancellationToken) =>
@@ -98,7 +102,7 @@ internal static class RequestEndpoints
 
             try
             {
-                return Results.Ok(await handler.HandleAsync(new ListMyClaimsQuery(member.MemberId, cursor, limit), cancellationToken));
+                return Results.Ok(await reader.ListClaimedByAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
             }
             catch (InvalidCursorException)
             {

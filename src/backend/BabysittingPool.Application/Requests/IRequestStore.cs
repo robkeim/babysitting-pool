@@ -57,20 +57,26 @@ public interface IRequestStore
 /// <summary>Read port: queries project straight from the database (ADR 0002).</summary>
 public interface IRequestReader
 {
-    /// <summary>The Requester's Requests, newest posted first, starting after <paramref name="after"/>.</summary>
-    Task<IReadOnlyList<RequestRead>> ListByRequesterAsync(
-        Guid requesterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
+    /// <summary>
+    /// The Requester's Requests with each one's state at <paramref name="now"/>, newest posted first, one page as
+    /// <paramref name="page"/> asks (spec §4).
+    /// </summary>
+    Task<Page<RequestView>> ListByRequesterAsync(
+        Guid requesterId, DateTime now, PageRequest page, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Posted Requests still before their Claim Cutoff at <paramref name="now"/>, other than the Member's own,
-    /// earliest start first, starting after <paramref name="after"/>.
+    /// "Open Requests" (spec §4.4, §6): Posted Requests still before their Claim Cutoff at <paramref name="now"/>,
+    /// other than the Member's own, earliest start first, rough area only.
     /// </summary>
-    Task<IReadOnlyList<RequestRead>> ListOpenAsync(
-        Guid excludeRequesterId, DateTime now, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
+    Task<Page<OpenRequestView>> ListOpenAsync(
+        Guid excludeRequesterId, DateTime now, PageRequest page, CancellationToken cancellationToken);
 
-    /// <summary>The Requests the Member claimed as Sitter, latest start first, starting after <paramref name="after"/>.</summary>
-    Task<IReadOnlyList<RequestRead>> ListClaimedByAsync(
-        Guid sitterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken);
+    /// <summary>
+    /// The Requests the Member claimed as Sitter, latest start first, exact address included: the Sitter holds the
+    /// claim (spec §4.6). A Request the Sitter withdrew from has no Sitter any more, so it drops off the list.
+    /// </summary>
+    Task<Page<RequestView>> ListClaimedByAsync(
+        Guid sitterId, DateTime now, PageRequest page, CancellationToken cancellationToken);
 
     /// <summary>The Posted Requests whose Claim Cutoff has been reached at <paramref name="now"/>.</summary>
     Task<IReadOnlyList<Guid>> ListDueForExpiryAsync(DateTime now, CancellationToken cancellationToken);

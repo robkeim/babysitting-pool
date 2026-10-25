@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using BabysittingPool.Application;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
@@ -168,8 +169,8 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
         var other = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
 
         await using var scope = _database.CreateScope();
-        var open = await scope.ServiceProvider.GetRequiredService<ListOpenRequestsHandler>()
-            .HandleAsync(new ListOpenRequestsQuery(other, null, null), default);
+        var open = await scope.ServiceProvider.GetRequiredService<IRequestReader>()
+            .ListOpenAsync(other, _database.Clock.GetUtcNow().UtcDateTime, PageRequest.From(null, null), default);
 
         open.Items.Select(r => r.Id).Should().Equal(request.Id);
     }

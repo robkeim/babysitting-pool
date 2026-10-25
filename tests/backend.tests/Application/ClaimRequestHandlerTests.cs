@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using BabysittingPool.Application;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
@@ -44,15 +45,15 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
     private async Task<Page<OpenRequestView>> OpenAsync(Guid member, string? cursor = null, int? limit = null)
     {
         await using var scope = _database.CreateScope();
-        return await scope.ServiceProvider.GetRequiredService<ListOpenRequestsHandler>()
-            .HandleAsync(new ListOpenRequestsQuery(member, cursor, limit), default);
+        return await scope.ServiceProvider.GetRequiredService<IRequestReader>()
+            .ListOpenAsync(member, _database.Clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), default);
     }
 
     private async Task<Page<RequestView>> ClaimsAsync(Guid member)
     {
         await using var scope = _database.CreateScope();
-        return await scope.ServiceProvider.GetRequiredService<ListMyClaimsHandler>()
-            .HandleAsync(new ListMyClaimsQuery(member), default);
+        return await scope.ServiceProvider.GetRequiredService<IRequestReader>()
+            .ListClaimedByAsync(member, _database.Clock.GetUtcNow().UtcDateTime, PageRequest.From(null, null), default);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using BabysittingPool.Application;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Requests;
 using BabysittingPool.Infrastructure.Persistence;
@@ -7,59 +8,32 @@ namespace BabysittingPool.Infrastructure;
 
 internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReader
 {
-    public async Task<IReadOnlyList<RequestRead>> ListByRequesterAsync(
-        Guid requesterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken)
+    public async Task<Page<RequestView>> ListByRequesterAsync(
+        Guid requesterId, DateTime now, PageRequest page, CancellationToken cancellationToken)
     {
-        var requests = db.Requests.AsNoTracking().Where(r => r.RequesterId == requesterId);
-        if (after is { } position)
-        {
-            requests = requests.Where(r => r.PostedAt < position.At
-                || (r.PostedAt == position.At && r.Id.CompareTo(position.Id) < 0));
-        }
+        var rows = await db.Requests.AsNoTracking().Where(r => r.RequesterId == requesterId)
+            .ToKeysetPageAsync(page, r => r.PostedAt, r => r.Id, descending: true, cancellationToken);
 
-        var rows = await requests
-            .OrderByDescending(r => r.PostedAt).ThenByDescending(r => r.Id)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        return rows.Select(ToRead).ToList();
+        return page.ToPage(rows, r => new KeysetPosition(r.PostedAt, r.Id), r => ToRead(r).ToView(now));
     }
 
-    public async Task<IReadOnlyList<RequestRead>> ListOpenAsync(
-        Guid excludeRequesterId, DateTime now, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken)
+    public async Task<Page<OpenRequestView>> ListOpenAsync(
+        Guid excludeRequesterId, DateTime now, PageRequest page, CancellationToken cancellationToken)
     {
-        var requests = db.Requests.AsNoTracking().Where(r =>
-            r.Status == RequestStatus.Posted && r.ClaimCutoffAt > now && r.RequesterId != excludeRequesterId);
-        if (after is { } position)
-        {
-            requests = requests.Where(r => r.StartsAt > position.At
-                || (r.StartsAt == position.At && r.Id.CompareTo(position.Id) > 0));
-        }
+        var rows = await db.Requests.AsNoTracking().Where(r =>
+            r.Status == RequestStatus.Posted && r.ClaimCutoffAt > now && r.RequesterId != excludeRequesterId)
+            .ToKeysetPageAsync(page, r => r.StartsAt, r => r.Id, descending: false, cancellationToken);
 
-        var rows = await requests
-            .OrderBy(r => r.StartsAt).ThenBy(r => r.Id)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        return rows.Select(ToRead).ToList();
+        return page.ToPage(rows, r => new KeysetPosition(r.StartsAt, r.Id), r => ToRead(r).ToOpenView());
     }
 
-    public async Task<IReadOnlyList<RequestRead>> ListClaimedByAsync(
-        Guid sitterId, (DateTime At, Guid Id)? after, int take, CancellationToken cancellationToken)
+    public async Task<Page<RequestView>> ListClaimedByAsync(
+        Guid sitterId, DateTime now, PageRequest page, CancellationToken cancellationToken)
     {
-        var requests = db.Requests.AsNoTracking().Where(r => r.SitterId == sitterId);
-        if (after is { } position)
-        {
-            requests = requests.Where(r => r.StartsAt < position.At
-                || (r.StartsAt == position.At && r.Id.CompareTo(position.Id) < 0));
-        }
+        var rows = await db.Requests.AsNoTracking().Where(r => r.SitterId == sitterId)
+            .ToKeysetPageAsync(page, r => r.StartsAt, r => r.Id, descending: true, cancellationToken);
 
-        var rows = await requests
-            .OrderByDescending(r => r.StartsAt).ThenByDescending(r => r.Id)
-            .Take(take)
-            .ToListAsync(cancellationToken);
-
-        return rows.Select(ToRead).ToList();
+        return page.ToPage(rows, r => new KeysetPosition(r.StartsAt, r.Id), r => ToRead(r).ToView(now));
     }
 
     public async Task<IReadOnlyList<Guid>> ListDueForExpiryAsync(DateTime now, CancellationToken cancellationToken) =>

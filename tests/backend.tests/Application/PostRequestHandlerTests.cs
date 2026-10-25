@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using BabysittingPool.Application;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
@@ -119,7 +120,7 @@ public class PostRequestHandlerTests : IAsyncLifetime
         var newer = await PostAsync(Command(memberId, Start.AddDays(1)));
         await PostAsync(Command(other));
 
-        var page = await ListAsync(new ListMyRequestsQuery(memberId));
+        var page = await ListAsync(memberId);
 
         page.Items.Select(r => r.Id).Should().Equal(newer!.Id, older!.Id);
         page.Items.Should().OnlyContain(r => r.Status == RequestStatus.Posted);
@@ -133,7 +134,7 @@ public class PostRequestHandlerTests : IAsyncLifetime
         await PostAsync(Command(memberId));
         _database.Clock.Advance(TimeSpan.FromHours(7));
 
-        var page = await ListAsync(new ListMyRequestsQuery(memberId));
+        var page = await ListAsync(memberId);
 
         page.Items.Single().Status.Should().Be(RequestStatus.Expired);
     }
@@ -148,8 +149,8 @@ public class PostRequestHandlerTests : IAsyncLifetime
             _database.Clock.Advance(TimeSpan.FromMinutes(1));
         }
 
-        var first = await ListAsync(new ListMyRequestsQuery(memberId, Limit: 2));
-        var second = await ListAsync(new ListMyRequestsQuery(memberId, first.NextCursor, Limit: 2));
+        var first = await ListAsync(memberId, limit: 2);
+        var second = await ListAsync(memberId, first.NextCursor, limit: 2);
 
         first.Items.Should().HaveCount(2);
         first.NextCursor.Should().NotBeNullOrEmpty();
@@ -174,9 +175,10 @@ public class PostRequestHandlerTests : IAsyncLifetime
         return await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default);
     }
 
-    private async Task<BabysittingPool.Application.Credits.Page<RequestView>> ListAsync(ListMyRequestsQuery query)
+    private async Task<Page<RequestView>> ListAsync(Guid member, string? cursor = null, int? limit = null)
     {
         await using var scope = _database.CreateScope();
-        return await scope.ServiceProvider.GetRequiredService<ListMyRequestsHandler>().HandleAsync(query, default);
+        return await scope.ServiceProvider.GetRequiredService<IRequestReader>()
+            .ListByRequesterAsync(member, _database.Clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), default);
     }
 }
