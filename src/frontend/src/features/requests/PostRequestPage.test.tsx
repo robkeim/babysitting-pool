@@ -12,12 +12,25 @@ import {
 import type { PostRequestBody } from './types'
 
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText(/start time/i), '2026-03-02T10:00')
+  const startsAt = screen.getByLabelText(/start time/i)
+  await user.clear(startsAt)
+  await user.type(startsAt, '2026-03-02T10:00')
   await user.type(screen.getByLabelText(/^area/i), 'Riverside')
   await user.type(screen.getByLabelText(/exact address/i), '12 River Rd')
 }
 
 describe('PostRequestPage', () => {
+  it('defaults the start time to the next 5-minute mark', () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 2, 2, 14, 12, 30))
+    try {
+      renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+      expect(screen.getByLabelText(/start time/i)).toHaveValue('2026-03-02T14:15')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('previews the cost from the calculator and posts the details', async () => {
     const user = userEvent.setup()
     const posted: PostRequestBody[] = []

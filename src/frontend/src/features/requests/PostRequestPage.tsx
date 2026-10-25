@@ -17,6 +17,14 @@ interface PostRequestPageProps {
 const DURATION_STEP_MINUTES = 15
 const START_STEP_SECONDS = 5 * 60
 
+/** The current time rounded up to the next 5-minute mark, as a datetime-local value in local time. */
+function defaultStartsAt(): string {
+  const stepMs = START_STEP_SECONDS * 1000
+  const rounded = new Date(Math.ceil(Date.now() / stepMs) * stepMs)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${String(rounded.getFullYear())}-${pad(rounded.getMonth() + 1)}-${pad(rounded.getDate())}T${pad(rounded.getHours())}:${pad(rounded.getMinutes())}`
+}
+
 const selectClass =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30'
 
@@ -37,7 +45,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const intl = useIntl()
   const account = useMyAccount()
   const post = usePostRequest()
-  const [startsAt, setStartsAt] = useState('')
+  const [startsAt, setStartsAt] = useState(defaultStartsAt)
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [childCount, setChildCount] = useState(1)
   const [location, setLocation] = useState<BabysittingLocation>('SittersHouse')
