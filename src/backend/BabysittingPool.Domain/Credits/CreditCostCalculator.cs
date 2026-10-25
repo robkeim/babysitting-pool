@@ -12,7 +12,8 @@ public static class CreditCostCalculator
     public const decimal OneWayTransportFee = 0.50m;
     public const decimal RoundTripTransportFee = 0.75m;
 
-    public const decimal LunchOrDinnerFeePerChild = 0.50m;
+    public const decimal LunchFeePerChild = 0.50m;
+    public const decimal DinnerFeePerChild = 0.50m;
     public const decimal SnackFeePerChild = 0.25m;
 
     public static CreditCostBreakdown Calculate(CreditRequestDetails request)
@@ -33,7 +34,8 @@ public static class CreditCostCalculator
         };
 
         var mealFeePerChild =
-            (request.Meals.HasFlag(MealOption.LunchOrDinner) ? LunchOrDinnerFeePerChild : 0m) +
+            (request.Meals.HasFlag(MealOption.Lunch) ? LunchFeePerChild : 0m) +
+            (request.Meals.HasFlag(MealOption.Dinner) ? DinnerFeePerChild : 0m) +
             (request.Meals.HasFlag(MealOption.Snack) ? SnackFeePerChild : 0m);
 
         return new CreditCostBreakdown(

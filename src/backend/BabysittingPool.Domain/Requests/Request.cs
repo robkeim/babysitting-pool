@@ -9,6 +9,9 @@ namespace BabysittingPool.Domain.Requests;
 /// </summary>
 public sealed class Request
 {
+    /// <summary>Start times fall on a boundary of this many minutes, with no seconds (spec §4.1).</summary>
+    public const int StartIncrementMinutes = 5;
+
     public const int MaxAreaLength = 100;
     public const int MaxAddressLength = 200;
 
@@ -69,6 +72,12 @@ public sealed class Request
 
         var cleanArea = RequireText(area, MaxAreaLength, "area");
         var cleanAddress = RequireText(address, MaxAddressLength, "address");
+        if (startsAt.Ticks % TimeSpan.FromMinutes(StartIncrementMinutes).Ticks != 0)
+        {
+            throw new DomainException(
+                $"A request must start on a {StartIncrementMinutes}-minute boundary.", "invalid_start_time");
+        }
+
         if (startsAt - now < minimumLeadTime)
         {
             throw new DomainException(
