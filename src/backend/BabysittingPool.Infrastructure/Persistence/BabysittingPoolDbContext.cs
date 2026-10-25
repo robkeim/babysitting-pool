@@ -8,12 +8,19 @@ namespace BabysittingPool.Infrastructure.Persistence;
 public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbContext> options) : DbContext(options)
 {
     public DbSet<CreditAccountRecord> CreditAccounts => Set<CreditAccountRecord>();
+
     public DbSet<LedgerEntryRecord> LedgerEntries => Set<LedgerEntryRecord>();
+
     public DbSet<RequestRecord> Requests => Set<RequestRecord>();
+
     public DbSet<MemberRecord> Members => Set<MemberRecord>();
+
     public DbSet<InvitationRecord> Invitations => Set<InvitationRecord>();
+
     public DbSet<SignInLinkRecord> SignInLinks => Set<SignInLinkRecord>();
+
     public DbSet<SessionRecord> Sessions => Set<SessionRecord>();
+
     public DbSet<FeatureFlagRecord> FeatureFlags => Set<FeatureFlagRecord>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

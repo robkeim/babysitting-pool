@@ -1431,7 +1431,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunchOrDinner\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunchOrDinner\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
+                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -1655,7 +1655,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunchOrDinner\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunchOrDinner\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
+                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"address\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\",\n      \"postedAt\": \"<dateTime>\",\n      \"status\": \"Posted\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -1812,7 +1812,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                  "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -1850,7 +1850,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -1867,7 +1867,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
+                  "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1898,7 +1898,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -1946,7 +1946,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -1994,7 +1994,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -2042,7 +2042,7 @@
                     "method": "POST",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "raw": "{\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -2171,7 +2171,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunchOrDinner\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunchOrDinner\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
+                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"area\": \"<string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"claimCutoffAt\": \"<dateTime>\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -2374,7 +2374,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
+                          "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -2611,7 +2611,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
+                          "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -2848,7 +2848,7 @@
                               "value": "application/json"
                             }
                           ],
-                          "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunchOrDinner\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
+                          "body": "{\n  \"id\": \"<uuid>\",\n  \"startsAt\": \"<dateTime>\",\n  \"durationMinutes\": \"<integer>\",\n  \"childCount\": \"<integer>\",\n  \"location\": \"SittersHouse\",\n  \"transport\": \"None\",\n  \"lunch\": \"<boolean>\",\n  \"snack\": \"<boolean>\",\n  \"dinner\": \"<boolean>\",\n  \"area\": \"<string>\",\n  \"address\": \"<string>\",\n  \"costQuarterCredits\": \"<long>\",\n  \"claimCutoffAt\": \"<dateTime>\",\n  \"postedAt\": \"<dateTime>\",\n  \"status\": \"Posted\"\n}",
                           "cookie": [],
                           "_postman_previewlanguage": "json"
                         },
@@ -3071,7 +3071,7 @@
                             "content": "",
                             "type": "text/plain"
                           },
-                          "key": "LunchOrDinner",
+                          "key": "Lunch",
                           "value": "false"
                         },
                         {
@@ -3081,6 +3081,15 @@
                             "type": "text/plain"
                           },
                           "key": "Snack",
+                          "value": "false"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "",
+                            "type": "text/plain"
+                          },
+                          "key": "Dinner",
                           "value": "false"
                         }
                       ],
@@ -3152,7 +3161,7 @@
                                 "content": "",
                                 "type": "text/plain"
                               },
-                              "key": "LunchOrDinner",
+                              "key": "Lunch",
                               "value": "false"
                             },
                             {
@@ -3162,6 +3171,15 @@
                                 "type": "text/plain"
                               },
                               "key": "Snack",
+                              "value": "false"
+                            },
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "Dinner",
                               "value": "false"
                             }
                           ],
@@ -3243,7 +3261,7 @@
                                 "content": "",
                                 "type": "text/plain"
                               },
-                              "key": "LunchOrDinner",
+                              "key": "Lunch",
                               "value": "false"
                             },
                             {
@@ -3253,6 +3271,15 @@
                                 "type": "text/plain"
                               },
                               "key": "Snack",
+                              "value": "false"
+                            },
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "Dinner",
                               "value": "false"
                             }
                           ],
@@ -3334,7 +3361,7 @@
                                 "content": "",
                                 "type": "text/plain"
                               },
-                              "key": "LunchOrDinner",
+                              "key": "Lunch",
                               "value": "false"
                             },
                             {
@@ -3344,6 +3371,15 @@
                                 "type": "text/plain"
                               },
                               "key": "Snack",
+                              "value": "false"
+                            },
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "Dinner",
                               "value": "false"
                             }
                           ],

@@ -11,8 +11,9 @@ public sealed record RequestView(
     int ChildCount,
     BabysittingLocation Location,
     TransportOption Transport,
-    bool LunchOrDinner,
+    bool Lunch,
     bool Snack,
+    bool Dinner,
     string Area,
     string Address,
     long CostQuarterCredits,
@@ -31,8 +32,9 @@ public sealed record OpenRequestView(
     int ChildCount,
     BabysittingLocation Location,
     TransportOption Transport,
-    bool LunchOrDinner,
+    bool Lunch,
     bool Snack,
+    bool Dinner,
     string Area,
     long CostQuarterCredits,
     DateTime ClaimCutoffAt);
@@ -60,13 +62,13 @@ public sealed record RequestRead(
 
     public RequestView ToView(DateTime now) => new(
         Id, StartsAt, DurationMinutes, ChildCount, Location, Transport,
-        Meals.HasFlag(MealOption.LunchOrDinner), Meals.HasFlag(MealOption.Snack),
+        Meals.HasFlag(MealOption.Lunch), Meals.HasFlag(MealOption.Snack), Meals.HasFlag(MealOption.Dinner),
         Area, Address, CostQuarterCredits, ClaimCutoffAt, PostedAt,
         Request.StatusAt(Status, ClaimCutoffAt, StartsAt, now));
 
     public OpenRequestView ToOpenView() => new(
         Id, StartsAt, DurationMinutes, ChildCount, Location, Transport,
-        Meals.HasFlag(MealOption.LunchOrDinner), Meals.HasFlag(MealOption.Snack),
+        Meals.HasFlag(MealOption.Lunch), Meals.HasFlag(MealOption.Snack), Meals.HasFlag(MealOption.Dinner),
         Area, CostQuarterCredits, ClaimCutoffAt);
 }
 

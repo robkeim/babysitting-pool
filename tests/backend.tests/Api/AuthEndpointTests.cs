@@ -54,7 +54,7 @@ public class AuthEndpointTests : IDisposable
         (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("language").GetString().Should().Be("en-US");
 
         var changed = await client.PutAsJsonAsync("/api/me/language", new { language = "en-XA" });
-        var rejected = await client.PutAsJsonAsync("/api/me/language", new { language = "fr-FR" });
+        var rejected = await client.PutAsJsonAsync("/api/me/language", new { language = "de-DE" });
 
         changed.StatusCode.Should().Be(HttpStatusCode.NoContent);
         await AssertProblemAsync(rejected, HttpStatusCode.BadRequest, "invalid_request");

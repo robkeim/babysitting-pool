@@ -815,7 +815,7 @@
             }
           },
           {
-            "name": "LunchOrDinner",
+            "name": "Lunch",
             "in": "query",
             "schema": {
               "type": "boolean",
@@ -824,6 +824,14 @@
           },
           {
             "name": "Snack",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "Dinner",
             "in": "query",
             "schema": {
               "type": "boolean",
@@ -1423,8 +1431,9 @@
           "childCount",
           "location",
           "transport",
-          "lunchOrDinner",
+          "lunch",
           "snack",
+          "dinner",
           "area",
           "costQuarterCredits",
           "claimCutoffAt"
@@ -1453,10 +1462,13 @@
           "transport": {
             "$ref": "#/components/schemas/TransportOption"
           },
-          "lunchOrDinner": {
+          "lunch": {
             "type": "boolean"
           },
           "snack": {
+            "type": "boolean"
+          },
+          "dinner": {
             "type": "boolean"
           },
           "area": {
@@ -1563,8 +1575,9 @@
           "childCount",
           "location",
           "transport",
-          "lunchOrDinner",
+          "lunch",
           "snack",
+          "dinner",
           "area",
           "address"
         ],
@@ -1588,10 +1601,13 @@
           "transport": {
             "$ref": "#/components/schemas/TransportOption"
           },
-          "lunchOrDinner": {
+          "lunch": {
             "type": "boolean"
           },
           "snack": {
+            "type": "boolean"
+          },
+          "dinner": {
             "type": "boolean"
           },
           "area": {
@@ -1661,8 +1677,9 @@
           "childCount",
           "location",
           "transport",
-          "lunchOrDinner",
+          "lunch",
           "snack",
+          "dinner",
           "area",
           "address",
           "costQuarterCredits",
@@ -1694,10 +1711,13 @@
           "transport": {
             "$ref": "#/components/schemas/TransportOption"
           },
-          "lunchOrDinner": {
+          "lunch": {
             "type": "boolean"
           },
           "snack": {
+            "type": "boolean"
+          },
+          "dinner": {
             "type": "boolean"
           },
           "area": {

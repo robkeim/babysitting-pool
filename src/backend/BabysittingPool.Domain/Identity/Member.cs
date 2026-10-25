@@ -17,11 +17,17 @@ public sealed class Member
     }
 
     public Guid Id { get; }
+
     public EmailAddress Email { get; private set; }
+
     public DisplayName DisplayName { get; private set; }
+
     public Language Language { get; }
+
     public bool IsAdmin { get; }
+
     public DateTime CreatedAt { get; }
+
     public DateTime? ClosedAt { get; private set; }
 
     public bool IsClosed => ClosedAt is not null;

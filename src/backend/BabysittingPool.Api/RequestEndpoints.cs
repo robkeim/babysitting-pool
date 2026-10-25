@@ -223,13 +223,14 @@ internal static class RequestEndpoints
         int ChildCount,
         BabysittingLocation Location,
         TransportOption Transport,
-        bool LunchOrDinner,
+        bool Lunch,
         bool Snack,
+        bool Dinner,
         string? Area,
         string? Address)
     {
         public CreditRequestDetails ToDetails() =>
-            new(DurationMinutes, ChildCount, Location, Transport, Meals(LunchOrDinner, Snack));
+            new(DurationMinutes, ChildCount, Location, Transport, Meals(Lunch, Snack, Dinner));
     }
 
     private sealed record QuoteQuery(
@@ -237,13 +238,16 @@ internal static class RequestEndpoints
         [FromQuery] int ChildCount,
         [FromQuery] BabysittingLocation Location = BabysittingLocation.SittersHouse,
         [FromQuery] TransportOption Transport = TransportOption.None,
-        [FromQuery] bool LunchOrDinner = false,
-        [FromQuery] bool Snack = false)
+        [FromQuery] bool Lunch = false,
+        [FromQuery] bool Snack = false,
+        [FromQuery] bool Dinner = false)
     {
         public CreditRequestDetails ToDetails() =>
-            new(DurationMinutes, ChildCount, Location, Transport, Meals(LunchOrDinner, Snack));
+            new(DurationMinutes, ChildCount, Location, Transport, Meals(Lunch, Snack, Dinner));
     }
 
-    private static MealOption Meals(bool lunchOrDinner, bool snack) =>
-        (lunchOrDinner ? MealOption.LunchOrDinner : MealOption.None) | (snack ? MealOption.Snack : MealOption.None);
+    private static MealOption Meals(bool lunch, bool snack, bool dinner) =>
+        (lunch ? MealOption.Lunch : MealOption.None) |
+        (snack ? MealOption.Snack : MealOption.None) |
+        (dinner ? MealOption.Dinner : MealOption.None);
 }

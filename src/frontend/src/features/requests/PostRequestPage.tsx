@@ -15,6 +15,7 @@ interface PostRequestPageProps {
 }
 
 const DURATION_STEP_MINUTES = 15
+const START_STEP_SECONDS = 5 * 60
 
 const selectClass =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30'
@@ -41,8 +42,9 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const [childCount, setChildCount] = useState(1)
   const [location, setLocation] = useState<BabysittingLocation>('SittersHouse')
   const [transport, setTransport] = useState<TransportOption>('None')
-  const [lunchOrDinner, setLunchOrDinner] = useState(false)
+  const [lunch, setLunch] = useState(false)
   const [snack, setSnack] = useState(false)
+  const [dinner, setDinner] = useState(false)
   const [area, setArea] = useState('')
   const [address, setAddress] = useState('')
 
@@ -51,8 +53,9 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
     childCount,
     location,
     transport,
-    lunchOrDinner,
+    lunch,
     snack,
+    dinner,
   }
   const detailsValid =
     Number.isInteger(durationMinutes) &&
@@ -95,6 +98,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             <Input
               id="startsAt"
               type="datetime-local"
+              step={START_STEP_SECONDS}
               required
               value={startsAt}
               onChange={(event) => {
@@ -189,12 +193,12 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                checked={lunchOrDinner}
+                checked={lunch}
                 onChange={(event) => {
-                  setLunchOrDinner(event.target.checked)
+                  setLunch(event.target.checked)
                 }}
               />
-              <FormattedMessage id="requests.post.meals.lunchOrDinner" />
+              <FormattedMessage id="requests.post.meals.lunch" />
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -205,6 +209,16 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                 }}
               />
               <FormattedMessage id="requests.post.meals.snack" />
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={dinner}
+                onChange={(event) => {
+                  setDinner(event.target.checked)
+                }}
+              />
+              <FormattedMessage id="requests.post.meals.dinner" />
             </label>
           </fieldset>
           <div className="space-y-2">

@@ -20,8 +20,9 @@ public class RequestEndpointTests : IDisposable
         childCount = 1,
         location = "SittersHouse",
         transport,
-        lunchOrDinner = false,
+        lunch = false,
         snack = false,
+        dinner = false,
         area = "Riverside",
         address = "12 River Rd",
     };
@@ -88,6 +89,30 @@ public class RequestEndpointTests : IDisposable
         var response = await client.PostAsJsonAsync("/api/requests", Body(durationMinutes: 82));
 
         await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "invalid_duration");
+    }
+
+    [Fact]
+    public async Task Posting_a_start_time_off_the_five_minute_boundary_answers_422()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+        var body = new
+        {
+            startsAt = _factory.Clock.GetUtcNow().AddHours(10).AddMinutes(1),
+            durationMinutes = 120,
+            childCount = 1,
+            location = "SittersHouse",
+            transport = "None",
+            lunch = false,
+            snack = false,
+            dinner = false,
+            area = "Riverside",
+            address = "12 River Rd",
+        };
+
+        var response = await client.PostAsJsonAsync("/api/requests", body);
+
+        await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "invalid_start_time");
     }
 
     [Fact]
@@ -297,7 +322,7 @@ public class RequestEndpointTests : IDisposable
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
 
         var quote = await client.GetFromJsonAsync<JsonElement>(
-            "/api/requests/quote?durationMinutes=90&childCount=2&location=RequestingFamilysHouse&transport=None&lunchOrDinner=true&snack=false");
+            "/api/requests/quote?durationMinutes=90&childCount=2&location=RequestingFamilysHouse&transport=None&lunch=true&snack=false&dinner=false");
 
         // 1.5h x 1.50 + 0.50 premium + 2 children x 0.50 lunch = 3.75
         quote.GetProperty("costQuarterCredits").GetInt64().Should().Be(15);

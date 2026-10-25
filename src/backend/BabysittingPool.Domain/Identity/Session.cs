@@ -16,9 +16,13 @@ public sealed class Session
     }
 
     public Guid Id { get; }
+
     public Guid MemberId { get; }
+
     public string SecretHash { get; }
+
     public DateTime CreatedAt { get; }
+
     public DateTime LastUsedAt { get; }
 
     public static Session Start(Guid memberId, string secretHash, DateTime now) =>
