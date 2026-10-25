@@ -143,3 +143,11 @@ Expiry, Payout and Demurrage are applied by **Settle** (see ADR 0007).
 - **Claim Cutoff snapshot:** the cutoff instant is stored on the Request when it is posted or edited. Later changes to the setting affect only new or edited Requests.
 - **Between runs:** claims past the Claim Cutoff are rejected by the clock check, and read models show an overdue Posted Request as Expired.
 - **Idempotency:** Settle selects only Requests still Posted or Claimed past their trigger, so a repeat run does nothing. Demurrage is idempotent per (Member, boundary).
+
+---
+
+## 7. Member-facing Rules ("How it works")
+- **Rules endpoint:** `GET /api/rules` is read-only and needs a session. It exposes the Starting Balance, the duration increment, Minimum Lead Time, Claim Cutoff, the Demurrage weekday, time and co-op time zone, the grace period (21 days) and weekly charge, the dormancy threshold, the per-option prices (§3) and a few worked pricing examples. Examples carry their inputs and a quote priced by the same calculator as posting, so the numbers cannot drift from the engine. It holds no personal data and is identical for every Member.
+- **Page:** `/how-it-works` explains the rules in plain language in four Cards with anchors: `#credits`, `#pricing`, `#requests` and `#demurrage`. It shows the numbers the endpoint returns and has no calculator.
+- **Links:** the page is linked from the account menu in the top bar and, as `/how-it-works#pricing` in a new tab so a half-filled form is kept, from the post form's cost breakdown.
+- **Out of scope for now:** an Admin section, linking the balance to Demurrage, contextual links from claim and cancel, and rules for invitees before they join.

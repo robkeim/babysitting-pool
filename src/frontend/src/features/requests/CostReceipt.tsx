@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, useId } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { formatCredits } from '@/features/credits'
 import type { CostQuote, QuoteDetails } from './types'
@@ -9,6 +9,8 @@ interface CostReceiptProps {
   details: QuoteDetails
   available: number | undefined
   cannotAfford: boolean
+  /** Adds a link to the pricing rules, opened in a new tab so a half-filled form is kept. */
+  showRulesLink?: boolean
 }
 
 function Row({
@@ -29,8 +31,15 @@ function Row({
 }
 
 /** The post form's cost breakdown, like a receipt: one row per cost driver, then the total (spec §3). */
-export function CostReceipt({ quote, details, available, cannotAfford }: CostReceiptProps) {
+export function CostReceipt({
+  quote,
+  details,
+  available,
+  cannotAfford,
+  showRulesLink = false,
+}: CostReceiptProps) {
   const intl = useIntl()
+  const titleId = useId()
   const lines = quote?.lines
   const options = quote?.options
   const meal = (id: 'lunch' | 'snack' | 'dinner', amount: number, perChild: number) => (
@@ -53,10 +62,10 @@ export function CostReceipt({ quote, details, available, cannotAfford }: CostRec
   return (
     <section
       aria-live="polite"
-      aria-labelledby="receipt-title"
+      aria-labelledby={titleId}
       className="rounded-lg bg-accent px-3 py-3 text-sm text-accent-foreground"
     >
-      <h3 id="receipt-title" className="mb-2 font-medium">
+      <h3 id={titleId} className="mb-2 font-medium">
         <FormattedMessage id="requests.post.receipt.title" />
       </h3>
       <dl className="space-y-1">
@@ -129,6 +138,18 @@ export function CostReceipt({ quote, details, available, cannotAfford }: CostRec
               />
             </>
           )}
+        </p>
+      )}
+      {showRulesLink && (
+        <p className="mt-2">
+          <a
+            href="/how-it-works#pricing"
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2"
+          >
+            <FormattedMessage id="requests.post.receipt.rules" />
+          </a>
         </p>
       )}
     </section>

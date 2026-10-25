@@ -33,6 +33,16 @@ describe('AccountMenu', () => {
     })
   })
 
+  it('links to the How it works page', async () => {
+    server.use(meHandler(ada))
+    renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
+
+    expect(await screen.findByRole('link', { name: 'How it works' })).toHaveAttribute(
+      'href',
+      '/how-it-works',
+    )
+  })
+
   it('saves the Language the Member picks and shows it selected', async () => {
     let saved: unknown
     server.use(

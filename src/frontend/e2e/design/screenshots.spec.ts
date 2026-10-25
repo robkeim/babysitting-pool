@@ -153,6 +153,10 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
         await adminPage.goto(`${backend.appUrl}/admin/feature-flags`)
         await expect(adminPage.getByRole('heading', { level: 2 })).toBeVisible()
         await capture(adminPage, 'feature-flags', `${language.tag}-${scheme}-${viewport.name}`)
+        // The rules are the same for every Member; the Admin's context spares the viewer's rate limit.
+        await adminPage.goto(`${backend.appUrl}/how-it-works`)
+        await expect(adminPage.locator('#demurrage')).toBeVisible()
+        await capture(adminPage, 'how-it-works', `${language.tag}-${scheme}-${viewport.name}`)
         await adminContext.close()
       }
     }

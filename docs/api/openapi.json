@@ -319,6 +319,36 @@
         }
       }
     },
+    "/api/rules": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "GetRules",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/requests": {
       "post": {
         "tags": [
@@ -1367,6 +1397,17 @@
           }
         }
       },
+      "DayOfWeek": {
+        "enum": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ]
+      },
       "FeatureFlagView": {
         "required": [
           "name",
@@ -1736,6 +1777,47 @@
           }
         }
       },
+      "PricingExample": {
+        "required": [
+          "durationMinutes",
+          "childCount",
+          "location",
+          "transport",
+          "lunch",
+          "snack",
+          "dinner",
+          "quote"
+        ],
+        "type": "object",
+        "properties": {
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "location": {
+            "$ref": "#/components/schemas/BabysittingLocation"
+          },
+          "transport": {
+            "$ref": "#/components/schemas/TransportOption"
+          },
+          "lunch": {
+            "type": "boolean"
+          },
+          "snack": {
+            "type": "boolean"
+          },
+          "dinner": {
+            "type": "boolean"
+          },
+          "quote": {
+            "$ref": "#/components/schemas/CostQuote"
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -1868,6 +1950,71 @@
           "rolloutPercent": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "RulesView": {
+        "required": [
+          "startingBalanceQuarterCredits",
+          "durationIncrementMinutes",
+          "minimumLeadTimeMinutes",
+          "claimCutoffMinutes",
+          "demurrageDay",
+          "demurrageTime",
+          "timeZone",
+          "demurrageGraceDays",
+          "demurrageChargeQuarterCredits",
+          "dormancyDays",
+          "prices",
+          "examples"
+        ],
+        "type": "object",
+        "properties": {
+          "startingBalanceQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "durationIncrementMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minimumLeadTimeMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimCutoffMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "demurrageDay": {
+            "$ref": "#/components/schemas/DayOfWeek"
+          },
+          "demurrageTime": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "demurrageGraceDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "demurrageChargeQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dormancyDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "prices": {
+            "$ref": "#/components/schemas/CostOptionPrices"
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingExample"
+            }
           }
         }
       },

@@ -355,6 +355,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
             details={details}
             available={available}
             cannotAfford={cannotAfford}
+            showRulesLink
           />
           {cannotAfford && (
             <Alert variant="destructive">

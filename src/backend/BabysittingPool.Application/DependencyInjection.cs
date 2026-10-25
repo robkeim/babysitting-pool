@@ -13,6 +13,7 @@ public static class DependencyInjection
     {
         services.AddScoped<GetMyAccountHandler>();
         services.AddSingleton(new CoopSettings());
+        services.AddScoped<GetRulesHandler>();
         services.AddScoped<IssueInvitationHandler>();
         services.AddScoped<PreviewInvitationHandler>();
         services.AddScoped<AcceptInvitationHandler>();

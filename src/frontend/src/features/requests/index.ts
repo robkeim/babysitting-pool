@@ -1,3 +1,4 @@
+export { CostReceipt } from './CostReceipt'
 export { MyClaimsPage } from './MyClaimsPage'
 export { MyRequestsPage } from './MyRequestsPage'
 export { OpenRequestsPage } from './OpenRequestsPage'

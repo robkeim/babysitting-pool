@@ -1780,6 +1780,115 @@
           ]
         },
         {
+          "name": "rules",
+          "description": "",
+          "item": [
+            {
+              "name": "Get Rules",
+              "request": {
+                "name": "Get Rules",
+                "description": {},
+                "url": {
+                  "path": [
+                    "api",
+                    "rules"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {},
+                "auth": null
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "api",
+                        "rules"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "GET",
+                    "body": {}
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"startingBalanceQuarterCredits\": \"<long>\",\n  \"durationIncrementMinutes\": \"<integer>\",\n  \"minimumLeadTimeMinutes\": \"<integer>\",\n  \"claimCutoffMinutes\": \"<integer>\",\n  \"demurrageDay\": \"Sunday\",\n  \"demurrageTime\": \"<string>\",\n  \"timeZone\": \"<string>\",\n  \"demurrageGraceDays\": \"<integer>\",\n  \"demurrageChargeQuarterCredits\": \"<long>\",\n  \"dormancyDays\": \"<integer>\",\n  \"prices\": {\n    \"familyHouseQuarterCredits\": \"<long>\",\n    \"oneWayTransportQuarterCredits\": \"<long>\",\n    \"roundTripTransportQuarterCredits\": \"<long>\",\n    \"lunchQuarterCredits\": \"<long>\",\n    \"snackQuarterCredits\": \"<long>\",\n    \"dinnerQuarterCredits\": \"<long>\",\n    \"lunchPerChildQuarterCredits\": \"<long>\",\n    \"snackPerChildQuarterCredits\": \"<long>\",\n    \"dinnerPerChildQuarterCredits\": \"<long>\",\n    \"secondChildHourlyQuarterCredits\": \"<long>\",\n    \"additionalChildHourlyQuarterCredits\": \"<long>\"\n  },\n  \"examples\": [\n    {\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"quote\": {\n        \"costQuarterCredits\": \"<long>\",\n        \"lines\": {\n          \"hourlyRateQuarterCredits\": \"<long>\",\n          \"timeQuarterCredits\": \"<long>\",\n          \"locationQuarterCredits\": \"<long>\",\n          \"transportQuarterCredits\": \"<long>\",\n          \"lunchQuarterCredits\": \"<long>\",\n          \"snackQuarterCredits\": \"<long>\",\n          \"dinnerQuarterCredits\": \"<long>\"\n        },\n        \"options\": {\n          \"familyHouseQuarterCredits\": \"<long>\",\n          \"oneWayTransportQuarterCredits\": \"<long>\",\n          \"roundTripTransportQuarterCredits\": \"<long>\",\n          \"lunchQuarterCredits\": \"<long>\",\n          \"snackQuarterCredits\": \"<long>\",\n          \"dinnerQuarterCredits\": \"<long>\",\n          \"lunchPerChildQuarterCredits\": \"<long>\",\n          \"snackPerChildQuarterCredits\": \"<long>\",\n          \"dinnerPerChildQuarterCredits\": \"<long>\",\n          \"secondChildHourlyQuarterCredits\": \"<long>\",\n          \"additionalChildHourlyQuarterCredits\": \"<long>\"\n        }\n      }\n    },\n    {\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"location\": \"SittersHouse\",\n      \"transport\": \"None\",\n      \"lunch\": \"<boolean>\",\n      \"snack\": \"<boolean>\",\n      \"dinner\": \"<boolean>\",\n      \"quote\": {\n        \"costQuarterCredits\": \"<long>\",\n        \"lines\": {\n          \"hourlyRateQuarterCredits\": \"<long>\",\n          \"timeQuarterCredits\": \"<long>\",\n          \"locationQuarterCredits\": \"<long>\",\n          \"transportQuarterCredits\": \"<long>\",\n          \"lunchQuarterCredits\": \"<long>\",\n          \"snackQuarterCredits\": \"<long>\",\n          \"dinnerQuarterCredits\": \"<long>\"\n        },\n        \"options\": {\n          \"familyHouseQuarterCredits\": \"<long>\",\n          \"oneWayTransportQuarterCredits\": \"<long>\",\n          \"roundTripTransportQuarterCredits\": \"<long>\",\n          \"lunchQuarterCredits\": \"<long>\",\n          \"snackQuarterCredits\": \"<long>\",\n          \"dinnerQuarterCredits\": \"<long>\",\n          \"lunchPerChildQuarterCredits\": \"<long>\",\n          \"snackPerChildQuarterCredits\": \"<long>\",\n          \"dinnerPerChildQuarterCredits\": \"<long>\",\n          \"secondChildHourlyQuarterCredits\": \"<long>\",\n          \"additionalChildHourlyQuarterCredits\": \"<long>\"\n        }\n      }\n    }\n  ]\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "Unauthorized",
+                  "originalRequest": {
+                    "url": {
+                      "path": [
+                        "api",
+                        "rules"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/problem+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "body": {}
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/problem+json"
+                    }
+                  ],
+                  "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                  "cookie": [],
+                  "_postman_previewlanguage": "json"
+                }
+              ],
+              "event": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
           "name": "requests",
           "description": "",
           "item": [
