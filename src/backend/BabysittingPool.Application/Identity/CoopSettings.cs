@@ -25,6 +25,9 @@ public sealed record CoopSettings
     /// <summary>The time of day, in <see cref="TimeZone"/>, Demurrage is charged at.</summary>
     public TimeOnly DemurrageTime { get; init; } = TimeOnly.MinValue;
 
+    /// <summary>A Member with no activity for this long appears on the Admin's dormant list (spec §5).</summary>
+    public TimeSpan DormancyThreshold { get; init; } = TimeSpan.FromDays(42);
+
     /// <summary>The one co-op time zone that drives the weekly Demurrage run (spec §2A).</summary>
     public TimeZoneInfo TimeZone { get; init; } = TimeZoneInfo.Utc;
 }

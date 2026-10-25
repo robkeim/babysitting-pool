@@ -192,5 +192,9 @@ describe('PostRequestPage', () => {
     expect(within(receipt).getByText('4.00 credits')).toBeInTheDocument()
     expect(within(receipt).getByText(/you have 21\.00 available/i)).toBeInTheDocument()
     expect(within(receipt).getByText(/after posting: 17\.00 credits left/i)).toBeInTheDocument()
+    expect(within(receipt).getByRole('link', { name: /how is this calculated/i })).toHaveAttribute(
+      'href',
+      '/how-it-works#pricing',
+    )
   })
 })

@@ -32,5 +32,11 @@ internal static class AccountEndpoints
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound);
+
+        app.MapGet("/api/rules", (GetRulesHandler handler) => Results.Ok(handler.Handle()))
+        .RequireAuthorization()
+        .WithName("GetRules")
+        .Produces<RulesView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 }
