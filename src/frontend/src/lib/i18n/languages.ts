@@ -21,7 +21,7 @@ export const DEFAULT_LANGUAGE = 'en-US'
 
 const ENGLISH: LanguageOption = {
   tag: DEFAULT_LANGUAGE,
-  label: 'English (US)',
+  label: '🇺🇸 English',
   formatLocale: 'en-US',
   testOnly: false,
   load: () => Promise.resolve(enUS),
@@ -31,8 +31,15 @@ const ENGLISH: LanguageOption = {
 export const LANGUAGES: readonly LanguageOption[] = [
   ENGLISH,
   {
+    tag: 'fr-FR',
+    label: '🇫🇷 Français',
+    formatLocale: 'fr-FR',
+    testOnly: false,
+    load: async () => (await import('./fr-FR.json')).default,
+  },
+  {
     tag: 'en-XA',
-    label: 'Ünïcödé Tëst',
+    label: '🏴‍☠️ Ünïcödé Tëst',
     formatLocale: 'en-US',
     testOnly: true,
     load: async () => (await import('./pseudo.catalog')).default,

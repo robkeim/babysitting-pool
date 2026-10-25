@@ -9,9 +9,9 @@ import { FRONTEND_ROOT } from '../paths.ts'
 const OUTPUT = path.join(FRONTEND_ROOT, 'design-screenshots')
 
 const LANGUAGES = [
-  { tag: 'en-US', label: 'English (US)', heading: /^Babysitting Pool$/ },
+  { tag: 'en-US', label: '🇺🇸 English', heading: /^Babysitting Pool$/ },
   // The padded, accented test Language stands in for every real translation (ADR 0009).
-  { tag: 'en-XA', label: 'Ünïcödé Tëst', heading: /^⏩/u },
+  { tag: 'en-XA', label: '🏴‍☠️ Ünïcödé Tëst', heading: /^⏩/u },
 ]
 const SCHEMES = ['light', 'dark'] as const
 const VIEWPORTS = [

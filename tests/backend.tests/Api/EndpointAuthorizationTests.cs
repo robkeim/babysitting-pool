@@ -20,6 +20,8 @@ public class EndpointAuthorizationTests : IDisposable
         "POST /api/auth/sessions",
         // Signing out must clear the cookie even when the session has already expired.
         "DELETE /api/auth/sessions/current",
+        // Resolved for the caller and safe before sign-in: the SPA reads it first (ADR 0016).
+        "GET /api/feature-flags",
     ];
 
     // Production, so the Development and E2E endpoints (/api/dev, /api/test) are not mapped and cannot hide a gap.

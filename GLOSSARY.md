@@ -119,7 +119,7 @@ _Avoid_: Cron job, batch, sweep
 ### Language
 
 **Language**:
-The language a Member reads the co-op in, chosen by the Member and kept on their profile. English (en-US) is the first; others are added over time.
+The language a Member reads the co-op in, chosen by the Member and kept on their profile. English (en-US) is the first, followed by French (fr-FR); others are added over time.
 _Avoid_: Locale, translation
 
 **Ünïcödé Tëst**:

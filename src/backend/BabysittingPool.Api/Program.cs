@@ -6,6 +6,7 @@ using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.RefuseE2EInProduction();
 
 // Deterministic output (ADR 0006): the document is committed and drift-checked, so it must not
 // vary with the host it was fetched from.
@@ -113,6 +114,7 @@ app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapRequestEndpoints();
 app.MapAdminEndpoints();
+app.MapFeatureFlagEndpoints();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(TestEndpoints.Environment))
 {

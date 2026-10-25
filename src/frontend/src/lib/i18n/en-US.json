@@ -68,6 +68,7 @@
   "requests.post.title": "Post a request",
   "requests.post.startsAt": "Start time (your local time)",
   "requests.post.duration": "Duration (minutes, in steps of 15)",
+  "requests.post.duration.invalid": "Enter a duration in whole steps of 15 minutes (15, 30, 45, 60…).",
   "requests.post.children": "Number of children",
   "requests.post.location": "Location",
   "requests.post.location.SittersHouse": "Sitter's house",

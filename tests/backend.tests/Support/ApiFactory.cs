@@ -21,7 +21,8 @@ internal sealed class ApiFactory(
     string environment = "E2E",
     string? bootstrapAdminEmail = null,
     FeatureFlag[]? flags = null,
-    Dictionary<string, string>? features = null) : WebApplicationFactory<Program>
+    Dictionary<string, string>? features = null,
+    string? e2eToken = null) : WebApplicationFactory<Program>
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-api-{Guid.NewGuid():N}.db");
 
@@ -37,6 +38,11 @@ internal sealed class ApiFactory(
         if (bootstrapAdminEmail is not null)
         {
             builder.UseSetting("Bootstrap:AdminEmail", bootstrapAdminEmail);
+        }
+
+        if (e2eToken is not null)
+        {
+            builder.UseSetting("E2E:Token", e2eToken);
         }
 
         foreach (var (name, value) in features ?? [])

@@ -6,13 +6,16 @@ namespace BabysittingPool.Infrastructure.Persistence;
 public sealed class LedgerEntryRecord
 {
     public Guid Id { get; set; }
+
     public Guid MemberId { get; set; }
 
     /// <summary>The Request an Escrow, Refund or Payout belongs to; null for movements that have none.</summary>
     public Guid? RequestId { get; set; }
 
     public LedgerEntryKind Kind { get; set; }
+
     public Credits Amount { get; set; }
+
     public DateTime OccurredAt { get; set; }
 
     /// <summary>The weekly boundary a Demurrage charge belongs to; null for every other kind.</summary>

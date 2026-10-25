@@ -27,6 +27,7 @@ internal static class AccountSeeder
                 OccurredAt = clock.GetUtcNow().UtcDateTime.AddHours(i),
             });
         }
+
         await db.SaveChangesAsync();
         return memberId;
     }
@@ -55,6 +56,7 @@ internal static class AccountSeeder
                 OccurredAt = clock.GetUtcNow().UtcDateTime,
             });
         }
+
         await db.SaveChangesAsync();
         return memberId;
     }

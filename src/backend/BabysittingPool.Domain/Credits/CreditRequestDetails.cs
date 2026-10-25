@@ -45,8 +45,12 @@ public sealed record CreditRequestDetails
     }
 
     public int DurationMinutes { get; }
+
     public int ChildCount { get; }
+
     public BabysittingLocation Location { get; }
+
     public TransportOption Transport { get; }
+
     public MealOption Meals { get; }
 }

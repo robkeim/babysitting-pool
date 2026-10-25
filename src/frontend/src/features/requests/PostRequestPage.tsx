@@ -17,6 +17,14 @@ interface PostRequestPageProps {
 const DURATION_STEP_MINUTES = 15
 const START_STEP_SECONDS = 5 * 60
 
+/** The current time rounded up to the next 5-minute mark, as a datetime-local value in local time. */
+function defaultStartsAt(): string {
+  const stepMs = START_STEP_SECONDS * 1000
+  const rounded = new Date(Math.ceil(Date.now() / stepMs) * stepMs)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${String(rounded.getFullYear())}-${pad(rounded.getMonth() + 1)}-${pad(rounded.getDate())}T${pad(rounded.getHours())}:${pad(rounded.getMinutes())}`
+}
+
 const selectClass =
   'h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 lg:h-8 lg:text-sm dark:bg-input/30'
 
@@ -37,7 +45,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const intl = useIntl()
   const account = useMyAccount()
   const post = usePostRequest()
-  const [startsAt, setStartsAt] = useState('')
+  const [startsAt, setStartsAt] = useState(defaultStartsAt)
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [childCount, setChildCount] = useState(1)
   const [location, setLocation] = useState<BabysittingLocation>('SittersHouse')
@@ -57,12 +65,11 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
     snack,
     dinner,
   }
-  const detailsValid =
+  const durationValid =
     Number.isInteger(durationMinutes) &&
     durationMinutes > 0 &&
-    durationMinutes % DURATION_STEP_MINUTES === 0 &&
-    Number.isInteger(childCount) &&
-    childCount >= 1
+    durationMinutes % DURATION_STEP_MINUTES === 0
+  const detailsValid = durationValid && Number.isInteger(childCount) && childCount >= 1
   const quote = useQuote(details, detailsValid)
   const cost = detailsValid ? quote.data?.costQuarterCredits : undefined
   const available = account.data?.pages[0]?.availableQuarterCredits
@@ -119,11 +126,18 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                 required
                 min={DURATION_STEP_MINUTES}
                 step={DURATION_STEP_MINUTES}
+                aria-invalid={!durationValid}
+                aria-describedby={durationValid ? undefined : 'duration-error'}
                 value={Number.isNaN(durationMinutes) ? '' : durationMinutes}
                 onChange={(event) => {
                   setDurationMinutes(event.target.valueAsNumber)
                 }}
               />
+              {!durationValid && (
+                <p id="duration-error" role="alert" className="text-sm text-destructive">
+                  <FormattedMessage id="requests.post.duration.invalid" />
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <label htmlFor="children" className="text-sm font-medium">
