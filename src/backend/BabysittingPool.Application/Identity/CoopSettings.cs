@@ -4,6 +4,7 @@ namespace BabysittingPool.Application.Identity;
 public sealed record CoopSettings
 {
     public TimeSpan InvitationLifetime { get; init; } = TimeSpan.FromDays(7);
+
     public TimeSpan SignInLinkLifetime { get; init; } = TimeSpan.FromDays(1);
 
     /// <summary>A session expires after this long without use.</summary>

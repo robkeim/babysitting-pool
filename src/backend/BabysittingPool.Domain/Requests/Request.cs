@@ -30,9 +30,13 @@ public sealed class Request
     }
 
     public Guid Id { get; }
+
     public Guid RequesterId { get; }
+
     public Guid? SitterId { get; private set; }
+
     public CreditRequestDetails Details { get; }
+
     public DateTime StartsAt { get; }
 
     /// <summary>The rough neighbourhood, which is all other Members see while the Request is Posted (spec §4.6).</summary>
@@ -48,6 +52,7 @@ public sealed class Request
     public DateTime ClaimCutoffAt { get; }
 
     public DateTime PostedAt { get; }
+
     public RequestStatus Status { get; private set; }
 
     /// <summary>

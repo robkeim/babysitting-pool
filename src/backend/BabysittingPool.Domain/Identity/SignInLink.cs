@@ -13,9 +13,13 @@ public sealed class SignInLink
     }
 
     public Guid Id { get; }
+
     public Guid MemberId { get; }
+
     public string SecretHash { get; }
+
     public DateTime ExpiresAt { get; }
+
     public DateTime? ConsumedAt { get; }
 
     public static SignInLink Issue(Guid memberId, string secretHash, DateTime now, TimeSpan lifetime) =>

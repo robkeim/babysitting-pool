@@ -19,11 +19,17 @@ public sealed class Invitation
     }
 
     public Guid Id { get; }
+
     public EmailAddress Email { get; }
+
     public bool IsAdmin { get; }
+
     public string SecretHash { get; }
+
     public DateTime IssuedAt { get; }
+
     public DateTime ExpiresAt { get; }
+
     public DateTime? ConsumedAt { get; }
 
     public static Invitation Issue(EmailAddress email, bool isAdmin, string secretHash, DateTime now, TimeSpan lifetime) =>

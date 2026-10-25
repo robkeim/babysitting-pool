@@ -14,6 +14,7 @@ public sealed class CreditAccount
     }
 
     public decimal Available { get; private set; }
+
     public decimal Escrowed { get; private set; }
 
     /// <summary>Opens an account for a newly activated member with the starting balance.</summary>
