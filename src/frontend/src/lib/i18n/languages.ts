@@ -32,7 +32,7 @@ export const LANGUAGES: readonly LanguageOption[] = [
   ENGLISH,
   {
     tag: 'fr-FR',
-    label: '🇫🇷 Français (France)',
+    label: '🇫🇷 Français',
     formatLocale: 'fr-FR',
     testOnly: false,
     load: async () => (await import('./fr-FR.json')).default,
