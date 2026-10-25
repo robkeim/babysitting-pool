@@ -68,6 +68,7 @@
   "requests.post.title": "Publier une demande",
   "requests.post.startsAt": "Heure de début (votre heure locale)",
   "requests.post.duration": "Durée (minutes, par tranches de 15)",
+  "requests.post.duration.invalid": "Saisissez une durée par tranches de 15 minutes (15, 30, 45, 60…).",
   "requests.post.children": "Nombre d’enfants",
   "requests.post.location": "Lieu",
   "requests.post.location.SittersHouse": "Domicile du baby-sitter",
