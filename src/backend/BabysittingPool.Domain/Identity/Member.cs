@@ -17,8 +17,8 @@ public sealed class Member
     }
 
     public Guid Id { get; }
-    public EmailAddress Email { get; }
-    public DisplayName DisplayName { get; }
+    public EmailAddress Email { get; private set; }
+    public DisplayName DisplayName { get; private set; }
     public Language Language { get; }
     public bool IsAdmin { get; }
     public DateTime CreatedAt { get; }
@@ -40,6 +40,24 @@ public sealed class Member
         }
 
         ClosedAt = now;
+    }
+
+    /// <summary>What Erasure leaves in place of a name and an email address (spec §2A, ADR 0014).</summary>
+    public const string Tombstone = "Former member";
+
+    /// <summary>
+    /// Replaces the personal details of a closed Member with <see cref="Tombstone"/> (spec §2A, ADR 0014). Irreversible,
+    /// and safe to repeat. An open Member, the Admin included, is refused.
+    /// </summary>
+    public void Erase()
+    {
+        if (!IsClosed)
+        {
+            throw new DomainException("Only a closed Member can be erased.", "member_not_closed");
+        }
+
+        Email = EmailAddress.Restore(Tombstone);
+        DisplayName = DisplayName.Restore(Tombstone);
     }
 
     public static Member Join(EmailAddress email, DisplayName displayName, bool isAdmin, DateTime now) =>

@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<WithdrawClaimHandler>();
         services.AddScoped<SettleHandler>();
         services.AddScoped<OffboardMemberHandler>();
+        services.AddScoped<EraseMemberHandler>();
         return services;
     }
 }
