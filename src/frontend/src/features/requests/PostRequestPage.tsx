@@ -8,6 +8,7 @@ import { formatCredits, useMyAccount } from '@/features/credits'
 import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useQuote, usePostRequest } from './api'
+import { CostReceipt } from './CostReceipt'
 import type { BabysittingLocation, QuoteDetails, TransportOption } from './types'
 
 interface PostRequestPageProps {
@@ -71,9 +72,26 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
     durationMinutes % DURATION_STEP_MINUTES === 0
   const detailsValid = durationValid && Number.isInteger(childCount) && childCount >= 1
   const quote = useQuote(details, detailsValid)
-  const cost = detailsValid ? quote.data?.costQuarterCredits : undefined
+  const currentQuote = detailsValid ? quote.data : undefined
+  const cost = currentQuote?.costQuarterCredits
+  const options = currentQuote?.options
+  const lines = currentQuote?.lines
   const available = account.data?.pages[0]?.availableQuarterCredits
   const cannotAfford = cost !== undefined && available !== undefined && available < cost
+
+  /** "Lunch (+1.50 credits)" once the backend has priced it, the bare label until then. */
+  function priced(label: string, price: number | undefined) {
+    return price === undefined
+      ? label
+      : intl.formatMessage({ id: 'requests.post.priced' }, { label, price: formatCredits(price) })
+  }
+
+  function perChild(rate: number) {
+    return intl.formatMessage(
+      { id: 'requests.post.perChild' },
+      { rate: formatCredits(rate), count: childCount },
+    )
+  }
 
   function changeLocation(next: BabysittingLocation) {
     setLocation(next)
@@ -138,6 +156,17 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   <FormattedMessage id="requests.post.duration.invalid" />
                 </p>
               )}
+              {durationValid && lines && (
+                <p className="text-sm text-muted-foreground">
+                  <FormattedMessage
+                    id="requests.post.duration.hint"
+                    values={{
+                      rate: formatCredits(lines.hourlyRateQuarterCredits),
+                      count: childCount,
+                    }}
+                  />
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <label htmlFor="children" className="text-sm font-medium">
@@ -155,6 +184,17 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setChildCount(event.target.valueAsNumber)
                 }}
               />
+              {options && (
+                <p className="text-sm text-muted-foreground">
+                  <FormattedMessage
+                    id="requests.post.children.hint"
+                    values={{
+                      second: formatCredits(options.secondChildHourlyQuarterCredits),
+                      additional: formatCredits(options.additionalChildHourlyQuarterCredits),
+                    }}
+                  />
+                </p>
+              )}
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -174,7 +214,10 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   {intl.formatMessage({ id: 'requests.post.location.SittersHouse' })}
                 </option>
                 <option value="RequestingFamilysHouse">
-                  {intl.formatMessage({ id: 'requests.post.location.RequestingFamilysHouse' })}
+                  {priced(
+                    intl.formatMessage({ id: 'requests.post.location.RequestingFamilysHouse' }),
+                    options?.familyHouseQuarterCredits,
+                  )}
                 </option>
               </select>
             </div>
@@ -195,10 +238,16 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   {intl.formatMessage({ id: 'requests.post.transport.None' })}
                 </option>
                 <option value="OneWay">
-                  {intl.formatMessage({ id: 'requests.post.transport.OneWay' })}
+                  {priced(
+                    intl.formatMessage({ id: 'requests.post.transport.OneWay' }),
+                    options?.oneWayTransportQuarterCredits,
+                  )}
                 </option>
                 <option value="RoundTrip">
-                  {intl.formatMessage({ id: 'requests.post.transport.RoundTrip' })}
+                  {priced(
+                    intl.formatMessage({ id: 'requests.post.transport.RoundTrip' }),
+                    options?.roundTripTransportQuarterCredits,
+                  )}
                 </option>
               </select>
             </div>
@@ -216,7 +265,17 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setLunch(event.target.checked)
                 }}
               />
-              <FormattedMessage id="requests.post.meals.lunch" />
+              <span>
+                {priced(
+                  intl.formatMessage({ id: 'requests.post.meals.lunch' }),
+                  options?.lunchQuarterCredits,
+                )}
+                {options && (
+                  <span className="block text-xs text-muted-foreground">
+                    {perChild(options.lunchPerChildQuarterCredits)}
+                  </span>
+                )}
+              </span>
             </label>
             <label className="flex min-h-11 items-center gap-3 text-sm lg:min-h-0 lg:gap-2">
               <input
@@ -227,7 +286,17 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setSnack(event.target.checked)
                 }}
               />
-              <FormattedMessage id="requests.post.meals.snack" />
+              <span>
+                {priced(
+                  intl.formatMessage({ id: 'requests.post.meals.snack' }),
+                  options?.snackQuarterCredits,
+                )}
+                {options && (
+                  <span className="block text-xs text-muted-foreground">
+                    {perChild(options.snackPerChildQuarterCredits)}
+                  </span>
+                )}
+              </span>
             </label>
             <label className="flex min-h-11 items-center gap-3 text-sm lg:min-h-0 lg:gap-2">
               <input
@@ -238,7 +307,17 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setDinner(event.target.checked)
                 }}
               />
-              <FormattedMessage id="requests.post.meals.dinner" />
+              <span>
+                {priced(
+                  intl.formatMessage({ id: 'requests.post.meals.dinner' }),
+                  options?.dinnerQuarterCredits,
+                )}
+                {options && (
+                  <span className="block text-xs text-muted-foreground">
+                    {perChild(options.dinnerPerChildQuarterCredits)}
+                  </span>
+                )}
+              </span>
             </label>
           </fieldset>
           <div className="space-y-2">
@@ -271,34 +350,12 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               }}
             />
           </div>
-          <p
-            aria-live="polite"
-            className="rounded-lg bg-accent px-3 py-2 text-sm text-accent-foreground"
-          >
-            {cost === undefined ? (
-              <FormattedMessage
-                id="requests.post.costUnknown"
-                values={{ strong: (chunks) => <strong>{chunks}</strong> }}
-              />
-            ) : (
-              <FormattedMessage
-                id="requests.post.cost"
-                values={{
-                  cost: formatCredits(cost),
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                }}
-              />
-            )}
-            {available !== undefined && (
-              <>
-                {' · '}
-                <FormattedMessage
-                  id="requests.post.available"
-                  values={{ available: formatCredits(available) }}
-                />
-              </>
-            )}
-          </p>
+          <CostReceipt
+            quote={currentQuote}
+            details={details}
+            available={available}
+            cannotAfford={cannotAfford}
+          />
           {cannotAfford && (
             <Alert variant="destructive">
               <AlertTitle>

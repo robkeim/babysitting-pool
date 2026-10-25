@@ -40,6 +40,19 @@ public static class QuoteRequest
     public static CostQuote Handle(CreditRequestDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
-        return new CostQuote(DomainCredits.FromDecimal(CreditCostCalculator.Calculate(details).Total).QuarterCredits);
+        var cost = CreditCostCalculator.Calculate(details);
+        var prices = CreditCostCalculator.OptionPrices(details.ChildCount);
+        return new CostQuote(
+            Quarters(cost.Total),
+            new CostLines(
+                Quarters(cost.HourlyRate), Quarters(cost.TimeCost), Quarters(cost.LocationPremium),
+                Quarters(cost.TransportFee), Quarters(cost.LunchFee), Quarters(cost.SnackFee), Quarters(cost.DinnerFee)),
+            new CostOptionPrices(
+                Quarters(prices.FamilyHouse), Quarters(prices.OneWayTransport), Quarters(prices.RoundTripTransport),
+                Quarters(prices.Lunch), Quarters(prices.Snack), Quarters(prices.Dinner),
+                Quarters(prices.LunchPerChild), Quarters(prices.SnackPerChild), Quarters(prices.DinnerPerChild),
+                Quarters(prices.SecondChildHourly), Quarters(prices.AdditionalChildHourly)));
     }
+
+    private static long Quarters(decimal credits) => DomainCredits.FromDecimal(credits).QuarterCredits;
 }

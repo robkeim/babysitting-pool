@@ -44,7 +44,28 @@ public static class CreditCostCalculator
             TimeCost: hours * hourlyRate,
             LocationPremium: locationPremium,
             TransportFee: transportFee,
-            MealFee: mealFeePerChild * request.ChildCount);
+            MealFee: mealFeePerChild * request.ChildCount,
+            LunchFee: request.Meals.HasFlag(MealOption.Lunch) ? LunchFeePerChild * request.ChildCount : 0m,
+            SnackFee: request.Meals.HasFlag(MealOption.Snack) ? SnackFeePerChild * request.ChildCount : 0m,
+            DinnerFee: request.Meals.HasFlag(MealOption.Dinner) ? DinnerFeePerChild * request.ChildCount : 0m);
+    }
+
+    /// <summary>What each option costs for this many children, whether or not it is selected, for inline hints on the post form.</summary>
+    public static CreditOptionPrices OptionPrices(int childCount)
+    {
+        HourlyRate(childCount);
+        return new CreditOptionPrices(
+            FamilyHouse: RequestingFamilysHousePremium,
+            OneWayTransport: OneWayTransportFee,
+            RoundTripTransport: RoundTripTransportFee,
+            LunchPerChild: LunchFeePerChild,
+            SnackPerChild: SnackFeePerChild,
+            DinnerPerChild: DinnerFeePerChild,
+            Lunch: LunchFeePerChild * childCount,
+            Snack: SnackFeePerChild * childCount,
+            Dinner: DinnerFeePerChild * childCount,
+            SecondChildHourly: SecondChildHourlyRate,
+            AdditionalChildHourly: AdditionalChildHourlyRate);
     }
 
     /// <summary>Combined per-hour rate: 1st child 1.0, 2nd +0.50, each additional +0.25.</summary>

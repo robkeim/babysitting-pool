@@ -390,9 +390,51 @@ export interface components {
         };
         /** @enum {unknown} */
         BabysittingLocation: "SittersHouse" | "RequestingFamilysHouse";
+        CostLines: {
+            /** Format: int64 */
+            hourlyRateQuarterCredits: number;
+            /** Format: int64 */
+            timeQuarterCredits: number;
+            /** Format: int64 */
+            locationQuarterCredits: number;
+            /** Format: int64 */
+            transportQuarterCredits: number;
+            /** Format: int64 */
+            lunchQuarterCredits: number;
+            /** Format: int64 */
+            snackQuarterCredits: number;
+            /** Format: int64 */
+            dinnerQuarterCredits: number;
+        };
+        CostOptionPrices: {
+            /** Format: int64 */
+            familyHouseQuarterCredits: number;
+            /** Format: int64 */
+            oneWayTransportQuarterCredits: number;
+            /** Format: int64 */
+            roundTripTransportQuarterCredits: number;
+            /** Format: int64 */
+            lunchQuarterCredits: number;
+            /** Format: int64 */
+            snackQuarterCredits: number;
+            /** Format: int64 */
+            dinnerQuarterCredits: number;
+            /** Format: int64 */
+            lunchPerChildQuarterCredits: number;
+            /** Format: int64 */
+            snackPerChildQuarterCredits: number;
+            /** Format: int64 */
+            dinnerPerChildQuarterCredits: number;
+            /** Format: int64 */
+            secondChildHourlyQuarterCredits: number;
+            /** Format: int64 */
+            additionalChildHourlyQuarterCredits: number;
+        };
         CostQuote: {
             /** Format: int64 */
             costQuarterCredits: number;
+            lines: components["schemas"]["CostLines"];
+            options: components["schemas"]["CostOptionPrices"];
         };
         FeatureFlagView: {
             name: string;
