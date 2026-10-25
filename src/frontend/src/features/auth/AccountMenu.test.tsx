@@ -45,7 +45,7 @@ describe('AccountMenu', () => {
     renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
 
     const dropdown = await screen.findByRole('combobox', { name: 'Language' })
-    await userEvent.selectOptions(dropdown, 'Ünïcödé Tëst')
+    await userEvent.selectOptions(dropdown, '🏴‍☠️ Ünïcödé Tëst')
 
     await waitFor(() => {
       expect(dropdown).toHaveValue('en-XA')
