@@ -4055,6 +4055,446 @@
                   ]
                 }
               ]
+            },
+            {
+              "name": "feature-flags",
+              "description": "",
+              "item": [
+                {
+                  "name": "List Feature Flags",
+                  "request": {
+                    "name": "List Feature Flags",
+                    "description": {},
+                    "url": {
+                      "path": [
+                        "api",
+                        "admin",
+                        "feature-flags"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "GET",
+                    "body": {},
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"items\": [\n    {\n      \"name\": \"<string>\",\n      \"defaultEnabled\": \"<boolean>\",\n      \"removalIssue\": \"<integer>\",\n      \"enabled\": \"<boolean>\",\n      \"rolloutPercent\": \"<integer>\",\n      \"allowedMemberIds\": [\n        \"<uuid>\",\n        \"<uuid>\"\n      ],\n      \"deniedMemberIds\": [\n        \"<uuid>\",\n        \"<uuid>\"\n      ],\n      \"roleRollouts\": [\n        {\n          \"role\": \"<string>\",\n          \"rolloutPercent\": \"<integer>\"\n        },\n        {\n          \"role\": \"<string>\",\n          \"rolloutPercent\": \"<integer>\"\n        }\n      ]\n    },\n    {\n      \"name\": \"<string>\",\n      \"defaultEnabled\": \"<boolean>\",\n      \"removalIssue\": \"<integer>\",\n      \"enabled\": \"<boolean>\",\n      \"rolloutPercent\": \"<integer>\",\n      \"allowedMemberIds\": [\n        \"<uuid>\",\n        \"<uuid>\"\n      ],\n      \"deniedMemberIds\": [\n        \"<uuid>\",\n        \"<uuid>\"\n      ],\n      \"roleRollouts\": [\n        {\n          \"role\": \"<string>\",\n          \"rolloutPercent\": \"<integer>\"\n        },\n        {\n          \"role\": \"<string>\",\n          \"rolloutPercent\": \"<integer>\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Unauthorized",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Forbidden",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                },
+                {
+                  "name": "Update Feature Flag",
+                  "request": {
+                    "name": "Update Feature Flag",
+                    "description": {},
+                    "url": {
+                      "path": [
+                        "api",
+                        "admin",
+                        "feature-flags"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "PUT",
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"<string>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"<string>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"name\": \"<string>\",\n  \"defaultEnabled\": \"<boolean>\",\n  \"removalIssue\": \"<integer>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Bad Request",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"<string>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Unauthorized",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"<string>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Forbidden",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"<string>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Not Found",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "feature-flags"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"<string>\",\n  \"enabled\": \"<boolean>\",\n  \"rolloutPercent\": \"<integer>\",\n  \"allowedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"deniedMemberIds\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"roleRollouts\": [\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    },\n    {\n      \"role\": \"<string>\",\n      \"rolloutPercent\": \"<integer>\"\n    }\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                }
+              ]
             }
           ]
         }

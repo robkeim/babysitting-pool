@@ -98,6 +98,8 @@
   "error.start_passed": "The start time has passed, so that can't be changed any more.",
   "error.member_not_found": "That member no longer exists.",
   "error.cannot_offboard_admin": "The Admin can't be offboarded.",
+  "error.feature_off": "That feature isn't available right now.",
+  "error.feature_flag_not_found": "That feature flag no longer exists.",
   "requests.open.title": "Open Requests",
   "requests.open.loadFailed.title": "We couldn't load the open requests",
   "requests.open.loadFailed.body": "Please try again in a moment.",

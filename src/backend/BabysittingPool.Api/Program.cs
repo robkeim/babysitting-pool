@@ -55,6 +55,7 @@ else
 }
 
 builder.Services.AddSessionAuthentication();
+builder.Services.AddFeatureFlags();
 builder.Services.AddApiRateLimiting(builder.Configuration);
 
 if (builder.Configuration.GetValue(SettleHostedService.EnabledSetting, !builder.Environment.IsEnvironment(TestEndpoints.Environment)))
@@ -65,6 +66,8 @@ if (builder.Configuration.GetValue(SettleHostedService.EnabledSetting, !builder.
 var app = builder.Build();
 
 await app.Services.MigrateDatabaseAsync();
+
+await app.Services.SeedFeatureFlagsAsync(app.Configuration);
 
 var adminEmailSetting = app.Configuration["Bootstrap:AdminEmail"];
 EmailAddress? adminEmail = null;

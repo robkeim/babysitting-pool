@@ -341,6 +341,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/feature-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListFeatureFlags"];
+        put: operations["UpdateFeatureFlag"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -361,6 +377,18 @@ export interface components {
         CostQuote: {
             /** Format: int64 */
             costQuarterCredits: number;
+        };
+        FeatureFlagView: {
+            name: string;
+            defaultEnabled: boolean;
+            /** Format: int32 */
+            removalIssue: number;
+            enabled: boolean;
+            /** Format: int32 */
+            rolloutPercent: number;
+            allowedMemberIds: string[];
+            deniedMemberIds: string[];
+            roleRollouts: components["schemas"]["RoleRollout"][];
         };
         InvitationPreview: {
             email: string;
@@ -415,6 +443,10 @@ export interface components {
             costQuarterCredits: number;
             /** Format: date-time */
             claimCutoffAt: string;
+        };
+        PageOfFeatureFlagView: {
+            items: components["schemas"]["FeatureFlagView"][];
+            nextCursor: null | string;
         };
         PageOfLedgerEntryView: {
             items: components["schemas"]["LedgerEntryView"][];
@@ -475,6 +507,11 @@ export interface components {
             postedAt: string;
             status: components["schemas"]["RequestStatus"];
         };
+        RoleRollout: {
+            role: string;
+            /** Format: int32 */
+            rolloutPercent: number;
+        };
         SettleResult: {
             /** Format: int32 */
             expired: number;
@@ -493,6 +530,15 @@ export interface components {
         };
         /** @enum {unknown} */
         TransportOption: "None" | "OneWay" | "RoundTrip";
+        UpdateFeatureFlagRequest: {
+            name: string;
+            enabled: boolean;
+            /** Format: int32 */
+            rolloutPercent: number;
+            allowedMemberIds: string[];
+            deniedMemberIds: string[];
+            roleRollouts: components["schemas"]["RoleRollout"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -1328,6 +1374,104 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListFeatureFlags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageOfFeatureFlagView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateFeatureFlag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFeatureFlagRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeatureFlagView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

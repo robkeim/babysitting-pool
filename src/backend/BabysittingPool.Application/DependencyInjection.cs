@@ -1,4 +1,5 @@
 using BabysittingPool.Application.Credits;
+using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Offboarding;
 using BabysittingPool.Application.Requests;
@@ -31,6 +32,9 @@ public static class DependencyInjection
         services.AddScoped<SettleHandler>();
         services.AddScoped<OffboardMemberHandler>();
         services.AddScoped<EraseMemberHandler>();
+        services.AddSingleton(FeatureFlagRegistry.Production);
+        services.AddScoped<ListFeatureFlagsHandler>();
+        services.AddScoped<UpdateFeatureFlagHandler>();
         return services;
     }
 }
