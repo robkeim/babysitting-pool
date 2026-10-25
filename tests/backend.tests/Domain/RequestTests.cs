@@ -52,6 +52,29 @@ public class RequestTests
         act.Should().NotThrow();
     }
 
+    [Theory]
+    [InlineData(1, 0, 0)]
+    [InlineData(0, 3, 0)]
+    [InlineData(0, 0, 30)]
+    [InlineData(0, 4, 59)]
+    public void Posting_off_the_five_minute_boundary_is_blocked_and_escrows_nothing(int minutes, int seconds, int millis)
+    {
+        var account = CreditAccount.Open();
+
+        var act = () => Post(account, Start + new TimeSpan(0, 0, minutes, seconds, millis));
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("invalid_start_time");
+        account.Escrowed.Should().Be(0m);
+    }
+
+    [Fact]
+    public void Posting_on_a_five_minute_boundary_is_allowed()
+    {
+        var act = () => Post(CreditAccount.Open(), Start.AddMinutes(35));
+
+        act.Should().NotThrow();
+    }
+
     [Fact]
     public void Posting_inside_the_minimum_lead_time_is_blocked_and_escrows_nothing()
     {

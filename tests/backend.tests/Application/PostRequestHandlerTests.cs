@@ -145,7 +145,7 @@ public class PostRequestHandlerTests : IAsyncLifetime
         for (var i = 0; i < 3; i++)
         {
             await PostAsync(Command(memberId, durationMinutes: 15));
-            _database.Clock.Advance(TimeSpan.FromMinutes(1));
+            _database.Clock.Advance(TimeSpan.FromMinutes(5));
         }
 
         var first = await ListAsync(new ListMyRequestsQuery(memberId, Limit: 2));

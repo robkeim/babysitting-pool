@@ -92,6 +92,30 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task Posting_a_start_time_off_the_five_minute_boundary_answers_422()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+        var body = new
+        {
+            startsAt = _factory.Clock.GetUtcNow().AddHours(10).AddMinutes(1),
+            durationMinutes = 120,
+            childCount = 1,
+            location = "SittersHouse",
+            transport = "None",
+            lunch = false,
+            snack = false,
+            dinner = false,
+            area = "Riverside",
+            address = "12 River Rd",
+        };
+
+        var response = await client.PostAsJsonAsync("/api/requests", body);
+
+        await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "invalid_start_time");
+    }
+
+    [Fact]
     public async Task Posting_without_a_session_answers_401()
     {
         using var client = _factory.CreateSpaClient();
