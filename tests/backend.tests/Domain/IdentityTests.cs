@@ -20,9 +20,10 @@ public class IdentityTests
 
     [Theory]
     [InlineData("en-US", false, true)]
+    [InlineData("fr-FR", false, true)]
     [InlineData("en-XA", false, false)]
     [InlineData("en-XA", true, true)]
-    [InlineData("fr-FR", true, false)]
+    [InlineData("de-DE", true, false)]
     [InlineData(null, true, false)]
     public void Test_languages_are_only_parsed_outside_production(string? tag, bool includeTest, bool expected) =>
         Language.TryParse(tag, includeTest, out _).Should().Be(expected);

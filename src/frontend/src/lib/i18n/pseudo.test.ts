@@ -25,7 +25,7 @@ describe('pseudoLocalize', () => {
 
 describe('choosableLanguages', () => {
   it('never offers Ünïcödé Tëst in production', () => {
-    expect(choosableLanguages(true).map((l) => l.tag)).toEqual(['en-US'])
-    expect(choosableLanguages(false).map((l) => l.tag)).toEqual(['en-US', 'en-XA'])
+    expect(choosableLanguages(true).map((l) => l.tag)).toEqual(['en-US', 'fr-FR'])
+    expect(choosableLanguages(false).map((l) => l.tag)).toEqual(['en-US', 'fr-FR', 'en-XA'])
   })
 })

@@ -31,6 +31,13 @@ const ENGLISH: LanguageOption = {
 export const LANGUAGES: readonly LanguageOption[] = [
   ENGLISH,
   {
+    tag: 'fr-FR',
+    label: 'Français (France)',
+    formatLocale: 'fr-FR',
+    testOnly: false,
+    load: async () => (await import('./fr-FR.json')).default,
+  },
+  {
     tag: 'en-XA',
     label: 'Ünïcödé Tëst',
     formatLocale: 'en-US',

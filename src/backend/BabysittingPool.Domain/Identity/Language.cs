@@ -7,9 +7,10 @@ namespace BabysittingPool.Domain.Identity;
 public sealed record Language
 {
     public static readonly Language EnglishUs = new("en-US", isTest: false);
+    public static readonly Language FrenchFrance = new("fr-FR", isTest: false);
     public static readonly Language UnicodeTest = new("en-XA", isTest: true);
 
-    private static readonly Language[] All = [EnglishUs, UnicodeTest];
+    private static readonly Language[] All = [EnglishUs, FrenchFrance, UnicodeTest];
 
     private Language(string tag, bool isTest)
     {
