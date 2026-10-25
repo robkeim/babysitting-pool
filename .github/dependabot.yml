@@ -22,6 +22,9 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: "@eslint/js"
         update-types: [version-update:semver-major]
+      # Blocked on typescript-eslint supporting TypeScript 7 (#90).
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
