@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
@@ -133,5 +133,64 @@ describe('PostRequestPage', () => {
     await user.click(screen.getByRole('button', { name: /post request/i }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/too soon/i)
+  })
+
+  it('prices each option inline and itemises the backend quote as a receipt', async () => {
+    const user = userEvent.setup()
+    server.use(
+      availableBalanceHandler(84),
+      quoteHandler({
+        costQuarterCredits: 16,
+        lines: {
+          hourlyRateQuarterCredits: 7,
+          timeQuarterCredits: 7,
+          locationQuarterCredits: 0,
+          transportQuarterCredits: 0,
+          lunchQuarterCredits: 6,
+          snackQuarterCredits: 3,
+          dinnerQuarterCredits: 0,
+        },
+        options: {
+          familyHouseQuarterCredits: 2,
+          oneWayTransportQuarterCredits: 2,
+          roundTripTransportQuarterCredits: 3,
+          lunchQuarterCredits: 6,
+          snackQuarterCredits: 3,
+          dinnerQuarterCredits: 6,
+          lunchPerChildQuarterCredits: 2,
+          snackPerChildQuarterCredits: 1,
+          dinnerPerChildQuarterCredits: 2,
+          secondChildHourlyQuarterCredits: 2,
+          additionalChildHourlyQuarterCredits: 1,
+        },
+      }),
+    )
+
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+    await user.clear(screen.getByLabelText(/number of children/i))
+    await user.type(screen.getByLabelText(/number of children/i), '3')
+
+    expect(await screen.findByLabelText(/lunch \(\+1\.50 credits\)/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/snack \(\+0\.75 credits\)/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/dinner \(\+1\.50 credits\)/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/lunch/i)).toHaveAccessibleName(/0\.50 × 3 children/)
+    expect(
+      screen.getByRole('option', { name: /requesting family's house \(\+0\.50 credits\)/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /one way \(\+0\.50 credits\)/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /round trip \(\+0\.75 credits\)/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/1\.75 credits per hour for 3 children/i)).toBeInTheDocument()
+
+    const receipt = screen.getByRole('region', { name: /cost breakdown/i })
+    expect(within(receipt).getByText(/time \(60 min at 1\.75\/hr\)/i)).toBeInTheDocument()
+    expect(within(receipt).getByText('1.75')).toBeInTheDocument()
+    expect(within(receipt).getByText('1.50')).toBeInTheDocument()
+    expect(within(receipt).getByText('0.75')).toBeInTheDocument()
+    expect(within(receipt).queryByText(/dinner/i)).not.toBeInTheDocument()
+    expect(within(receipt).getByText('4.00 credits')).toBeInTheDocument()
+    expect(within(receipt).getByText(/you have 21\.00 available/i)).toBeInTheDocument()
+    expect(within(receipt).getByText(/after posting: 17\.00 credits left/i)).toBeInTheDocument()
   })
 })

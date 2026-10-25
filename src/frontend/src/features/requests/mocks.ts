@@ -39,9 +39,35 @@ export function myRequestsFailureHandler() {
   )
 }
 
-/** Answers every quote with the same cost. */
-export function quoteHandler(quote: CostQuote) {
-  return http.get('*/api/requests/quote', () => HttpResponse.json(quote))
+const zeroQuote: CostQuote = {
+  costQuarterCredits: 0,
+  lines: {
+    hourlyRateQuarterCredits: 4,
+    timeQuarterCredits: 0,
+    locationQuarterCredits: 0,
+    transportQuarterCredits: 0,
+    lunchQuarterCredits: 0,
+    snackQuarterCredits: 0,
+    dinnerQuarterCredits: 0,
+  },
+  options: {
+    familyHouseQuarterCredits: 2,
+    oneWayTransportQuarterCredits: 2,
+    roundTripTransportQuarterCredits: 3,
+    lunchQuarterCredits: 2,
+    snackQuarterCredits: 1,
+    dinnerQuarterCredits: 2,
+    lunchPerChildQuarterCredits: 2,
+    snackPerChildQuarterCredits: 1,
+    dinnerPerChildQuarterCredits: 2,
+    secondChildHourlyQuarterCredits: 2,
+    additionalChildHourlyQuarterCredits: 1,
+  },
+}
+
+/** Answers every quote with the same itemised cost; unset parts are the one-child defaults. */
+export function quoteHandler(quote: Partial<CostQuote> & Pick<CostQuote, 'costQuarterCredits'>) {
+  return http.get('*/api/requests/quote', () => HttpResponse.json({ ...zeroQuote, ...quote }))
 }
 
 /** Calls `onPost` with the body, then answers 201. */

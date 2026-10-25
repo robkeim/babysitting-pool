@@ -73,4 +73,28 @@ public sealed record RequestRead(
 }
 
 /// <summary>What a Request would cost, from the same calculator posting uses (spec §3).</summary>
-public sealed record CostQuote(long CostQuarterCredits);
+public sealed record CostQuote(long CostQuarterCredits, CostLines Lines, CostOptionPrices Options);
+
+/// <summary>The receipt: what each cost driver adds to this quote, in quarter-credits. The lines sum to the total.</summary>
+public sealed record CostLines(
+    long HourlyRateQuarterCredits,
+    long TimeQuarterCredits,
+    long LocationQuarterCredits,
+    long TransportQuarterCredits,
+    long LunchQuarterCredits,
+    long SnackQuarterCredits,
+    long DinnerQuarterCredits);
+
+/// <summary>What each option would add at this child count, whether or not it is selected, so the form can price its own labels.</summary>
+public sealed record CostOptionPrices(
+    long FamilyHouseQuarterCredits,
+    long OneWayTransportQuarterCredits,
+    long RoundTripTransportQuarterCredits,
+    long LunchQuarterCredits,
+    long SnackQuarterCredits,
+    long DinnerQuarterCredits,
+    long LunchPerChildQuarterCredits,
+    long SnackPerChildQuarterCredits,
+    long DinnerPerChildQuarterCredits,
+    long SecondChildHourlyQuarterCredits,
+    long AdditionalChildHourlyQuarterCredits);

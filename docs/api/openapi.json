@@ -1243,15 +1243,127 @@
           "RequestingFamilysHouse"
         ]
       },
+      "CostLines": {
+        "required": [
+          "hourlyRateQuarterCredits",
+          "timeQuarterCredits",
+          "locationQuarterCredits",
+          "transportQuarterCredits",
+          "lunchQuarterCredits",
+          "snackQuarterCredits",
+          "dinnerQuarterCredits"
+        ],
+        "type": "object",
+        "properties": {
+          "hourlyRateQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "timeQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transportQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lunchQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "snackQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dinnerQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostOptionPrices": {
+        "required": [
+          "familyHouseQuarterCredits",
+          "oneWayTransportQuarterCredits",
+          "roundTripTransportQuarterCredits",
+          "lunchQuarterCredits",
+          "snackQuarterCredits",
+          "dinnerQuarterCredits",
+          "lunchPerChildQuarterCredits",
+          "snackPerChildQuarterCredits",
+          "dinnerPerChildQuarterCredits",
+          "secondChildHourlyQuarterCredits",
+          "additionalChildHourlyQuarterCredits"
+        ],
+        "type": "object",
+        "properties": {
+          "familyHouseQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "oneWayTransportQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "roundTripTransportQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lunchQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "snackQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dinnerQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lunchPerChildQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "snackPerChildQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dinnerPerChildQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "secondChildHourlyQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "additionalChildHourlyQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "CostQuote": {
         "required": [
-          "costQuarterCredits"
+          "costQuarterCredits",
+          "lines",
+          "options"
         ],
         "type": "object",
         "properties": {
           "costQuarterCredits": {
             "type": "integer",
             "format": "int64"
+          },
+          "lines": {
+            "$ref": "#/components/schemas/CostLines"
+          },
+          "options": {
+            "$ref": "#/components/schemas/CostOptionPrices"
           }
         }
       },

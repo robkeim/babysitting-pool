@@ -329,6 +329,42 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task Quote_itemises_the_cost_so_the_lines_sum_to_the_total()
+    {
+        using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+
+        var quote = await client.GetFromJsonAsync<JsonElement>(
+            "/api/requests/quote?durationMinutes=60&childCount=3&location=SittersHouse&transport=None&lunch=true&snack=true&dinner=false");
+
+        // 1h x 1.75 + 3 x 0.50 lunch + 3 x 0.25 snack = 4.00
+        var lines = quote.GetProperty("lines");
+        lines.GetProperty("hourlyRateQuarterCredits").GetInt64().Should().Be(7);
+        lines.GetProperty("timeQuarterCredits").GetInt64().Should().Be(7);
+        lines.GetProperty("lunchQuarterCredits").GetInt64().Should().Be(6);
+        lines.GetProperty("snackQuarterCredits").GetInt64().Should().Be(3);
+        lines.GetProperty("dinnerQuarterCredits").GetInt64().Should().Be(0);
+        quote.GetProperty("costQuarterCredits").GetInt64().Should().Be(16);
+    }
+
+    [Fact]
+    public async Task Quote_prices_every_option_at_the_current_child_count_even_when_unselected()
+    {
+        using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+
+        var quote = await client.GetFromJsonAsync<JsonElement>(
+            "/api/requests/quote?durationMinutes=60&childCount=3");
+
+        var options = quote.GetProperty("options");
+        options.GetProperty("lunchQuarterCredits").GetInt64().Should().Be(6);
+        options.GetProperty("lunchPerChildQuarterCredits").GetInt64().Should().Be(2);
+        options.GetProperty("dinnerQuarterCredits").GetInt64().Should().Be(6);
+        options.GetProperty("snackQuarterCredits").GetInt64().Should().Be(3);
+        options.GetProperty("familyHouseQuarterCredits").GetInt64().Should().Be(2);
+        options.GetProperty("oneWayTransportQuarterCredits").GetInt64().Should().Be(2);
+        options.GetProperty("roundTripTransportQuarterCredits").GetInt64().Should().Be(3);
+    }
+
+    [Fact]
     public async Task Quote_rejects_transport_with_the_family_house_premium_with_422()
     {
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
