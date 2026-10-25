@@ -4,6 +4,7 @@ using BabysittingPool.Application.Requests;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BabysittingPool.Infrastructure;
 
@@ -23,11 +24,29 @@ public static class DependencyInjection
         return services;
     }
 
-    /// <summary>Development, E2E and tests: emails are kept and logged, never sent.</summary>
+    /// <summary>E2E and tests: emails are kept and logged, never sent.</summary>
     public static IServiceCollection AddEmailOutbox(this IServiceCollection services)
     {
-        services.AddSingleton<EmailOutbox>();
+        services.AddSingleton(sp => new EmailOutbox(sp.GetRequiredService<ILogger<EmailOutbox>>()));
         services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<EmailOutbox>());
+        return services;
+    }
+
+    /// <summary>Development with SMTP secrets: every message is kept and logged, then sent over SMTP.</summary>
+    public static IServiceCollection AddEmailOutboxOverSmtp(this IServiceCollection services, SmtpSettings settings)
+    {
+        services.AddSingleton(new SmtpEmailSender(settings));
+        services.AddSingleton(sp => new EmailOutbox(
+            sp.GetRequiredService<ILogger<EmailOutbox>>(), sp.GetRequiredService<SmtpEmailSender>()));
+        services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<EmailOutbox>());
+        return services;
+    }
+
+    /// <summary>Production with SMTP secrets.</summary>
+    public static IServiceCollection AddSmtpEmailSender(this IServiceCollection services, SmtpSettings settings)
+    {
+        services.AddSingleton<SmtpEmailSender>(new SmtpEmailSender(settings));
+        services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SmtpEmailSender>());
         return services;
     }
 

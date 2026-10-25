@@ -46,9 +46,23 @@ if (string.IsNullOrWhiteSpace(baseUrl))
 }
 
 builder.Services.AddSingleton(new AppLinks(new Uri(baseUrl)));
+// SMTP secrets (dotnet user-secrets, ADR 0011) are only ever honoured in Development and Production; E2E and
+// tests always use the fake outbox, even on a machine that has them.
+var smtp = builder.Configuration.SmtpSettings();
 if (builder.Environment.IsProduction())
 {
-    builder.Services.AddUnconfiguredEmailSender();
+    if (smtp is null)
+    {
+        builder.Services.AddUnconfiguredEmailSender();
+    }
+    else
+    {
+        builder.Services.AddSmtpEmailSender(smtp);
+    }
+}
+else if (builder.Environment.IsDevelopment() && smtp is not null)
+{
+    builder.Services.AddEmailOutboxOverSmtp(smtp);
 }
 else
 {
@@ -81,7 +95,7 @@ if (!string.IsNullOrWhiteSpace(adminEmailSetting))
 
 if (app.Environment.IsDevelopment())
 {
-    await app.Services.SeedDevelopmentAsync(adminEmail?.Value ?? "admin@example.test");
+    await app.Services.SeedDevelopmentAsync(adminEmail?.Value, smtp?.Address);
 }
 
 // Anywhere but Production an empty database is fine (tests and E2E create their own Members).

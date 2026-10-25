@@ -64,22 +64,43 @@ public static class MemberSeeder
 
     /// <summary>
     /// Development: one Admin and three Members with different balances (ADR 0011), then logs the Admin's
-    /// sign-in link through the outbox. Safe to run on every start.
+    /// sign-in link through the outbox, never delivering it. Safe to run on every start. With a
+    /// <paramref name="baseAddress"/> the seed addresses are its plus-addresses (<c>local+user1@domain</c>), so
+    /// real email reaches one inbox; otherwise they are <c>example.test</c> addresses.
     /// </summary>
     public static async Task SeedDevelopmentAsync(
-        this IServiceProvider services, string adminEmail, CancellationToken cancellationToken = default)
+        this IServiceProvider services,
+        string? adminEmail = null,
+        string? baseAddress = null,
+        CancellationToken cancellationToken = default)
     {
+        string Address(string tag, string fallback) =>
+            baseAddress is not null && baseAddress.LastIndexOf('@') is > 0 and var at
+                ? $"{baseAddress[..at]}+{tag}{baseAddress[at..]}"
+                : fallback;
+
+        adminEmail ??= Address("admin", "admin@example.test");
         var admin = Credits.FromDecimal(CreditAccount.StartingBalance);
         await services.SeedMemberAsync(adminEmail, "Dev Admin", true, [admin], cancellationToken);
-        await services.SeedMemberAsync("ada@example.test", "Ada (10.0)", false, [admin], cancellationToken);
-        await services.SeedMemberAsync("ben@example.test", "Ben (0.0)", false, [], cancellationToken);
+        await services.SeedMemberAsync(Address("user1", "ada@example.test"), "Ada (10.0)", false, [admin], cancellationToken);
+        await services.SeedMemberAsync(Address("user2", "ben@example.test"), "Ben (0.0)", false, [], cancellationToken);
         await services.SeedMemberAsync(
-            "cleo@example.test", "Cleo (25.5)", false, [admin, Credits.FromDecimal(15.5m)], cancellationToken);
+            Address("user3", "cleo@example.test"), "Cleo (25.5)", false, [admin, Credits.FromDecimal(15.5m)], cancellationToken);
 
-        await using var scope = services.CreateAsyncScope();
         if (EmailAddress.TryParse(adminEmail, out var address))
         {
-            await scope.ServiceProvider.GetRequiredService<RequestSignInLinkHandler>().HandleAsync(address, cancellationToken);
+            await using var scope = services.CreateAsyncScope();
+            var outbox = scope.ServiceProvider.GetRequiredService<EmailOutbox>();
+            var handler = ActivatorUtilities.CreateInstance<RequestSignInLinkHandler>(
+                scope.ServiceProvider, new OutboxOnly(outbox));
+            await handler.HandleAsync(address, cancellationToken);
         }
+    }
+
+    /// <summary>Keeps and logs a message in the outbox without passing it on to a real sender.</summary>
+    private sealed class OutboxOnly(EmailOutbox outbox) : IEmailSender
+    {
+        public Task SendAsync(EmailMessage message, CancellationToken cancellationToken) =>
+            outbox.SendWithoutDeliveryAsync(message, cancellationToken);
     }
 }
