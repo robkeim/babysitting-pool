@@ -1152,7 +1152,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"availableQuarterCredits\": \"<long>\",\n  \"escrowedQuarterCredits\": \"<long>\",\n  \"ledger\": {\n    \"items\": [\n      {\n        \"id\": \"<uuid>\",\n        \"kind\": \"<string>\",\n        \"amountQuarterCredits\": \"<long>\",\n        \"occurredAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<uuid>\",\n        \"kind\": \"<string>\",\n        \"amountQuarterCredits\": \"<long>\",\n        \"occurredAt\": \"<dateTime>\"\n      }\n    ],\n    \"nextCursor\": \"<null,string>\"\n  }\n}",
+                      "body": "{\n  \"availableQuarterCredits\": \"<long>\",\n  \"escrowedQuarterCredits\": \"<long>\",\n  \"ledger\": {\n    \"items\": [\n      {\n        \"id\": \"<uuid>\",\n        \"kind\": \"Grant\",\n        \"amountQuarterCredits\": \"<long>\",\n        \"occurredAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<uuid>\",\n        \"kind\": \"Grant\",\n        \"amountQuarterCredits\": \"<long>\",\n        \"occurredAt\": \"<dateTime>\"\n      }\n    ],\n    \"nextCursor\": \"<null,string>\"\n  }\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },

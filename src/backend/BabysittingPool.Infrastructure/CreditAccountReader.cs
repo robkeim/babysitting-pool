@@ -31,6 +31,6 @@ internal sealed class CreditAccountReader(BabysittingPoolDbContext db) : ICredit
         return new AccountRead(
             account.Available.QuarterCredits,
             account.Escrowed.QuarterCredits,
-            entries.Select(e => new LedgerEntryView(e.Id, e.Kind.ToString(), e.Amount.QuarterCredits, e.OccurredAt)).ToList());
+            entries.Select(e => new LedgerEntryView(e.Id, e.Kind, e.Amount.QuarterCredits, e.OccurredAt)).ToList());
     }
 }

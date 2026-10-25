@@ -13,9 +13,10 @@ import {
 import { type MessageId } from '@/lib/i18n'
 import { useMyAccount } from './api'
 import { formatCredits, formatInstant } from './format'
+import { type LedgerEntryKind } from './types'
 
-/** One message per Ledger entry kind; the backend enum is checked against it in CreditsPage.test.tsx. */
-const KIND_MESSAGES: Partial<Record<string, MessageId>> = {
+/** One message per Ledger entry kind; a kind with no message fails the typecheck. */
+const KIND_MESSAGES: Record<LedgerEntryKind, MessageId> = {
   Grant: 'credits.ledger.kind.Grant',
   Escrow: 'credits.ledger.kind.Escrow',
   Refund: 'credits.ledger.kind.Refund',
@@ -89,10 +90,7 @@ export function CreditsPage() {
             <TableRow key={entry.id}>
               <TableCell>{formatInstant(entry.occurredAt)}</TableCell>
               <TableCell>
-                {(() => {
-                  const id = KIND_MESSAGES[entry.kind]
-                  return id ? <FormattedMessage id={id} /> : entry.kind
-                })()}
+                <FormattedMessage id={KIND_MESSAGES[entry.kind]} />
               </TableCell>
               <TableCell className="text-right">
                 {formatCredits(entry.amountQuarterCredits)}
