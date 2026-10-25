@@ -57,12 +57,11 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
     snack,
     dinner,
   }
-  const detailsValid =
+  const durationValid =
     Number.isInteger(durationMinutes) &&
     durationMinutes > 0 &&
-    durationMinutes % DURATION_STEP_MINUTES === 0 &&
-    Number.isInteger(childCount) &&
-    childCount >= 1
+    durationMinutes % DURATION_STEP_MINUTES === 0
+  const detailsValid = durationValid && Number.isInteger(childCount) && childCount >= 1
   const quote = useQuote(details, detailsValid)
   const cost = detailsValid ? quote.data?.costQuarterCredits : undefined
   const available = account.data?.pages[0]?.availableQuarterCredits
@@ -117,11 +116,18 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                 required
                 min={DURATION_STEP_MINUTES}
                 step={DURATION_STEP_MINUTES}
+                aria-invalid={!durationValid}
+                aria-describedby={durationValid ? undefined : 'duration-error'}
                 value={Number.isNaN(durationMinutes) ? '' : durationMinutes}
                 onChange={(event) => {
                   setDurationMinutes(event.target.valueAsNumber)
                 }}
               />
+              {!durationValid && (
+                <p id="duration-error" role="alert" className="text-sm text-destructive">
+                  <FormattedMessage id="requests.post.duration.invalid" />
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <label htmlFor="children" className="text-sm font-medium">

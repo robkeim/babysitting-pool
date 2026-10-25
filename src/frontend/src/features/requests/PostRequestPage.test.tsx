@@ -74,6 +74,27 @@ describe('PostRequestPage', () => {
     expect(screen.getByRole('button', { name: /post request/i })).toBeDisabled()
   })
 
+  it('rejects a duration that is not a multiple of 15 minutes', async () => {
+    const user = userEvent.setup()
+    server.use(availableBalanceHandler(40), quoteHandler({ costQuarterCredits: 8 }))
+
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+    await fillRequiredFields(user)
+    const duration = screen.getByLabelText(/duration/i)
+    await user.clear(duration)
+    await user.type(duration, '32')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/steps of 15 minutes/i)
+    expect(duration).toBeInvalid()
+    expect(screen.getByRole('button', { name: /post request/i })).toBeDisabled()
+
+    await user.clear(duration)
+    await user.type(duration, '30')
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /post request/i })).toBeEnabled()
+  })
+
   it('does not offer transport at the requesting family’s house', async () => {
     const user = userEvent.setup()
     server.use(availableBalanceHandler(40), quoteHandler({ costQuarterCredits: 6 }))
