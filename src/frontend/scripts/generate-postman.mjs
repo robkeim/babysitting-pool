@@ -1,6 +1,7 @@
 // Generates docs/api/postman_collection.json from docs/api/openapi.json (ADR 0006).
 // The converter emits random ids and picks random enum examples; ids are stripped and every enum is narrowed to
-// its first value in the copy handed to the converter, so the output is deterministic and drift-checkable.
+// its first value, and a free-form map (additionalProperties, no properties) becomes an object with one fixed key, in the
+// copy handed to the converter, so the output is deterministic and drift-checkable.
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -19,6 +20,10 @@ const pinEnums = (node) => {
       Object.entries(node).map(([key, value]) => [key, pinEnums(value)]),
     )
     if (Array.isArray(pinned.enum)) pinned.enum = pinned.enum.slice(0, 1)
+    if (!pinned.properties && pinned.additionalProperties?.type) {
+      pinned.properties = { key: pinned.additionalProperties }
+      delete pinned.additionalProperties
+    }
     return pinned
   }
   return node

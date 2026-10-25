@@ -20,6 +20,7 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
     public DbSet<SignInLinkRecord> SignInLinks => Set<SignInLinkRecord>();
 
     public DbSet<SessionRecord> Sessions => Set<SessionRecord>();
+
     public DbSet<FeatureFlagRecord> FeatureFlags => Set<FeatureFlagRecord>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
