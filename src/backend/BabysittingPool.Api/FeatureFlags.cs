@@ -44,7 +44,6 @@ internal static class FeatureFlagEndpoints
         services.AddFeatureFlagStore();
         services.AddScoped<FeatureFlagEvaluator>();
     }
-
 }
 
 public static class FeatureGate
