@@ -33,8 +33,10 @@ The total cost of a request is calculated deterministically using the following 
 
 ### A. Base Duration
 - Calculated in minutes, converted to fractional hours (e.g., 75 minutes = 1.25 hours).
-- Duration must be a positive multiple of **15 minutes** (15, 30, 45, 60, 75, ...). Any other value (e.g., 82 minutes) is rejected. This keeps every cost an exact decimal, so no rounding rule is needed.
+- Duration must be a positive multiple of **15 minutes** (15, 30, 45, 60, 75, ...). Any other value (e.g., 82 minutes) is rejected.
 - Rate: 1.0 credit / hour for the 1st child.
+
+- **Rounding:** Hours × hourly rate can fall between quarters (15 minutes with 3 children = 0.25 × 1.75 = 0.4375). The time cost is rounded to the nearest 0.25 credit, a midpoint going up (0.4375 → 0.50, 0.625 → 0.75). Rounding applies once, to the time cost only, before the fees in C–E, which are already multiples of 0.25. So every total is a whole number of quarter-credits (ADR 0001).
 
 ### B. Additional Children Scaling (Per Hour)
 - A request must include **at least 1 child**.
@@ -143,3 +145,11 @@ Expiry, Payout and Demurrage are applied by **Settle** (see ADR 0007).
 - **Claim Cutoff snapshot:** the cutoff instant is stored on the Request when it is posted or edited. Later changes to the setting affect only new or edited Requests.
 - **Between runs:** claims past the Claim Cutoff are rejected by the clock check, and read models show an overdue Posted Request as Expired.
 - **Idempotency:** Settle selects only Requests still Posted or Claimed past their trigger, so a repeat run does nothing. Demurrage is idempotent per (Member, boundary).
+
+---
+
+## 7. Member-facing Rules ("How it works")
+- **Rules endpoint:** `GET /api/rules` is read-only and needs a session. It exposes the Starting Balance, the duration increment, Minimum Lead Time, Claim Cutoff, the Demurrage weekday, time and co-op time zone, the grace period (21 days) and weekly charge, the dormancy threshold, the per-option prices (§3) and a few worked pricing examples. Examples carry their inputs and a quote priced by the same calculator as posting, so the numbers cannot drift from the engine. It holds no personal data and is identical for every Member.
+- **Page:** `/how-it-works` explains the rules in plain language in four Cards with anchors: `#credits`, `#pricing`, `#requests` and `#demurrage`. It shows the numbers the endpoint returns and has no calculator.
+- **Links:** the page is linked from the account menu in the top bar and, as `/how-it-works#pricing` in a new tab so a half-filled form is kept, from the post form's cost breakdown.
+- **Out of scope for now:** an Admin section, linking the balance to Demurrage, contextual links from claim and cancel, and rules for invitees before they join.

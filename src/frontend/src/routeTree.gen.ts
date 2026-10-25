@@ -14,6 +14,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as InvitationRouteImport } from './routes/invitation'
 import { Route as AuthedClaimsRouteImport } from './routes/_authed/claims'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
+import { Route as AuthedHowItWorksRouteImport } from './routes/_authed/how-it-works'
 import { Route as AuthedOpenRequestsRouteImport } from './routes/_authed/open-requests'
 import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
@@ -44,6 +45,11 @@ const AuthedClaimsRoute = AuthedClaimsRouteImport.update({
 const AuthedCreditsRoute = AuthedCreditsRouteImport.update({
   id: '/credits',
   path: '/credits',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedHowItWorksRoute = AuthedHowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedOpenRequestsRoute = AuthedOpenRequestsRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/invitation': typeof InvitationRoute
   '/claims': typeof AuthedClaimsRoute
   '/credits': typeof AuthedCreditsRoute
+  '/how-it-works': typeof AuthedHowItWorksRoute
   '/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/invitation': typeof InvitationRoute
   '/claims': typeof AuthedClaimsRoute
   '/credits': typeof AuthedCreditsRoute
+  '/how-it-works': typeof AuthedHowItWorksRoute
   '/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in': typeof SignInIndexRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/invitation': typeof InvitationRoute
   '/_authed/claims': typeof AuthedClaimsRoute
   '/_authed/credits': typeof AuthedCreditsRoute
+  '/_authed/how-it-works': typeof AuthedHowItWorksRoute
   '/_authed/open-requests': typeof AuthedOpenRequestsRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/invitation'
     | '/claims'
     | '/credits'
+    | '/how-it-works'
     | '/open-requests'
     | '/sign-in/verify'
     | '/sign-in/'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/invitation'
     | '/claims'
     | '/credits'
+    | '/how-it-works'
     | '/open-requests'
     | '/sign-in/verify'
     | '/sign-in'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/invitation'
     | '/_authed/claims'
     | '/_authed/credits'
+    | '/_authed/how-it-works'
     | '/_authed/open-requests'
     | '/sign-in/verify'
     | '/sign-in/'
@@ -209,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/credits'
       fullPath: '/credits'
       preLoaderRoute: typeof AuthedCreditsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/how-it-works': {
+      id: '/_authed/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof AuthedHowItWorksRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/open-requests': {
@@ -266,6 +285,7 @@ declare module '@tanstack/react-router' {
 interface AuthedRouteChildren {
   AuthedClaimsRoute: typeof AuthedClaimsRoute
   AuthedCreditsRoute: typeof AuthedCreditsRoute
+  AuthedHowItWorksRoute: typeof AuthedHowItWorksRoute
   AuthedOpenRequestsRoute: typeof AuthedOpenRequestsRoute
   AuthedAdminFeatureFlagsRoute: typeof AuthedAdminFeatureFlagsRoute
   AuthedAdminInvitationsRoute: typeof AuthedAdminInvitationsRoute
@@ -276,6 +296,7 @@ interface AuthedRouteChildren {
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedClaimsRoute: AuthedClaimsRoute,
   AuthedCreditsRoute: AuthedCreditsRoute,
+  AuthedHowItWorksRoute: AuthedHowItWorksRoute,
   AuthedOpenRequestsRoute: AuthedOpenRequestsRoute,
   AuthedAdminFeatureFlagsRoute: AuthedAdminFeatureFlagsRoute,
   AuthedAdminInvitationsRoute: AuthedAdminInvitationsRoute,

@@ -165,6 +165,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetRules"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/requests": {
         parameters: {
             query?: never;
@@ -468,6 +484,8 @@ export interface components {
             lines: components["schemas"]["CostLines"];
             options: components["schemas"]["CostOptionPrices"];
         };
+        /** @enum {unknown} */
+        DayOfWeek: "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
         FeatureFlagView: {
             name: string;
             defaultEnabled: boolean;
@@ -588,6 +606,18 @@ export interface components {
             area: null | string;
             address: null | string;
         };
+        PricingExample: {
+            /** Format: int32 */
+            durationMinutes: number;
+            /** Format: int32 */
+            childCount: number;
+            location: components["schemas"]["BabysittingLocation"];
+            transport: components["schemas"]["TransportOption"];
+            lunch: boolean;
+            snack: boolean;
+            dinner: boolean;
+            quote: components["schemas"]["CostQuote"];
+        };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -626,6 +656,27 @@ export interface components {
             role: string;
             /** Format: int32 */
             rolloutPercent: number;
+        };
+        RulesView: {
+            /** Format: int64 */
+            startingBalanceQuarterCredits: number;
+            /** Format: int32 */
+            durationIncrementMinutes: number;
+            /** Format: int32 */
+            minimumLeadTimeMinutes: number;
+            /** Format: int32 */
+            claimCutoffMinutes: number;
+            demurrageDay: components["schemas"]["DayOfWeek"];
+            demurrageTime: string;
+            timeZone: string;
+            /** Format: int32 */
+            demurrageGraceDays: number;
+            /** Format: int64 */
+            demurrageChargeQuarterCredits: number;
+            /** Format: int32 */
+            dormancyDays: number;
+            prices: components["schemas"]["CostOptionPrices"];
+            examples: components["schemas"]["PricingExample"][];
         };
         SettleResult: {
             /** Format: int32 */
@@ -926,6 +977,35 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RulesView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -41,7 +41,7 @@ public static class CreditCostCalculator
         return new CreditCostBreakdown(
             Hours: hours,
             HourlyRate: hourlyRate,
-            TimeCost: hours * hourlyRate,
+            TimeCost: RoundToQuarter(hours * hourlyRate),
             LocationPremium: locationPremium,
             TransportFee: transportFee,
             MealFee: mealFeePerChild * request.ChildCount,
@@ -49,6 +49,10 @@ public static class CreditCostCalculator
             SnackFee: request.Meals.HasFlag(MealOption.Snack) ? SnackFeePerChild * request.ChildCount : 0m,
             DinnerFee: request.Meals.HasFlag(MealOption.Dinner) ? DinnerFeePerChild * request.ChildCount : 0m);
     }
+
+    /// <summary>Rounds to the nearest 0.25, a midpoint going up (spec §3A), so the time cost is a whole number of quarter-credits (ADR 0001).</summary>
+    private static decimal RoundToQuarter(decimal credits) =>
+        decimal.Round(credits * 4m, MidpointRounding.AwayFromZero) / 4m;
 
     /// <summary>What each option costs for this many children, whether or not it is selected, for inline hints on the post form.</summary>
     public static CreditOptionPrices OptionPrices(int childCount)

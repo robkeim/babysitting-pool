@@ -1,6 +1,6 @@
-import { LogOut } from 'lucide-react'
+import { CircleHelp, LogOut } from 'lucide-react'
 import { useIntl } from 'react-intl'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { choosableLanguages } from '@/lib/i18n'
 import { useChangeLanguage, useMe, useSignOut } from './api'
 
@@ -26,6 +26,13 @@ export function AccountMenu({ onSignedOut }: AccountMenuProps) {
         {Array.from(me.data.displayName)[0]}
       </span>
       <span className="sr-only">{me.data.displayName}</span>
+      <a
+        href="/how-it-works"
+        aria-label={intl.formatMessage({ id: 'auth.accountMenu.howItWorks' })}
+        className={buttonVariants({ variant: 'ghost', size: 'icon-lg' })}
+      >
+        <CircleHelp />
+      </a>
       <select
         aria-label={intl.formatMessage({ id: 'auth.accountMenu.language' })}
         className="h-9 max-w-32 rounded-lg border border-input bg-card px-2 text-base lg:max-w-none lg:text-sm"
