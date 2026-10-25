@@ -17,6 +17,7 @@ public enum TransportOption
 public enum MealOption
 {
     None = 0,
-    LunchOrDinner = 1,
+    Lunch = 1,
     Snack = 2,
+    Dinner = 4,
 }

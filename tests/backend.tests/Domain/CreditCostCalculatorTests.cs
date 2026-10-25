@@ -76,9 +76,11 @@ public class CreditCostCalculatorTests
 
     [Theory]
     [InlineData(MealOption.None, 1, 1.0)]
-    [InlineData(MealOption.LunchOrDinner, 1, 1.5)]
+    [InlineData(MealOption.Lunch, 1, 1.5)]
     [InlineData(MealOption.Snack, 1, 1.25)]
-    [InlineData(MealOption.LunchOrDinner | MealOption.Snack, 1, 1.75)]
+    [InlineData(MealOption.Dinner, 1, 1.5)]
+    [InlineData(MealOption.Lunch | MealOption.Dinner, 1, 2.0)]
+    [InlineData(MealOption.Lunch | MealOption.Snack, 1, 1.75)]
     public void Meals_add_flat_fee_per_child(MealOption meals, int children, double expectedMealOnlyTotal)
     {
         Cost(60, children, meals: meals).Should().Be((decimal)expectedMealOnlyTotal);
@@ -88,7 +90,7 @@ public class CreditCostCalculatorTests
     public void Meal_fee_is_multiplied_by_child_count_but_not_by_duration()
     {
         // 2h * (1.0 + 0.5) = 3.0, plus 2 children * 0.5 lunch = 1.0
-        Cost(120, children: 2, meals: MealOption.LunchOrDinner).Should().Be(4.0m);
+        Cost(120, children: 2, meals: MealOption.Lunch).Should().Be(4.0m);
     }
 
     [Fact]
@@ -97,7 +99,7 @@ public class CreditCostCalculatorTests
         // 90 min, 3 children: 1.5h * 1.75 = 2.625; family house +0.5; meals+snack 3 * 0.75 = 2.25
         var breakdown = CreditCostCalculator.Calculate(new CreditRequestDetails(
             90, 3, BabysittingLocation.RequestingFamilysHouse, TransportOption.None,
-            MealOption.LunchOrDinner | MealOption.Snack));
+            MealOption.Lunch | MealOption.Snack));
 
         breakdown.Hours.Should().Be(1.5m);
         breakdown.HourlyRate.Should().Be(1.75m);

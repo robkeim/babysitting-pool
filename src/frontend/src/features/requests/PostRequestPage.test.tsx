@@ -41,8 +41,9 @@ describe('PostRequestPage', () => {
       childCount: 1,
       location: 'SittersHouse',
       transport: 'None',
-      lunchOrDinner: false,
+      lunch: false,
       snack: false,
+      dinner: false,
       area: 'Riverside',
       address: '12 River Rd',
     })

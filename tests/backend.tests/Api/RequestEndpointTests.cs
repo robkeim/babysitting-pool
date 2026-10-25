@@ -20,8 +20,9 @@ public class RequestEndpointTests : IDisposable
         childCount = 1,
         location = "SittersHouse",
         transport,
-        lunchOrDinner = false,
+        lunch = false,
         snack = false,
+        dinner = false,
         area = "Riverside",
         address = "12 River Rd",
     };
@@ -297,7 +298,7 @@ public class RequestEndpointTests : IDisposable
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
 
         var quote = await client.GetFromJsonAsync<JsonElement>(
-            "/api/requests/quote?durationMinutes=90&childCount=2&location=RequestingFamilysHouse&transport=None&lunchOrDinner=true&snack=false");
+            "/api/requests/quote?durationMinutes=90&childCount=2&location=RequestingFamilysHouse&transport=None&lunch=true&snack=false&dinner=false");
 
         // 1.5h x 1.50 + 0.50 premium + 2 children x 0.50 lunch = 3.75
         quote.GetProperty("costQuarterCredits").GetInt64().Should().Be(15);

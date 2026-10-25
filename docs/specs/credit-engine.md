@@ -62,8 +62,10 @@ The total cost of a request is calculated deterministically using the following 
 - *Constraint:* Transport fees cannot be combined with the "At Requesting Family's House" location premium (mutually exclusive to prevent double-counting).
 
 ### E. Meals & Snacks (Per Child Flat Fee)
-- **Lunch / Dinner:** +0.50 credits per child.
+- **Lunch:** +0.50 credits per child.
+- **Dinner:** +0.50 credits per child.
 - **Snack:** +0.25 credits per child.
+- Lunch, Dinner and Snack are independent options; choosing Lunch and Dinner charges both fees.
 
 ---
 
@@ -86,7 +88,7 @@ The total cost of a request is calculated deterministically using the following 
    - Upon posting a request, the system calculates the required cost and moves that amount from the Requester’s **Available Balance** into **Escrow**.
    - If `Available Balance < Request Cost`, posting is blocked.
    - A Request records the cost drivers, a rough **Area** and the exact address. Both are required. While Posted, other Members see only the Area (§4.6); in v1 only the Requester's own "My Requests" list shows the exact address.
-   - A Request's start time must be at least the **Minimum Lead Time** (default 6 hours, configurable) after the time of posting; otherwise posting is blocked.
+   - A Request's start time falls on a 5-minute boundary (the form offers no finer steps and hides seconds). It must be at least the **Minimum Lead Time** (default 6 hours, configurable) after the time of posting; otherwise posting is blocked.
 2. **Cancellation / Expiration:**
    - If a request is cancelled by the owner or expires unclaimed, the escrowed credits are immediately returned to the owner’s Available Balance.
    - **Claim Cutoff:** A Posted Request can no longer be claimed once the **Claim Cutoff** passes (default 3 hours before the start time, configurable). An unclaimed Request expires at the Claim Cutoff, so a Sitter is never claiming too late to arrange care.

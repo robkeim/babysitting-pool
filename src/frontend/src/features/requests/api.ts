@@ -40,8 +40,9 @@ export function useQuote(details: QuoteDetails, enabled: boolean) {
         childCount: String(details.childCount),
         location: details.location,
         transport: details.transport,
-        lunchOrDinner: String(details.lunchOrDinner),
+        lunch: String(details.lunch),
         snack: String(details.snack),
+        dinner: String(details.dinner),
       })
       return apiFetch<CostQuote>(`/api/requests/quote?${params.toString()}`)
     },

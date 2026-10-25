@@ -408,8 +408,9 @@ export interface components {
             childCount: number;
             location: components["schemas"]["BabysittingLocation"];
             transport: components["schemas"]["TransportOption"];
-            lunchOrDinner: boolean;
+            lunch: boolean;
             snack: boolean;
+            dinner: boolean;
             area: string;
             /** Format: int64 */
             costQuarterCredits: number;
@@ -437,8 +438,9 @@ export interface components {
             childCount: number;
             location: components["schemas"]["BabysittingLocation"];
             transport: components["schemas"]["TransportOption"];
-            lunchOrDinner: boolean;
+            lunch: boolean;
             snack: boolean;
+            dinner: boolean;
             area: null | string;
             address: null | string;
         };
@@ -463,8 +465,9 @@ export interface components {
             childCount: number;
             location: components["schemas"]["BabysittingLocation"];
             transport: components["schemas"]["TransportOption"];
-            lunchOrDinner: boolean;
+            lunch: boolean;
             snack: boolean;
+            dinner: boolean;
             area: string;
             address: string;
             /** Format: int64 */
@@ -1138,8 +1141,9 @@ export interface operations {
                 ChildCount: number;
                 Location?: components["schemas"]["BabysittingLocation"];
                 Transport?: components["schemas"]["TransportOption"];
-                LunchOrDinner?: boolean;
+                Lunch?: boolean;
                 Snack?: boolean;
+                Dinner?: boolean;
             };
             header?: never;
             path?: never;
