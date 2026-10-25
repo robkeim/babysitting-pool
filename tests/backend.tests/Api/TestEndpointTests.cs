@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using AwesomeAssertions;
+using BabysittingPool.Application.Flags;
 using backend.tests.Support;
 
 namespace backend.tests.Api;
@@ -60,5 +61,71 @@ public class TestEndpointTests
             .StatusCode.Should().Be(HttpStatusCode.NotFound);
         (await client.PutAsJsonAsync("/api/test/clock", new { now = "2027-01-02T03:04:05Z" }))
             .StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private static async Task<HttpResponseMessage> PostFlagOverrideAsync(HttpClient client, string? token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/test/feature-flags")
+        {
+            Content = JsonContent.Create(new { name = "alpha", enabled = true }),
+        };
+        if (token is not null)
+        {
+            request.Headers.Add("X-E2E-Token", token);
+        }
+
+        return await client.SendAsync(request);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("wrong")]
+    public async Task The_flag_override_is_404_without_the_right_token(string? token)
+    {
+        using var factory = new ApiFactory("E2E", flags: [new FeatureFlag("alpha", false, 1)], e2eToken: "s3cret");
+        using var client = factory.CreateClient();
+
+        (await PostFlagOverrideAsync(client, token)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await client.GetAsync("/api/test/gated/alpha")).StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task The_flag_override_is_404_when_no_token_is_configured()
+    {
+        using var factory = new ApiFactory("E2E", flags: [new FeatureFlag("alpha", false, 1)]);
+        using var client = factory.CreateClient();
+
+        (await PostFlagOverrideAsync(client, "anything")).StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task The_flag_override_changes_the_flag_with_the_right_token()
+    {
+        using var factory = new ApiFactory("E2E", flags: [new FeatureFlag("alpha", false, 1)], e2eToken: "s3cret");
+        using var client = factory.CreateClient();
+
+        var response = await PostFlagOverrideAsync(client, "s3cret");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await client.GetAsync("/api/test/gated/alpha")).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task The_flag_override_does_not_exist_in_Production()
+    {
+        using var factory = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com");
+        using var client = factory.CreateClient();
+
+        (await PostFlagOverrideAsync(client, null)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public void Production_refuses_to_start_with_an_E2E_token()
+    {
+        using var factory = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com", e2eToken: "s3cret");
+
+        var start = () => factory.CreateClient();
+
+        start.Should().Throw<InvalidOperationException>().WithMessage("*E2E:Token*");
     }
 }
