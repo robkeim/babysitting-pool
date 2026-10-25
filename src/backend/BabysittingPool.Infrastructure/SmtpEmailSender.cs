@@ -21,7 +21,9 @@ public sealed class SmtpEmailSender(SmtpSettings settings) : IEmailSender
         mime.Subject = message.Subject;
         mime.Body = new TextPart(TextFormat.Plain) { Text = message.Body };
 
-        using var client = new SmtpClient();
+        // The chain and host name are still validated; only the online revocation lookup is skipped, because it
+        // often cannot complete (macOS) and then fails the TLS handshake.
+        using var client = new SmtpClient { CheckCertificateRevocation = false };
         await client.ConnectAsync(settings.Host, settings.Port, SecureSocketOptions.StartTls, cancellationToken);
         await client.AuthenticateAsync(settings.Address, settings.Password, cancellationToken);
         await client.SendAsync(mime, cancellationToken);
