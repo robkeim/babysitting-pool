@@ -109,6 +109,7 @@
   "error.invalid_state": "Cette demande n’est plus disponible.",
   "error.own_request": "Vous ne pouvez pas réserver votre propre demande.",
   "error.claim_cutoff_passed": "Il est trop tard pour réserver cette demande.",
+  "error.sitter_overlap": "Vous avez déjà une réservation à ce moment-là.",
   "error.start_passed": "L’heure de début est passée, cela ne peut donc plus être modifié.",
   "error.member_not_found": "Ce membre n’existe plus.",
   "error.cannot_offboard_admin": "L’administrateur ne peut pas être retiré.",

@@ -13,6 +13,7 @@ const CLAIM_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   invalid_state: 'error.invalid_state',
   own_request: 'error.own_request',
   claim_cutoff_passed: 'error.claim_cutoff_passed',
+  sitter_overlap: 'error.sitter_overlap',
   request_not_found: 'error.request_not_found',
   concurrent_update: 'error.invalid_state',
 }

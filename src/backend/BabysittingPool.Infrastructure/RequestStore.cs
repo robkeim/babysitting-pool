@@ -2,7 +2,9 @@ using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
 using BabysittingPool.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BabysittingPool.Infrastructure;
 
@@ -25,10 +27,37 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             record.StartsAt, record.Area, record.Address, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status);
     }
 
+    private IDbContextTransaction? _claimTransaction;
+
+    public async Task BeginClaimAsync(CancellationToken cancellationToken)
+    {
+        var connection = (SqliteConnection)db.Database.GetDbConnection();
+        await connection.OpenAsync(cancellationToken);
+        // BEGIN IMMEDIATE: a deferred transaction would only take the write lock at the first write, after the check.
+        var transaction = connection.BeginTransaction(deferred: false);
+        _claimTransaction = await db.Database.UseTransactionAsync(transaction, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Request>> FindClaimedBySitterAsync(Guid sitterId, CancellationToken cancellationToken)
+    {
+        var records = await db.Requests.AsNoTracking()
+            .Where(r => r.SitterId == sitterId && r.Status == RequestStatus.Claimed)
+            .ToListAsync(cancellationToken);
+        return records.Select(record => Request.Restore(
+            record.Id, record.RequesterId, record.SitterId,
+            new CreditRequestDetails(record.DurationMinutes, record.ChildCount, record.Location, record.Transport, record.Meals),
+            record.StartsAt, record.Area, record.Address, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status)).ToList();
+    }
+
     public async Task SaveClaimedAsync(Request request, CancellationToken cancellationToken)
     {
         await SetRequestStateAsync(request, cancellationToken);
         await SaveAsync(cancellationToken);
+        if (_claimTransaction is { } transaction)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            _claimTransaction = null;
+        }
     }
 
     public async Task SaveExpiredAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)

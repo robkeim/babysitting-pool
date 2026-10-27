@@ -22,6 +22,16 @@ public interface IRequestStore
     Task<Request?> FindRequestAsync(Guid requestId, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Takes the database write lock for the claim that follows, so two claims by the same Sitter run one after the
+    /// other and the overlap check sees the first (spec §4.7). Released by <see cref="SaveClaimedAsync"/>, or
+    /// rolled back when the unit of work ends without saving.
+    /// </summary>
+    Task BeginClaimAsync(CancellationToken cancellationToken);
+
+    /// <summary>The Requests the Sitter currently holds as Claimed, for the overlap rule (spec §4.7).</summary>
+    Task<IReadOnlyList<Request>> FindClaimedBySitterAsync(Guid sitterId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Saves a Request's Claim. Throws <see cref="ConcurrencyConflictException"/> if the Request changed since it
     /// was read, which is how the loser of a claim race finds out (ADR 0004).
     /// </summary>

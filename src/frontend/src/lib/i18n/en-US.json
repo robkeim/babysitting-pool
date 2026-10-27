@@ -107,6 +107,7 @@
   "error.invalid_state": "That request is no longer available.",
   "error.own_request": "You can't claim your own request.",
   "error.claim_cutoff_passed": "It's too late to claim that request.",
+  "error.sitter_overlap": "You already have a claim during that time.",
   "error.start_passed": "The start time has passed, so that can't be changed any more.",
   "error.member_not_found": "That member no longer exists.",
   "error.cannot_offboard_admin": "The Admin can't be offboarded.",

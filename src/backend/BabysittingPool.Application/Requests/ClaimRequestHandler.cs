@@ -15,12 +15,14 @@ public sealed class ClaimRequestHandler(IRequestStore store, TimeProvider clock)
     {
         ArgumentNullException.ThrowIfNull(command);
         var now = clock.GetUtcNow().UtcDateTime;
+        await store.BeginClaimAsync(cancellationToken);
         if (await store.FindRequestAsync(command.RequestId, cancellationToken) is not { } request)
         {
             return null;
         }
 
-        request.Claim(command.SitterId, now);
+        var sitterClaims = await store.FindClaimedBySitterAsync(command.SitterId, cancellationToken);
+        request.Claim(command.SitterId, now, sitterClaims);
         await store.SaveClaimedAsync(request, cancellationToken);
 
         return RequestRead.From(request).ToView(now);
