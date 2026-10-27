@@ -11,7 +11,7 @@ internal sealed class SqliteConnectionSetup : DbConnectionInterceptor
     public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
     {
         using var command = connection.CreateCommand();
-        // nosemgrep: csharp.lang.security.sqli.csharp-sqli.csharp-sqli -- Pragmas is a compile-time constant
+        // nosemgrep: csharp.lang.security.sqli.csharp-sqli.csharp-sqli, project.csharp.raw-sql-outside-migrations -- Pragmas is a compile-time constant
         command.CommandText = Pragmas;
         command.ExecuteNonQuery();
     }
@@ -20,7 +20,7 @@ internal sealed class SqliteConnectionSetup : DbConnectionInterceptor
         DbConnection connection, ConnectionEndEventData eventData, CancellationToken cancellationToken = default)
     {
         await using var command = connection.CreateCommand();
-        // nosemgrep: csharp.lang.security.sqli.csharp-sqli.csharp-sqli -- Pragmas is a compile-time constant
+        // nosemgrep: csharp.lang.security.sqli.csharp-sqli.csharp-sqli, project.csharp.raw-sql-outside-migrations -- Pragmas is a compile-time constant
         command.CommandText = Pragmas;
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

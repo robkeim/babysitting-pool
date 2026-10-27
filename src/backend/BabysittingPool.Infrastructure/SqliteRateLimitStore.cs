@@ -9,8 +9,8 @@ namespace BabysittingPool.Infrastructure;
 public readonly record struct RateLimitDecision(bool Allowed, TimeSpan RetryAfter);
 
 /// <summary>
-/// Fixed-window rate-limit counters that survive a restart (ADR 0014). One atomic upsert per hit: LINQ cannot express
-/// it, and a read-then-update would race under concurrency.
+/// Fixed-window rate-limit counters that survive a restart (ADR 0014). Keys are stored hashed: they embed email
+/// addresses and IPs.
 /// </summary>
 public sealed class SqliteRateLimitStore(IDbContextFactory<RateLimitDbContext> contexts, TimeProvider time)
 {
@@ -26,14 +26,33 @@ public sealed class SqliteRateLimitStore(IDbContextFactory<RateLimitDbContext> c
         var windowMs = (long)window.TotalMilliseconds;
         await using var db = await contexts.CreateDbContextAsync(cancellationToken);
 
-        var rows = await db.Database.SqlQuery<Hit>($"""
-            INSERT INTO RateLimitCounters (Key, WindowEnd, Count) VALUES ({hash}, {now + windowMs}, 1)
-            ON CONFLICT (Key) DO UPDATE SET
-                WindowEnd = CASE WHEN WindowEnd <= {now} THEN {now + windowMs} ELSE WindowEnd END,
-                Count = CASE WHEN WindowEnd <= {now} THEN 1 ELSE Count + 1 END
-            RETURNING Count, WindowEnd
-            """).ToListAsync(cancellationToken);
-        var hit = rows.Single();
+        // Two or three atomic statements rather than one raw upsert (ADR 0004): between them another hit can
+        // land, which only over-counts, so the error is toward refusing, never toward letting a flood through.
+        var counter = db.Counters.Where(c => c.Key == hash);
+        for (var attempt = 0; ; attempt++)
+        {
+            var updated = await counter.ExecuteUpdateAsync(set => set
+                .SetProperty(c => c.Count, c => c.WindowEnd <= now ? 1 : c.Count + 1)
+                .SetProperty(c => c.WindowEnd, c => c.WindowEnd <= now ? now + windowMs : c.WindowEnd), cancellationToken);
+            if (updated > 0)
+            {
+                break;
+            }
+
+            db.Counters.Add(new RateLimitCounterRecord { Key = hash, WindowEnd = now + windowMs, Count = 1 });
+            try
+            {
+                await db.SaveChangesAsync(cancellationToken);
+                break;
+            }
+            catch (DbUpdateException) when (attempt == 0)
+            {
+                // A concurrent first hit created the row: count against it instead.
+                db.ChangeTracker.Clear();
+            }
+        }
+
+        var hit = await counter.AsNoTracking().Select(c => new Hit(c.Count, c.WindowEnd)).SingleAsync(cancellationToken);
 
         await PurgeExpiredAsync(db, now, cancellationToken);
         return new RateLimitDecision(hit.Count <= limit, TimeSpan.FromMilliseconds(Math.Max(0, hit.WindowEnd - now)));

@@ -98,7 +98,7 @@ scan_code() {
   step "code: semgrep"
   semgrep scan --config .semgrep --error --quiet --metrics off --disable-version-check \
     --exclude node_modules --exclude bin --exclude obj --exclude dist --exclude '*.gen.ts' \
-    --exclude Migrations src
+    --exclude Migrations --exclude RateLimitMigrations src
   step "dependencies: dotnet vulnerable packages"
   local out
   out=$(dotnet list src/backend/BabysittingPool.sln package --vulnerable --include-transitive 2>&1)
