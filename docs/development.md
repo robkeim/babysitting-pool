@@ -72,4 +72,19 @@ npm run test:e2e                  # or: npx playwright test
 
 ## Deployment
 
-Production is one always-on Fly.io Machine in `iad` (ADR 0018). Deploys are local: `scripts/deploy.sh` (#147) refuses to run unless the full-gate stamp matches the tree, then runs `fly deploy`. There is no GitHub workflow (ADR 0015). Backups, the restore drill and the production runbook are tracked in #148 and #149.
+Production is one always-on Fly.io Machine in `iad` (ADR 0018). Deploys are local: `scripts/deploy.sh` (#147) refuses to run unless the full-gate stamp matches the tree, then runs `fly deploy`. There is no GitHub workflow (ADR 0015). The production runbook is tracked in #149.
+
+### Backups and the restore drill
+
+The container's entrypoint (`scripts/entrypoint.sh`) starts `scripts/backup-daily.sh` beside the API when `BACKUP_REMOTE` is set. Daily at 03:00 UTC (`BACKUP_HOUR_UTC`) it runs `scripts/backup.sh`: a consistent `sqlite3 .backup` of the main database only, an integrity check, gzip, upload with `rclone` as `babysitting-<UTC timestamp>.db.gz`, then pruning to the newest 30 (`BACKUP_KEEP`). A failed run is retried hourly and never stops the API.
+
+Configure a free-tier Cloudflare R2 (or Backblaze B2) bucket with Fly secrets; rclone reads a remote named `offhost` from the environment, so there is no config file:
+
+```sh
+fly secrets set BACKUP_REMOTE=offhost:<bucket> \
+  RCLONE_CONFIG_OFFHOST_TYPE=s3 RCLONE_CONFIG_OFFHOST_PROVIDER=Cloudflare \
+  RCLONE_CONFIG_OFFHOST_ENDPOINT=https://<account>.r2.cloudflarestorage.com \
+  RCLONE_CONFIG_OFFHOST_ACCESS_KEY_ID=... RCLONE_CONFIG_OFFHOST_SECRET_ACCESS_KEY=...
+```
+
+**Restore drill.** `fly ssh console -C /app/scripts/restore-drill.sh` restores the latest snapshot into a scratch database and checks that it opens, passes `integrity_check` and has the Ledger triggers (`LedgerEntries_no_update`, `LedgerEntries_no_delete`). It exits non-zero on any failure. Run it once before launch, then quarterly; keep a calendar reminder. To try the scripts locally, set `BACKUP_REMOTE` to a plain directory (rclone accepts local paths) inside the Docker image.
