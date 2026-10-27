@@ -23,7 +23,7 @@ public sealed class ClaimRequestHandler(IRequestStore store, TimeProvider clock)
 
         var sitterClaims = await store.FindClaimedBySitterAsync(command.SitterId, cancellationToken);
         request.Claim(command.SitterId, now, sitterClaims);
-        await store.SaveClaimedAsync(request, cancellationToken);
+        await store.SaveClaimedAsync(request, now, cancellationToken);
 
         return RequestRead.From(request).ToView(now);
     }

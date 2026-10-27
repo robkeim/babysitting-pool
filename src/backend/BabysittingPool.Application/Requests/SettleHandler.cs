@@ -1,5 +1,6 @@
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Notifications;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,9 +66,30 @@ public sealed partial class SettleHandler(
             }
         }
 
+        await SweepNotificationsAsync(now, cancellationToken);
+
         var result = new SettleResult(expired, completed, charged, failed);
         LogRan(result.Expired, result.Completed, result.Charged, result.Failed);
         return result;
+    }
+
+    /// <summary>
+    /// Deletes Notifications past their retention, a safety net for ones nobody dismissed (ADR 0019). Settle itself
+    /// writes none (ADR 0007). A failure is logged and retried next run; it never blocks the rest.
+    /// </summary>
+    private async Task SweepNotificationsAsync(DateTime now, CancellationToken cancellationToken)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        try
+        {
+            var store = scope.ServiceProvider.GetRequiredService<INotificationStore>();
+            var deleted = await store.DeleteOlderThanAsync(now - settings.NotificationRetention, cancellationToken);
+            LogSwept(deleted);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LogSweepFailed(ex);
+        }
     }
 
     private async Task<bool> SettleAsync(
@@ -171,6 +193,12 @@ public sealed partial class SettleHandler(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "SettleRan {Expired} {Completed} {Charged} {Failed}")]
     private partial void LogRan(int expired, int completed, int charged, int failed);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "NotificationsSwept {Deleted}")]
+    private partial void LogSwept(int deleted);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "NotificationSweepFailed")]
+    private partial void LogSweepFailed(Exception exception);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Settled {Step} {Id}")]
     private partial void LogSettled(string step, Guid id);

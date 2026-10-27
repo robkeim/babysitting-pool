@@ -56,6 +56,10 @@ _Avoid_: Booking, job, session
 The state of a Request once a Sitter has taken it. The first claim wins and needs no approval.
 _Avoid_: Approved, accepted
 
+**Notification**:
+An in-app message kept for one Member until they dismiss it: a Request was Posted (sent to every other open Member) or a Request was Claimed (sent to its Requester). It carries ids and a few facts, never an address or a name. Not an email.
+_Avoid_: Alert, message, publication, accepted
+
 **Minimum Lead Time**:
 The least notice a Request must give between posting and its start time. Defaults to 6 hours and is configurable.
 _Avoid_: Notice period

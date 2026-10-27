@@ -23,6 +23,8 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
 
     public DbSet<FeatureFlagRecord> FeatureFlags => Set<FeatureFlagRecord>();
 
+    public DbSet<NotificationRecord> Notifications => Set<NotificationRecord>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<Credits>().HaveConversion<CreditsConverter>();
@@ -94,6 +96,16 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
             request.HasOne<MemberRecord>().WithMany().HasForeignKey(r => r.RequesterId).OnDelete(DeleteBehavior.Restrict);
             request.HasOne<MemberRecord>().WithMany().HasForeignKey(r => r.SitterId).OnDelete(DeleteBehavior.Restrict);
             request.HasIndex(r => new { r.RequesterId, r.PostedAt, r.Id });
+        });
+
+        modelBuilder.Entity<NotificationRecord>(notification =>
+        {
+            notification.ToTable("Notifications");
+            notification.HasKey(n => n.Id);
+            notification.HasOne<MemberRecord>().WithMany().HasForeignKey(n => n.MemberId).OnDelete(DeleteBehavior.Restrict);
+            // The list, newest first, and the sweep by age.
+            notification.HasIndex(n => new { n.MemberId, n.CreatedAt, n.Id });
+            notification.HasIndex(n => n.CreatedAt);
         });
 
         modelBuilder.Entity<LedgerEntryRecord>(entry =>
