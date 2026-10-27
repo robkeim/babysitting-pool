@@ -36,6 +36,11 @@ const erased = {
   isErased: true,
 }
 
+// The page sits inside the router in the app; here a link only needs to render as one.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children }: { children: React.ReactNode }) => <a href="/member">{children}</a>,
+}))
+
 describe('MembersAdminPage', () => {
   it('lists open and closed members, offering only the action that applies', async () => {
     server.use(membersHandler([sampleMember, admin, closed, erased]))

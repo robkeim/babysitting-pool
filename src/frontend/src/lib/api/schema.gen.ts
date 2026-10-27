@@ -373,6 +373,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/members/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetMember"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/members/{id}/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListMemberRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/pool-overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPoolOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/dormant-members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListDormantMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/members/{id}/offboard": {
         parameters: {
             query?: never;
@@ -530,6 +594,16 @@ export interface components {
         };
         /** @enum {unknown} */
         DayOfWeek: "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
+        DormantMemberView: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            email: string;
+            /** Format: date-time */
+            lastActivityAt: string;
+            /** Format: int64 */
+            availableQuarterCredits: number;
+        };
         FeatureFlagView: {
             name: string;
             defaultEnabled: boolean;
@@ -577,6 +651,42 @@ export interface components {
             /** Format: date-time */
             occurredAt: string;
         };
+        MemberDetailView: {
+            member: components["schemas"]["MemberSummaryView"];
+            ledger: components["schemas"]["PageOfLedgerEntryView"];
+        };
+        /** @enum {unknown} */
+        MemberRequestRole: "Requester" | "Sitter";
+        MemberRequestView: {
+            /** Format: uuid */
+            id: string;
+            role: components["schemas"]["MemberRequestRole"];
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            durationMinutes: number;
+            /** Format: int32 */
+            childCount: number;
+            area: null | string;
+            /** Format: int64 */
+            costQuarterCredits: number;
+            status: components["schemas"]["RequestStatus"];
+        };
+        MemberSummaryView: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            email: string;
+            isAdmin: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            closedAt: null | string;
+            /** Format: int64 */
+            availableQuarterCredits: number;
+            /** Format: int64 */
+            escrowedQuarterCredits: number;
+        };
         MemberView: {
             /** Format: uuid */
             memberId: string;
@@ -619,6 +729,10 @@ export interface components {
             items: components["schemas"]["AdminMemberView"][];
             nextCursor: null | string;
         };
+        PageOfDormantMemberView: {
+            items: components["schemas"]["DormantMemberView"][];
+            nextCursor: null | string;
+        };
         PageOfFeatureFlagView: {
             items: components["schemas"]["FeatureFlagView"][];
             nextCursor: null | string;
@@ -631,6 +745,10 @@ export interface components {
             items: components["schemas"]["LedgerEntryView"][];
             nextCursor: null | string;
         };
+        PageOfMemberRequestView: {
+            items: components["schemas"]["MemberRequestView"][];
+            nextCursor: null | string;
+        };
         PageOfOpenRequestView: {
             items: components["schemas"]["OpenRequestView"][];
             nextCursor: null | string;
@@ -638,6 +756,19 @@ export interface components {
         PageOfRequestView: {
             items: components["schemas"]["RequestView"][];
             nextCursor: null | string;
+        };
+        PoolOverview: {
+            /** Format: int64 */
+            creditsInCirculationQuarterCredits: number;
+            /** Format: int64 */
+            escrowedQuarterCredits: number;
+            /** Format: int64 */
+            burnedByDemurrageQuarterCredits: number;
+            /** Format: int64 */
+            burnedByOffboardingQuarterCredits: number;
+            /** Format: int32 */
+            openMembers: number;
+            requests: components["schemas"]["RequestCounts"];
         };
         PostRequestBody: {
             /** Format: date-time */
@@ -679,6 +810,18 @@ export interface components {
         ProfileView: {
             area: null | string;
             address: null | string;
+        };
+        RequestCounts: {
+            /** Format: int32 */
+            posted: number;
+            /** Format: int32 */
+            claimed: number;
+            /** Format: int32 */
+            completed: number;
+            /** Format: int32 */
+            cancelled: number;
+            /** Format: int32 */
+            expired: number;
         };
         /** @enum {unknown} */
         RequestStatus: "Posted" | "Claimed" | "Completed" | "Cancelled" | "Expired";
@@ -1644,6 +1787,204 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PageOfAdminMemberView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetMember: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberDetailView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMemberRequests: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageOfMemberRequestView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetPoolOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolOverview"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListDormantMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageOfDormantMemberView"];
                 };
             };
             /** @description Unauthorized */

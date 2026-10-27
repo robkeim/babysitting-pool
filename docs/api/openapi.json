@@ -1107,6 +1107,258 @@
         }
       }
     },
+    "/api/admin/members/{id}": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "GetMember",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberDetailView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}/requests": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "ListMemberRequests",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfMemberRequestView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/pool-overview": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "GetPoolOverview",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolOverview"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/dormant-members": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "ListDormantMembers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfDormantMemberView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/members/{id}/offboard": {
       "post": {
         "tags": [
@@ -1766,6 +2018,36 @@
           "Saturday"
         ]
       },
+      "DormantMemberView": {
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "lastActivityAt",
+          "availableQuarterCredits"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "lastActivityAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "availableQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "FeatureFlagView": {
         "required": [
           "name",
@@ -1942,6 +2224,121 @@
           }
         }
       },
+      "MemberDetailView": {
+        "required": [
+          "member",
+          "ledger"
+        ],
+        "type": "object",
+        "properties": {
+          "member": {
+            "$ref": "#/components/schemas/MemberSummaryView"
+          },
+          "ledger": {
+            "$ref": "#/components/schemas/PageOfLedgerEntryView"
+          }
+        }
+      },
+      "MemberRequestRole": {
+        "enum": [
+          "Requester",
+          "Sitter"
+        ]
+      },
+      "MemberRequestView": {
+        "required": [
+          "id",
+          "role",
+          "startsAt",
+          "durationMinutes",
+          "childCount",
+          "area",
+          "costQuarterCredits",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "$ref": "#/components/schemas/MemberRequestRole"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "area": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "costQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RequestStatus"
+          }
+        }
+      },
+      "MemberSummaryView": {
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "isAdmin",
+          "createdAt",
+          "closedAt",
+          "availableQuarterCredits",
+          "escrowedQuarterCredits"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "availableQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "escrowedQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "MemberView": {
         "required": [
           "memberId",
@@ -2082,6 +2479,27 @@
           }
         }
       },
+      "PageOfDormantMemberView": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DormantMemberView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "PageOfFeatureFlagView": {
         "required": [
           "items",
@@ -2145,6 +2563,27 @@
           }
         }
       },
+      "PageOfMemberRequestView": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberRequestView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "PageOfOpenRequestView": {
         "required": [
           "items",
@@ -2184,6 +2623,42 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "PoolOverview": {
+        "required": [
+          "creditsInCirculationQuarterCredits",
+          "escrowedQuarterCredits",
+          "burnedByDemurrageQuarterCredits",
+          "burnedByOffboardingQuarterCredits",
+          "openMembers",
+          "requests"
+        ],
+        "type": "object",
+        "properties": {
+          "creditsInCirculationQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "escrowedQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "burnedByDemurrageQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "burnedByOffboardingQuarterCredits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requests": {
+            "$ref": "#/components/schemas/RequestCounts"
           }
         }
       },
@@ -2345,6 +2820,38 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "RequestCounts": {
+        "required": [
+          "posted",
+          "claimed",
+          "completed",
+          "cancelled",
+          "expired"
+        ],
+        "type": "object",
+        "properties": {
+          "posted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelled": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expired": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

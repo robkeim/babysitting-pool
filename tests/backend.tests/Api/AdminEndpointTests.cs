@@ -318,4 +318,39 @@ public class AdminEndpointTests : IDisposable
         (await client.PostAsync($"/api/admin/invitations/{Guid.NewGuid()}/resend", null))
             .StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Theory]
+    [InlineData("/api/admin/members")]
+    [InlineData("/api/admin/pool-overview")]
+    [InlineData("/api/admin/dormant-members")]
+    public async Task Member_and_pool_views_are_forbidden_to_a_member_who_is_not_the_admin(string route)
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        (await client.GetAsync(new Uri(route, UriKind.Relative))).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task The_admin_reads_members_detail_requests_overview_and_dormant_list()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        var member = await _factory.SeedAccountAsync(Credits.FromDecimal(5m), Credits.FromQuarterCredits(0), Credits.FromDecimal(5m));
+        using var client = _factory.CreateMemberClient(admin);
+
+        var members = await client.GetFromJsonAsync<JsonElement>("/api/admin/members");
+        members.GetProperty("items").GetArrayLength().Should().Be(2);
+        var detail = await client.GetFromJsonAsync<JsonElement>($"/api/admin/members/{member}");
+        detail.GetProperty("member").GetProperty("availableQuarterCredits").GetInt64().Should().Be(20);
+        detail.GetProperty("ledger").GetProperty("items").GetArrayLength().Should().Be(1);
+        (await client.GetFromJsonAsync<JsonElement>($"/api/admin/members/{member}/requests"))
+            .GetProperty("items").GetArrayLength().Should().Be(0);
+        (await client.GetFromJsonAsync<JsonElement>("/api/admin/pool-overview"))
+            .GetProperty("openMembers").GetInt32().Should().Be(2);
+        (await client.GetFromJsonAsync<JsonElement>("/api/admin/dormant-members"))
+            .GetProperty("items").GetArrayLength().Should().Be(0);
+        (await client.GetAsync($"/api/admin/members/{Guid.NewGuid()}")).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await client.GetAsync($"/api/admin/members/{member}?cursor=garbage")).StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }

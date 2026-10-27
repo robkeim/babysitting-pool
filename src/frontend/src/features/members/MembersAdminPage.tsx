@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Users } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { EmptyState } from '@/components/EmptyState'
@@ -50,7 +51,15 @@ function MemberRow({ member }: { member: AdminMemberView }) {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
             <p className="font-medium">
-              <span id={nameId}>{name}</span>
+              <span id={nameId}>
+                <Link
+                  to="/admin/member/$memberId"
+                  params={{ memberId: member.id }}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {name}
+                </Link>
+              </span>
               {member.isAdmin && (
                 <span className="ml-2 text-sm text-muted-foreground">
                   <FormattedMessage id="members.admin.admin" />

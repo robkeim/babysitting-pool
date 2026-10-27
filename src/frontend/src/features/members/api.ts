@@ -1,9 +1,20 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api/client'
-import type { AdminMemberPage, OffboardMemberResult } from './types'
+import type {
+  AdminMemberPage,
+  DormantMemberPage,
+  MemberDetailView,
+  MemberRequestPage,
+  OffboardMemberResult,
+  PoolOverview,
+} from './types'
 
 export const memberKeys = {
   all: () => ['admin', 'members'] as const,
+  detail: (id: string) => ['admin', 'members', id] as const,
+  requests: (id: string) => ['admin', 'members', id, 'requests'] as const,
+  pool: () => ['admin', 'pool-overview'] as const,
+  dormant: () => ['admin', 'dormant-members'] as const,
 }
 
 /** Every Member, open and closed; Admin only (spec §2A). */
@@ -31,5 +42,45 @@ export function useEraseMember() {
     mutationFn: (id: string) =>
       apiFetch<undefined>(`/api/admin/members/${id}/erase`, { method: 'POST' }),
     onSettled: () => client.invalidateQueries({ queryKey: memberKeys.all() }),
+  })
+}
+
+function withCursor(path: string, cursor: string | undefined) {
+  return cursor ? `${path}?cursor=${encodeURIComponent(cursor)}` : path
+}
+
+/** One Member's balances; each page also carries the next slice of their Ledger. */
+export function useMemberDetail(id: string) {
+  return useInfiniteQuery({
+    queryKey: memberKeys.detail(id),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      apiFetch<MemberDetailView>(withCursor(`/api/admin/members/${id}`, pageParam)),
+    getNextPageParam: (lastPage) => lastPage.ledger.nextCursor ?? undefined,
+  })
+}
+
+export function useMemberRequests(id: string) {
+  return useInfiniteQuery({
+    queryKey: memberKeys.requests(id),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      apiFetch<MemberRequestPage>(withCursor(`/api/admin/members/${id}/requests`, pageParam)),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  })
+}
+
+export function usePoolOverview() {
+  return useQuery({
+    queryKey: memberKeys.pool(),
+    queryFn: () => apiFetch<PoolOverview>('/api/admin/pool-overview'),
+  })
+}
+
+/** Members with no activity past the dormancy threshold, longest dormant first (spec §5). */
+export function useDormantMembers() {
+  return useQuery({
+    queryKey: memberKeys.dormant(),
+    queryFn: () => apiFetch<DormantMemberPage>('/api/admin/dormant-members'),
   })
 }

@@ -7,6 +7,7 @@ import {
   MailPlus,
   Users,
   Wallet,
+  Waves,
 } from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
 import { AppShell, type ShellTab } from '@/components/AppShell'
@@ -31,6 +32,7 @@ const ADMIN_TABS: readonly ShellTab[] = [
     icon: MailPlus,
   },
   { to: '/admin/members', label: <FormattedMessage id="common.nav.members" />, icon: Users },
+  { to: '/admin/pool', label: <FormattedMessage id="common.nav.pool" />, icon: Waves },
   { to: '/admin/feature-flags', label: <FormattedMessage id="common.nav.flags" />, icon: Flag },
 ]
 

@@ -4316,6 +4316,708 @@
                   "description": "",
                   "item": [
                     {
+                      "name": "Get Member",
+                      "request": {
+                        "name": "Get Member",
+                        "description": {},
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "members",
+                            ":id"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "cursor",
+                              "value": "<string>"
+                            },
+                            {
+                              "disabled": false,
+                              "description": {
+                                "content": "",
+                                "type": "text/plain"
+                              },
+                              "key": "limit",
+                              "value": "<integer>"
+                            }
+                          ],
+                          "variable": [
+                            {
+                              "type": "any",
+                              "value": "<uuid>",
+                              "key": "id",
+                              "disabled": false,
+                              "description": {
+                                "content": "(Required) ",
+                                "type": "text/plain"
+                              }
+                            }
+                          ]
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "admin",
+                                "members",
+                                ":id"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "cursor",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "limit",
+                                  "value": "<integer>"
+                                }
+                              ],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "body": "{\n  \"member\": {\n    \"id\": \"<uuid>\",\n    \"displayName\": \"<string>\",\n    \"email\": \"<string>\",\n    \"isAdmin\": \"<boolean>\",\n    \"createdAt\": \"<dateTime>\",\n    \"closedAt\": \"<null,string-date-time>\",\n    \"availableQuarterCredits\": \"<long>\",\n    \"escrowedQuarterCredits\": \"<long>\"\n  },\n  \"ledger\": {\n    \"items\": [\n      {\n        \"id\": \"<uuid>\",\n        \"kind\": \"Grant\",\n        \"amountQuarterCredits\": \"<long>\",\n        \"occurredAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<uuid>\",\n        \"kind\": \"Grant\",\n        \"amountQuarterCredits\": \"<long>\",\n        \"occurredAt\": \"<dateTime>\"\n      }\n    ],\n    \"nextCursor\": \"<null,string>\"\n  }\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Bad Request",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "admin",
+                                "members",
+                                ":id"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "cursor",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "limit",
+                                  "value": "<integer>"
+                                }
+                              ],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Unauthorized",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "admin",
+                                "members",
+                                ":id"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "cursor",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "limit",
+                                  "value": "<integer>"
+                                }
+                              ],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Forbidden",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "admin",
+                                "members",
+                                ":id"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "cursor",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "limit",
+                                  "value": "<integer>"
+                                }
+                              ],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        },
+                        {
+                          "name": "Not Found",
+                          "originalRequest": {
+                            "url": {
+                              "path": [
+                                "api",
+                                "admin",
+                                "members",
+                                ":id"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "cursor",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "limit",
+                                  "value": "<integer>"
+                                }
+                              ],
+                              "variable": []
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/problem+json"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {}
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/problem+json"
+                            }
+                          ],
+                          "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                          "cookie": [],
+                          "_postman_previewlanguage": "json"
+                        }
+                      ],
+                      "event": [],
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      }
+                    },
+                    {
+                      "name": "requests",
+                      "description": "",
+                      "item": [
+                        {
+                          "name": "List Member Requests",
+                          "request": {
+                            "name": "List Member Requests",
+                            "description": {},
+                            "url": {
+                              "path": [
+                                "api",
+                                "admin",
+                                "members",
+                                ":id",
+                                "requests"
+                              ],
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "query": [
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "cursor",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "",
+                                    "type": "text/plain"
+                                  },
+                                  "key": "limit",
+                                  "value": "<integer>"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "type": "any",
+                                  "value": "<uuid>",
+                                  "key": "id",
+                                  "disabled": false,
+                                  "description": {
+                                    "content": "(Required) ",
+                                    "type": "text/plain"
+                                  }
+                                }
+                              ]
+                            },
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              }
+                            ],
+                            "method": "GET",
+                            "body": {},
+                            "auth": null
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "admin",
+                                    "members",
+                                    ":id",
+                                    "requests"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "cursor",
+                                      "value": "<string>"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "limit",
+                                      "value": "<integer>"
+                                    }
+                                  ],
+                                  "variable": []
+                                },
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"role\": \"Requester\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"area\": \"<null,string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"status\": \"Posted\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"role\": \"Requester\",\n      \"startsAt\": \"<dateTime>\",\n      \"durationMinutes\": \"<integer>\",\n      \"childCount\": \"<integer>\",\n      \"area\": \"<null,string>\",\n      \"costQuarterCredits\": \"<long>\",\n      \"status\": \"Posted\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
+                              "cookie": [],
+                              "_postman_previewlanguage": "json"
+                            },
+                            {
+                              "name": "Bad Request",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "admin",
+                                    "members",
+                                    ":id",
+                                    "requests"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "cursor",
+                                      "value": "<string>"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "limit",
+                                      "value": "<integer>"
+                                    }
+                                  ],
+                                  "variable": []
+                                },
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/problem+json"
+                                  }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                              },
+                              "status": "Bad Request",
+                              "code": 400,
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/problem+json"
+                                }
+                              ],
+                              "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                              "cookie": [],
+                              "_postman_previewlanguage": "json"
+                            },
+                            {
+                              "name": "Unauthorized",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "admin",
+                                    "members",
+                                    ":id",
+                                    "requests"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "cursor",
+                                      "value": "<string>"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "limit",
+                                      "value": "<integer>"
+                                    }
+                                  ],
+                                  "variable": []
+                                },
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/problem+json"
+                                  }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                              },
+                              "status": "Unauthorized",
+                              "code": 401,
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/problem+json"
+                                }
+                              ],
+                              "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                              "cookie": [],
+                              "_postman_previewlanguage": "json"
+                            },
+                            {
+                              "name": "Forbidden",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "admin",
+                                    "members",
+                                    ":id",
+                                    "requests"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "cursor",
+                                      "value": "<string>"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "limit",
+                                      "value": "<integer>"
+                                    }
+                                  ],
+                                  "variable": []
+                                },
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/problem+json"
+                                  }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                              },
+                              "status": "Forbidden",
+                              "code": 403,
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/problem+json"
+                                }
+                              ],
+                              "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                              "cookie": [],
+                              "_postman_previewlanguage": "json"
+                            },
+                            {
+                              "name": "Not Found",
+                              "originalRequest": {
+                                "url": {
+                                  "path": [
+                                    "api",
+                                    "admin",
+                                    "members",
+                                    ":id",
+                                    "requests"
+                                  ],
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "query": [
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "cursor",
+                                      "value": "<string>"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "limit",
+                                      "value": "<integer>"
+                                    }
+                                  ],
+                                  "variable": []
+                                },
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/problem+json"
+                                  }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                              },
+                              "status": "Not Found",
+                              "code": 404,
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/problem+json"
+                                }
+                              ],
+                              "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                              "cookie": [],
+                              "_postman_previewlanguage": "json"
+                            }
+                          ],
+                          "event": [],
+                          "protocolProfileBehavior": {
+                            "disableBodyPruning": true
+                          }
+                        }
+                      ]
+                    },
+                    {
                       "name": "offboard",
                       "description": "",
                       "item": [
@@ -4828,6 +5530,302 @@
                       ]
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "name": "pool-overview",
+              "description": "",
+              "item": [
+                {
+                  "name": "Get Pool Overview",
+                  "request": {
+                    "name": "Get Pool Overview",
+                    "description": {},
+                    "url": {
+                      "path": [
+                        "api",
+                        "admin",
+                        "pool-overview"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "GET",
+                    "body": {},
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "pool-overview"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"creditsInCirculationQuarterCredits\": \"<long>\",\n  \"escrowedQuarterCredits\": \"<long>\",\n  \"burnedByDemurrageQuarterCredits\": \"<long>\",\n  \"burnedByOffboardingQuarterCredits\": \"<long>\",\n  \"openMembers\": \"<integer>\",\n  \"requests\": {\n    \"posted\": \"<integer>\",\n    \"claimed\": \"<integer>\",\n    \"completed\": \"<integer>\",\n    \"cancelled\": \"<integer>\",\n    \"expired\": \"<integer>\"\n  }\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Unauthorized",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "pool-overview"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Forbidden",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "pool-overview"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                }
+              ]
+            },
+            {
+              "name": "dormant-members",
+              "description": "",
+              "item": [
+                {
+                  "name": "List Dormant Members",
+                  "request": {
+                    "name": "List Dormant Members",
+                    "description": {},
+                    "url": {
+                      "path": [
+                        "api",
+                        "admin",
+                        "dormant-members"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "method": "GET",
+                    "body": {},
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "dormant-members"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "body": "{\n  \"items\": [\n    {\n      \"id\": \"<uuid>\",\n      \"displayName\": \"<string>\",\n      \"email\": \"<string>\",\n      \"lastActivityAt\": \"<dateTime>\",\n      \"availableQuarterCredits\": \"<long>\"\n    },\n    {\n      \"id\": \"<uuid>\",\n      \"displayName\": \"<string>\",\n      \"email\": \"<string>\",\n      \"lastActivityAt\": \"<dateTime>\",\n      \"availableQuarterCredits\": \"<long>\"\n    }\n  ],\n  \"nextCursor\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Unauthorized",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "dormant-members"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Forbidden",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "admin",
+                            "dormant-members"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "GET",
+                        "body": {}
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
                 }
               ]
             },

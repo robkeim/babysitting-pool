@@ -1,4 +1,5 @@
 using BabysittingPool.Application;
+using BabysittingPool.Application.Admin;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
@@ -28,6 +29,65 @@ internal static class AdminEndpoints
             Results.Ok(new Page<AdminMemberView>(await handler.HandleAsync(cancellationToken), null)))
         .WithName("ListMembers")
         .Produces<Page<AdminMemberView>>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        // Read-only views of the Members and the pool; Admins cannot edit balances or Requests (spec §2A).
+        // The Member's balances and one page of their Ledger, newest first.
+        group.MapGet("/members/{id:guid}", async (
+            Guid id, GetMemberDetailHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                return await handler.HandleAsync(id, cursor, limit, cancellationToken) is { } detail
+                    ? Results.Ok(detail)
+                    : Problems.MemberNotFound();
+            }
+            catch (InvalidCursorException)
+            {
+                return Problems.InvalidRequest("cursor", "invalid");
+            }
+        })
+        .WithName("GetMember")
+        .Produces<MemberDetailView>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapGet("/members/{id:guid}/requests", async (
+            Guid id, ListMemberRequestsHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                return await handler.HandleAsync(id, cursor, limit, cancellationToken) is { } page
+                    ? Results.Ok(page)
+                    : Problems.MemberNotFound();
+            }
+            catch (InvalidCursorException)
+            {
+                return Problems.InvalidRequest("cursor", "invalid");
+            }
+        })
+        .WithName("ListMemberRequests")
+        .Produces<Page<MemberRequestView>>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapGet("/pool-overview", async (GetPoolOverviewHandler handler, CancellationToken cancellationToken) =>
+            Results.Ok(await handler.HandleAsync(cancellationToken)))
+        .WithName("GetPoolOverview")
+        .Produces<PoolOverview>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        // Longest dormant first (spec §5). Only the Admin can see this; the group policy enforces it.
+        group.MapGet("/dormant-members", async (ListDormantMembersHandler handler, CancellationToken cancellationToken) =>
+            Results.Ok(new Page<DormantMemberView>(await handler.HandleAsync(cancellationToken), null)))
+        .WithName("ListDormantMembers")
+        .Produces<Page<DormantMemberView>>()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status403Forbidden);
 
