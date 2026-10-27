@@ -11,4 +11,4 @@ export type OpenRequestView = components['schemas']['OpenRequestView']
 export type OpenRequestPage = components['schemas']['PageOfOpenRequestView']
 
 /** The cost drivers the live preview sends (spec §3). */
-export type QuoteDetails = Omit<PostRequestBody, 'startsAt' | 'area' | 'address'>
+export type QuoteDetails = Omit<PostRequestBody, 'startsAt'>

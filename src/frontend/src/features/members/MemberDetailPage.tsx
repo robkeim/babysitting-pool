@@ -60,7 +60,7 @@ function Requests({ memberId }: { memberId: string }) {
                       {
                         role: intl.formatMessage({ id: ROLE_MESSAGES[request.role] }),
                         status: intl.formatMessage({ id: STATUS_MESSAGES[request.status] }),
-                        area: request.area,
+                        area: request.area ?? '–',
                       },
                     )}
                   </p>

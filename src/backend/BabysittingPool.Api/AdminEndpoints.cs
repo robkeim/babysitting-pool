@@ -25,25 +25,14 @@ internal static class AdminEndpoints
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status403Forbidden);
 
-        // Read-only views of the Members and the pool; Admins cannot edit balances or Requests (spec §2A).
-        group.MapGet("/members", async (
-            ListMembersHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>
-        {
-            try
-            {
-                return Results.Ok(await handler.HandleAsync(cursor, limit, cancellationToken));
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
-        })
+        group.MapGet("/members", async (ListMembersHandler handler, CancellationToken cancellationToken) =>
+            Results.Ok(new Page<AdminMemberView>(await handler.HandleAsync(cancellationToken), null)))
         .WithName("ListMembers")
-        .Produces<Page<MemberSummaryView>>()
-        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .Produces<Page<AdminMemberView>>()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status403Forbidden);
 
+        // Read-only views of the Members and the pool; Admins cannot edit balances or Requests (spec §2A).
         // The Member's balances and one page of their Ledger, newest first.
         group.MapGet("/members/{id:guid}", async (
             Guid id, GetMemberDetailHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>

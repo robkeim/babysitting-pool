@@ -100,4 +100,43 @@ public class AccountEndpointTests : IDisposable
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         json.RootElement.GetProperty("code").GetString().Should().Be(code);
     }
+
+    [Fact]
+    public async Task The_profile_holds_the_members_area_and_address_and_can_be_changed()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var before = await client.GetFromJsonAsync<JsonElement>("/api/me/profile");
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { area = " Hilltop ", address = "1 Hill St" });
+        var after = await client.GetFromJsonAsync<JsonElement>("/api/me/profile");
+
+        before.GetProperty("area").GetString().Should().Be("Riverside");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        after.GetProperty("area").GetString().Should().Be("Hilltop");
+        after.GetProperty("address").GetString().Should().Be("1 Hill St");
+    }
+
+    [Theory]
+    [InlineData("", "1 Hill St", "invalid_area")]
+    [InlineData("Hilltop", "  ", "invalid_address")]
+    public async Task A_blank_area_or_address_is_refused_with_422_and_leaves_the_profile_alone(string area, string address, string code)
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { area, address });
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadAsStringAsync()).Should().Contain(code);
+        (await client.GetFromJsonAsync<JsonElement>("/api/me/profile")).GetProperty("area").GetString().Should().Be("Riverside");
+    }
+
+    [Fact]
+    public async Task The_profile_needs_a_session()
+    {
+        using var client = _factory.CreateClient();
+
+        (await client.GetAsync("/api/me/profile")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
 }

@@ -1,10 +1,11 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api/client'
 import type {
+  AdminMemberPage,
   DormantMemberPage,
   MemberDetailView,
-  MemberPage,
   MemberRequestPage,
+  OffboardMemberResult,
   PoolOverview,
 } from './types'
 
@@ -16,18 +17,36 @@ export const memberKeys = {
   dormant: () => ['admin', 'dormant-members'] as const,
 }
 
-function withCursor(path: string, cursor: string | undefined) {
-  return cursor ? `${path}?cursor=${encodeURIComponent(cursor)}` : path
+/** Every Member, open and closed; Admin only (spec §2A). */
+export function useMembers() {
+  return useQuery({
+    queryKey: memberKeys.all(),
+    queryFn: () => apiFetch<AdminMemberPage>('/api/admin/members'),
+  })
 }
 
-/** Every Member, closed ones included; Admin only, read-only (spec §2A). */
-export function useMembers() {
-  return useInfiniteQuery({
-    queryKey: memberKeys.all(),
-    initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) => apiFetch<MemberPage>(withCursor('/api/admin/members', pageParam)),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+/** Closes the account, releases the Member's open Requests and burns their balance; safe to repeat. */
+export function useOffboardMember() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<OffboardMemberResult>(`/api/admin/members/${id}/offboard`, { method: 'POST' }),
+    onSettled: () => client.invalidateQueries({ queryKey: memberKeys.all() }),
   })
+}
+
+/** Replaces a closed Member's name and email with "Former member"; irreversible (ADR 0014). */
+export function useEraseMember() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<undefined>(`/api/admin/members/${id}/erase`, { method: 'POST' }),
+    onSettled: () => client.invalidateQueries({ queryKey: memberKeys.all() }),
+  })
+}
+
+function withCursor(path: string, cursor: string | undefined) {
+  return cursor ? `${path}?cursor=${encodeURIComponent(cursor)}` : path
 }
 
 /** One Member's balances; each page also carries the next slice of their Ledger. */

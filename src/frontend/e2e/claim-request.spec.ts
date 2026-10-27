@@ -8,7 +8,7 @@ test('a Sitter claims an open Request, and the loser of a race is told it is gon
   backend,
 }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
-  const requesterId = await backend.seedMember([40])
+  const requesterId = await backend.seedMember([40], { area: 'Riverside', address: '12 River Rd' })
   const winnerId = await backend.seedMember([40])
   const loserId = await backend.seedMember([40])
   const [requester, winner, loser] = await Promise.all(
@@ -23,8 +23,7 @@ test('a Sitter claims an open Request, and the loser of a race is told it is gon
   await requester.goto(`${backend.appUrl}/requests/new`)
   await requester.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await requester.getByLabel(/duration/i).fill('120')
-  await requester.getByLabel(/^area/i).fill('Riverside')
-  await requester.getByLabel(/exact address/i).fill('12 River Rd')
+  await requester.getByLabel('Location').selectOption('RequestingFamilysHouse')
   await requester.getByRole('button', { name: /post request/i }).click()
   await expect(requester.getByRole('listitem').filter({ hasText: /riverside/i })).toContainText(
     'Posted',
@@ -62,15 +61,14 @@ test('a Sitter claims an open Request, and the loser of a race is told it is gon
 
 test('a Request past its Claim Cutoff is no longer open', async ({ browser, page, backend }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
-  const requesterId = await backend.seedMember([40])
+  const requesterId = await backend.seedMember([40], { area: 'Riverside', address: '12 River Rd' })
   const sitterId = await backend.seedMember([40])
   const requester = await browser.newContext({ timezoneId: 'UTC' })
   await backend.signIn(requester, requesterId)
   const requesterPage = await requester.newPage()
   await requesterPage.goto(`${backend.appUrl}/requests/new`)
   await requesterPage.getByLabel(/start time/i).fill('2026-03-01T20:00')
-  await requesterPage.getByLabel(/^area/i).fill('Riverside')
-  await requesterPage.getByLabel(/exact address/i).fill('12 River Rd')
+  await requesterPage.getByLabel('Location').selectOption('RequestingFamilysHouse')
   await requesterPage.getByRole('button', { name: /post request/i }).click()
   await expect(requesterPage.getByRole('listitem').filter({ hasText: /riverside/i })).toBeVisible()
   await backend.signIn(page.context(), sitterId)

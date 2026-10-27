@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<GetRulesHandler>();
         services.AddScoped<IssueInvitationHandler>();
         services.AddScoped<ListInvitationsHandler>();
+        services.AddScoped<ListMembersHandler>();
         services.AddScoped<InviteMemberHandler>();
         services.AddScoped<ResendInvitationHandler>();
         services.AddScoped<PreviewInvitationHandler>();
@@ -26,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<RedeemSignInLinkHandler>();
         services.AddScoped<ResolveSessionHandler>();
         services.AddScoped<ChangeLanguageHandler>();
+        services.AddScoped<GetMyProfileHandler>();
+        services.AddScoped<UpdateMyProfileHandler>();
         services.AddScoped<EndSessionHandler>();
         services.AddScoped<BootstrapAdminHandler>();
         services.AddScoped<PostRequestHandler>();
@@ -35,7 +38,6 @@ public static class DependencyInjection
         services.AddScoped<SettleHandler>();
         services.AddScoped<OffboardMemberHandler>();
         services.AddScoped<EraseMemberHandler>();
-        services.AddScoped<ListMembersHandler>();
         services.AddScoped<GetMemberDetailHandler>();
         services.AddScoped<ListMemberRequestsHandler>();
         services.AddScoped<GetPoolOverviewHandler>();

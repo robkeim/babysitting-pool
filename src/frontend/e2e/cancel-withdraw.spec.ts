@@ -8,7 +8,7 @@ test('a Sitter withdraws and the Request reopens, then the Requester cancels and
   backend,
 }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
-  const requesterId = await backend.seedMember([40])
+  const requesterId = await backend.seedMember([40], { area: 'Riverside', address: '12 River Rd' })
   const sitterId = await backend.seedMember([40])
   const [requester, sitter] = await Promise.all(
     [requesterId, sitterId].map(async (memberId) => {
@@ -22,8 +22,7 @@ test('a Sitter withdraws and the Request reopens, then the Requester cancels and
   await requester.goto(`${backend.appUrl}/requests/new`)
   await requester.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await requester.getByLabel(/duration/i).fill('120')
-  await requester.getByLabel(/^area/i).fill('Riverside')
-  await requester.getByLabel(/exact address/i).fill('12 River Rd')
+  await requester.getByLabel('Location').selectOption('RequestingFamilysHouse')
   await requester.getByRole('button', { name: /post request/i }).click()
   await expect(requester.getByRole('listitem').filter({ hasText: /riverside/i })).toContainText(
     'Posted',

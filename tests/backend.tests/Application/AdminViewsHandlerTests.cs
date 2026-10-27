@@ -160,22 +160,6 @@ public class AdminViewsHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Member_list_includes_closed_members_oldest_first_and_pages()
-    {
-        var first = await AddMemberAsync("first", Today.AddDays(-9));
-        var second = await AddMemberAsync("second", Today.AddDays(-8), closedAt: Today);
-        var third = await AddMemberAsync("third", Today.AddDays(-7));
-
-        var page1 = await RunAsync(sp => sp.GetRequiredService<ListMembersHandler>().HandleAsync(null, 2, default));
-        var page2 = await RunAsync(sp => sp.GetRequiredService<ListMembersHandler>().HandleAsync(page1.NextCursor, 2, default));
-
-        page1.Items.Select(m => m.Id).Should().Equal(first, second);
-        page1.Items[1].ClosedAt.Should().Be(Today);
-        page2.Items.Select(m => m.Id).Should().Equal(third);
-        page2.NextCursor.Should().BeNull();
-    }
-
-    [Fact]
     public async Task Member_detail_shows_balances_and_ledger_newest_first_and_is_null_for_a_stranger()
     {
         var member = await AddMemberAsync("m", Today.AddDays(-5), available: 8m, escrowed: 1m);

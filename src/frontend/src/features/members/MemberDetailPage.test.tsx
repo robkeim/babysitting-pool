@@ -2,13 +2,13 @@ import { screen, within } from '@testing-library/react'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { MemberDetailPage } from './MemberDetailPage'
-import { failureHandler, memberDetailHandler, memberRequestsHandler, sampleMember } from './mocks'
+import { failureHandler, memberDetailHandler, memberRequestsHandler, sampleSummary } from './mocks'
 
 describe('MemberDetailPage', () => {
   it('shows balances, requests and ledger, with nothing to edit', async () => {
     server.use(
       memberDetailHandler({
-        member: sampleMember,
+        member: sampleSummary,
         ledger: {
           items: [
             {
@@ -35,7 +35,7 @@ describe('MemberDetailPage', () => {
       ]),
     )
 
-    renderWithProviders(<MemberDetailPage memberId={sampleMember.id} />)
+    renderWithProviders(<MemberDetailPage memberId={sampleSummary.id} />)
 
     expect(await screen.findByRole('heading', { name: 'Ada Lovelace' })).toBeInTheDocument()
     expect(
@@ -50,7 +50,7 @@ describe('MemberDetailPage', () => {
   it('says so when the member cannot be loaded', async () => {
     server.use(failureHandler('*/api/admin/members/:id'), memberRequestsHandler([]))
 
-    renderWithProviders(<MemberDetailPage memberId={sampleMember.id} />)
+    renderWithProviders(<MemberDetailPage memberId={sampleSummary.id} />)
 
     expect(await screen.findByText("We couldn't load this member")).toBeInTheDocument()
   })

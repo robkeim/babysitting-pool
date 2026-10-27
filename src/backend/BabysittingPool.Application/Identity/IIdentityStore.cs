@@ -14,15 +14,21 @@ public interface IIdentityStore
 
     Task<Member?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken);
 
+    /// <summary>Every Member, open ones first, then closed ones, each group by name.</summary>
+    Task<IReadOnlyList<Member>> ListMembersAsync(CancellationToken cancellationToken);
+
     /// <summary>Closes the Member and ends all their Sessions. Does nothing if they are already closed.</summary>
     Task CloseMemberAsync(Guid memberId, DateTime now, CancellationToken cancellationToken);
 
     /// <summary>
-    /// In one transaction: saves the erased Member's name and email, clears the address of every Request they
-    /// posted, and deletes the Invitations sent to <paramref name="formerEmail"/> that are still unused and the
+    /// In one transaction: saves the erased Member's name and email, clears their profile address and the address of
+    /// every Request they posted, and deletes the Invitations sent to <paramref name="formerEmail"/> that are still unused and the
     /// sign-in links issued to the Member. The Ledger is untouched (ADR 0014).
     /// </summary>
     Task EraseMemberAsync(Member member, EmailAddress formerEmail, CancellationToken cancellationToken);
+
+    /// <summary>Saves the area and address on the Member's profile. Does nothing if they are closed.</summary>
+    Task SetHomeLocationAsync(Guid memberId, HomeLocation home, CancellationToken cancellationToken);
 
     Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken);
 

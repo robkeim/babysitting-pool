@@ -165,6 +165,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetMyProfile"];
+        put: operations["UpdateMyProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules": {
         parameters: {
             query?: never;
@@ -516,6 +532,18 @@ export interface components {
             escrowedQuarterCredits: number;
             ledger: components["schemas"]["PageOfLedgerEntryView"];
         };
+        AdminMemberView: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            email: string;
+            isAdmin: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            closedAt: null | string;
+            isErased: boolean;
+        };
         /** @enum {unknown} */
         BabysittingLocation: "SittersHouse" | "RequestingFamilysHouse";
         CostLines: {
@@ -639,7 +667,7 @@ export interface components {
             durationMinutes: number;
             /** Format: int32 */
             childCount: number;
-            area: string;
+            area: null | string;
             /** Format: int64 */
             costQuarterCredits: number;
             status: components["schemas"]["RequestStatus"];
@@ -691,11 +719,15 @@ export interface components {
             lunch: boolean;
             snack: boolean;
             dinner: boolean;
-            area: string;
+            area: null | string;
             /** Format: int64 */
             costQuarterCredits: number;
             /** Format: date-time */
             claimCutoffAt: string;
+        };
+        PageOfAdminMemberView: {
+            items: components["schemas"]["AdminMemberView"][];
+            nextCursor: null | string;
         };
         PageOfDormantMemberView: {
             items: components["schemas"]["DormantMemberView"][];
@@ -715,10 +747,6 @@ export interface components {
         };
         PageOfMemberRequestView: {
             items: components["schemas"]["MemberRequestView"][];
-            nextCursor: null | string;
-        };
-        PageOfMemberSummaryView: {
-            items: components["schemas"]["MemberSummaryView"][];
             nextCursor: null | string;
         };
         PageOfOpenRequestView: {
@@ -754,8 +782,6 @@ export interface components {
             lunch: boolean;
             snack: boolean;
             dinner: boolean;
-            area: null | string;
-            address: null | string;
         };
         PricingExample: {
             /** Format: int32 */
@@ -776,6 +802,14 @@ export interface components {
             status?: null | number;
             detail?: null | string;
             instance?: null | string;
+        };
+        ProfileBody: {
+            area: null | string;
+            address: null | string;
+        };
+        ProfileView: {
+            area: null | string;
+            address: null | string;
         };
         RequestCounts: {
             /** Format: int32 */
@@ -805,8 +839,8 @@ export interface components {
             lunch: boolean;
             snack: boolean;
             dinner: boolean;
-            area: string;
-            address: string;
+            area: null | string;
+            address: null | string;
             /** Format: int64 */
             costQuarterCredits: number;
             /** Format: date-time */
@@ -1140,6 +1174,95 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1650,10 +1773,7 @@ export interface operations {
     };
     ListMembers: {
         parameters: {
-            query?: {
-                cursor?: string;
-                limit?: number;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -1666,16 +1786,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PageOfMemberSummaryView"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                    "application/json": components["schemas"]["PageOfAdminMemberView"];
                 };
             };
             /** @description Unauthorized */

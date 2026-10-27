@@ -319,6 +319,104 @@
         }
       }
     },
+    "/api/me/profile": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "GetMyProfile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "UpdateMyProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rules": {
       "get": {
         "tags": [
@@ -975,40 +1073,13 @@
           "BabysittingPool.Api"
         ],
         "operationId": "ListMembers",
-        "parameters": [
-          {
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfMemberSummaryView"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/PageOfAdminMemberView"
                 }
               }
             }
@@ -1765,6 +1836,47 @@
           }
         }
       },
+      "AdminMemberView": {
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "isAdmin",
+          "createdAt",
+          "closedAt",
+          "isErased"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isErased": {
+            "type": "boolean"
+          }
+        }
+      },
       "BabysittingLocation": {
         "enum": [
           "SittersHouse",
@@ -2166,7 +2278,10 @@
             "format": "int32"
           },
           "area": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "costQuarterCredits": {
             "type": "integer",
@@ -2328,7 +2443,10 @@
             "type": "boolean"
           },
           "area": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "costQuarterCredits": {
             "type": "integer",
@@ -2337,6 +2455,27 @@
           "claimCutoffAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "PageOfAdminMemberView": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminMemberView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -2445,27 +2584,6 @@
           }
         }
       },
-      "PageOfMemberSummaryView": {
-        "required": [
-          "items",
-          "nextCursor"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MemberSummaryView"
-            }
-          },
-          "nextCursor": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
       "PageOfOpenRequestView": {
         "required": [
           "items",
@@ -2553,9 +2671,7 @@
           "transport",
           "lunch",
           "snack",
-          "dinner",
-          "area",
-          "address"
+          "dinner"
         ],
         "type": "object",
         "properties": {
@@ -2585,18 +2701,6 @@
           },
           "dinner": {
             "type": "boolean"
-          },
-          "area": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "address": {
-            "type": [
-              "null",
-              "string"
-            ]
           }
         }
       },
@@ -2670,6 +2774,48 @@
             ]
           },
           "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ProfileBody": {
+        "required": [
+          "area",
+          "address"
+        ],
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ProfileView": {
+        "required": [
+          "area",
+          "address"
+        ],
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address": {
             "type": [
               "null",
               "string"
@@ -2770,10 +2916,16 @@
             "type": "boolean"
           },
           "area": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "address": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "costQuarterCredits": {
             "type": "integer",

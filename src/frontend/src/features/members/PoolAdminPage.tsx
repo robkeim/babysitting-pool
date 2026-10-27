@@ -110,7 +110,7 @@ function Dormant() {
               <p className="font-medium [overflow-wrap:anywhere]">
                 <Link
                   id={`dormant-${member.id}`}
-                  to="/admin/members/$memberId"
+                  to="/admin/member/$memberId"
                   params={{ memberId: member.id }}
                   className="underline-offset-4 hover:underline"
                 >

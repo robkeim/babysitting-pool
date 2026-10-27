@@ -83,6 +83,56 @@ public class AdminEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task Listing_members_needs_a_session()
+    {
+        using var client = _factory.CreateSpaClient();
+
+        var response = await client.GetAsync("/api/admin/members");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Listing_members_is_forbidden_to_a_member_who_is_not_the_admin()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.GetAsync("/api/admin/members");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Listing_members_shows_open_and_closed_ones_and_who_is_erased()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        var open = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var closed = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var erased = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var adminClient = _factory.CreateMemberClient(admin);
+        (await adminClient.PostAsync($"/api/admin/members/{closed}/offboard", null)).EnsureSuccessStatusCode();
+        (await adminClient.PostAsync($"/api/admin/members/{erased}/offboard", null)).EnsureSuccessStatusCode();
+        (await adminClient.PostAsync($"/api/admin/members/{erased}/erase", null)).EnsureSuccessStatusCode();
+
+        var response = await adminClient.GetAsync("/api/admin/members");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var list = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("items").EnumerateArray().ToList();
+        var items = list.ToDictionary(m => m.GetProperty("id").GetGuid());
+        items[admin].GetProperty("isAdmin").GetBoolean().Should().BeTrue();
+        items[open].GetProperty("closedAt").ValueKind.Should().Be(JsonValueKind.Null);
+        items[open].GetProperty("isErased").GetBoolean().Should().BeFalse();
+        items[closed].GetProperty("closedAt").ValueKind.Should().Be(JsonValueKind.String);
+        items[closed].GetProperty("isErased").GetBoolean().Should().BeFalse();
+        items[erased].GetProperty("isErased").GetBoolean().Should().BeTrue();
+        items[erased].GetProperty("email").GetString().Should().Be("Former member");
+        var order = list.Select(m => m.GetProperty("closedAt").ValueKind == JsonValueKind.Null).ToList();
+        order.Should().BeInDescendingOrder("open Members come before closed ones");
+    }
+
+    [Fact]
     public async Task Offboard_needs_a_session()
     {
         using var client = _factory.CreateSpaClient();
@@ -301,6 +351,6 @@ public class AdminEndpointTests : IDisposable
         (await client.GetFromJsonAsync<JsonElement>("/api/admin/dormant-members"))
             .GetProperty("items").GetArrayLength().Should().Be(0);
         (await client.GetAsync($"/api/admin/members/{Guid.NewGuid()}")).StatusCode.Should().Be(HttpStatusCode.NotFound);
-        (await client.GetAsync("/api/admin/members?cursor=garbage")).StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await client.GetAsync($"/api/admin/members/{member}?cursor=garbage")).StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }

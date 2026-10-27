@@ -9,13 +9,6 @@ namespace BabysittingPool.Infrastructure;
 
 internal sealed class AdminReader(BabysittingPoolDbContext db) : IAdminReader
 {
-    public async Task<Page<MemberSummaryView>> ListMembersAsync(PageRequest page, CancellationToken cancellationToken)
-    {
-        var rows = await Summaries()
-            .ToKeysetPageAsync(page, m => m.CreatedAt, m => m.Id, descending: false, cancellationToken);
-        return page.ToPage(rows, m => new KeysetPosition(m.CreatedAt, m.Id), m => m.ToView());
-    }
-
     public async Task<MemberSummaryView?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken) =>
         (await Summaries().SingleOrDefaultAsync(m => m.Id == memberId, cancellationToken))?.ToView();
 

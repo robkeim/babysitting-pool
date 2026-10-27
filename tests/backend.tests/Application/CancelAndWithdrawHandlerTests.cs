@@ -30,7 +30,7 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            _requester, Now.AddHours(10), new CreditRequestDetails(120, 1), "Riverside", "12 River Rd");
+            _requester, Now.AddHours(10), new CreditRequestDetails(120, 1));
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!;
     }
 
@@ -152,7 +152,7 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
         var view = await WithdrawAsync(request.Id, _sitter);
 
         view!.Status.Should().Be(RequestStatus.Posted);
-        view.Address.Should().BeEmpty();
+        view.Address.Should().BeNull();
         await using var scope = _database.CreateScope();
         var stored = await _database.NewContext(scope).Requests.AsNoTracking().SingleAsync();
         stored.Status.Should().Be(RequestStatus.Posted);

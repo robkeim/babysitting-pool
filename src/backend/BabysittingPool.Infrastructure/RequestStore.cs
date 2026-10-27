@@ -1,5 +1,6 @@
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Identity;
 using BabysittingPool.Domain.Requests;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
@@ -15,6 +16,15 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         // Tracked on purpose: its original Version is what a later save checks against (ADR 0004).
         var record = await db.CreditAccounts.SingleOrDefaultAsync(a => a.MemberId == memberId, cancellationToken);
         return record is null ? null : CreditAccount.Restore(record.Available.Value, record.Escrowed.Value);
+    }
+
+    public async Task<HomeLocation?> FindHomeLocationAsync(Guid memberId, CancellationToken cancellationToken)
+    {
+        var member = await db.Members.AsNoTracking()
+            .Where(m => m.Id == memberId)
+            .Select(m => new { m.Area, m.Address })
+            .SingleOrDefaultAsync(cancellationToken);
+        return member is { Area: { } area, Address: { } address } ? HomeLocation.Restore(area, address) : null;
     }
 
     public async Task<Request?> FindRequestAsync(Guid requestId, CancellationToken cancellationToken)

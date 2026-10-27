@@ -5,9 +5,6 @@ namespace BabysittingPool.Application.Admin;
 /// <summary>Read port for the Admin's read-only views of the Members and the pool (spec §2A, §5).</summary>
 public interface IAdminReader
 {
-    /// <summary>Every Member, oldest account first, closed ones included.</summary>
-    Task<Page<MemberSummaryView>> ListMembersAsync(PageRequest page, CancellationToken cancellationToken);
-
     /// <summary>The Member and their balances, or null when there is no such Member.</summary>
     Task<MemberSummaryView?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken);
 
@@ -41,7 +38,7 @@ public sealed record MemberRequestView(
     DateTime StartsAt,
     int DurationMinutes,
     int ChildCount,
-    string Area,
+    string? Area,
     long CostQuarterCredits,
     RequestStatus Status);
 

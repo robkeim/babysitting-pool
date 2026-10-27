@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl'
 import { PageHeader } from '@/components/PageHeader'
 import { MemberDetailPage } from '@/features/members'
 
-export const Route = createFileRoute('/_authed/admin/members/$memberId')({
+export const Route = createFileRoute('/_authed/admin/member/$memberId')({
   component: function MemberDetail() {
     const { memberId } = Route.useParams()
     return (

@@ -180,3 +180,10 @@ export function releaseRequestRejectedHandler(
     ),
   )
 }
+
+/** The Member's profile as the post form reads it: where a Request at their house takes its area and address from. */
+export function profileHandler(profile: { area: string | null; address: string | null }) {
+  return http.get('*/api/me/profile', () => HttpResponse.json(profile))
+}
+
+export const sampleProfile = { area: 'Riverside', address: '12 River Rd' }

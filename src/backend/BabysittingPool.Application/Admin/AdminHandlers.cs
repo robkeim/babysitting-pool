@@ -5,12 +5,6 @@ namespace BabysittingPool.Application.Admin;
 /// <summary>A Member's balances, Requests and Ledger, as the Admin sees them (read-only, spec §2A).</summary>
 public sealed record MemberDetailView(MemberSummaryView Member, Page<LedgerEntryView> Ledger);
 
-public sealed class ListMembersHandler(IAdminReader reader)
-{
-    public Task<Page<MemberSummaryView>> HandleAsync(string? cursor, int? limit, CancellationToken cancellationToken) =>
-        reader.ListMembersAsync(PageRequest.From(cursor, limit), cancellationToken);
-}
-
 public sealed class GetMemberDetailHandler(IAdminReader members, ICreditAccountReader accounts)
 {
     /// <summary>Returns the Member with the first page of their Ledger, or null when there is no such Member.</summary>

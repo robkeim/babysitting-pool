@@ -192,11 +192,17 @@ async function postRequest(
   appUrl: string,
   request: { start: string; minutes: string; area: string },
 ) {
-  await page.goto(`${appUrl}/requests/new`)
-  await page.getByLabel(/start time/i).fill(request.start)
-  await page.getByLabel(/duration/i).fill(request.minutes)
+  // The area and address come from the profile, so set the profile before each Request.
+  await page.goto(`${appUrl}/profile`)
   await page.getByLabel(/^area/i).fill(request.area)
   await page.getByLabel(/exact address/i).fill('12 River Rd')
+  await page.getByRole('button', { name: /save/i }).click()
+  await expect(page.getByRole('status')).toContainText(/saved/i)
+
+  await page.goto(`${appUrl}/requests/new`)
+  await page.getByLabel('Location').selectOption('RequestingFamilysHouse')
+  await page.getByLabel(/start time/i).fill(request.start)
+  await page.getByLabel(/duration/i).fill(request.minutes)
   await page.getByRole('button', { name: /post request/i }).click()
   await expect(
     page.getByRole('listitem').filter({ hasText: new RegExp(request.area, 'i') }),
