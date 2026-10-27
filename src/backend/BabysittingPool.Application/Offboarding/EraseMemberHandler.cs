@@ -6,8 +6,8 @@ namespace BabysittingPool.Application.Offboarding;
 public sealed record EraseMemberCommand(Guid MemberId);
 
 /// <summary>
-/// The Admin erases a closed Member's personal data (spec §2A, ADR 0014): name and email become "Former member",
-/// Request addresses are cleared, and unused Invitations and sign-in links are deleted. Ledger amounts and ids stay.
+/// The Admin erases a closed Member's personal data (spec §2A, ADR 0014): name and email (also on the accepted Invitation)
+/// become "Former member", Request addresses are cleared, and unused Invitations and sign-in links are deleted. Ledger amounts and ids stay.
 /// </summary>
 public sealed class EraseMemberHandler(IIdentityStore identity)
 {
