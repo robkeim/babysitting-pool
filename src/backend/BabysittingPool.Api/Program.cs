@@ -118,6 +118,12 @@ if (app.Environment.IsProduction())
 
 app.UseHttpsRedirection();
 app.UseSecurityHeaders();
+var servesSpa = app.Environment.HasSpa();
+if (servesSpa)
+{
+    app.UseSpaStaticFiles();
+}
+
 app.UseCsrfHeaderCheck();
 app.UseAuthentication();
 app.UseApiRateLimiting();
@@ -138,6 +144,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(TestEndpoin
 if (app.Environment.IsEnvironment(TestEndpoints.Environment))
 {
     app.MapTestEndpoints();
+}
+
+if (servesSpa)
+{
+    app.MapSpaFallback();
 }
 
 app.Run();
