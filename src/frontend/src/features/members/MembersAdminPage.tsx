@@ -3,6 +3,14 @@ import { Users } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { EmptyState } from '@/components/EmptyState'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatCredits, formatInstant } from '@/features/credits'
@@ -95,64 +103,62 @@ function MemberRow({ member }: { member: AdminMemberView }) {
           )}
         </div>
 
-        {pending !== null && (
-          <Alert variant="destructive" role="alertdialog" aria-label={name}>
-            <AlertTitle>
+        <AlertDialog
+          open={pending !== null}
+          onOpenChange={(open) => {
+            if (!open && !busy) setPending(null)
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogTitle>
               <FormattedMessage
                 id={
-                  pending === 'offboard'
-                    ? 'members.admin.offboard.confirmTitle'
-                    : 'members.admin.erase.confirmTitle'
+                  pending === 'erase'
+                    ? 'members.admin.erase.confirmTitle'
+                    : 'members.admin.offboard.confirmTitle'
                 }
                 values={{ name }}
               />
-            </AlertTitle>
-            <AlertDescription className="space-y-3">
-              <p>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <FormattedMessage
+                id={
+                  pending === 'erase'
+                    ? 'members.admin.erase.confirmBody'
+                    : 'members.admin.offboard.confirmBody'
+                }
+              />
+            </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogClose
+                render={<Button variant="outline" className="h-11 lg:h-8" disabled={busy} />}
+              >
+                <FormattedMessage id="members.admin.cancel" />
+              </AlertDialogClose>
+              <Button
+                variant="destructive"
+                className="h-11 lg:h-8"
+                disabled={busy}
+                onClick={() => {
+                  const run = pending === 'erase' ? erase : offboard
+                  run.mutate(member.id, {
+                    onSettled: () => {
+                      setPending(null)
+                    },
+                  })
+                }}
+              >
                 <FormattedMessage
                   id={
-                    pending === 'offboard'
-                      ? 'members.admin.offboard.confirmBody'
-                      : 'members.admin.erase.confirmBody'
+                    pending === 'erase'
+                      ? 'members.admin.erase.confirm'
+                      : 'members.admin.offboard.confirm'
                   }
                 />
-              </p>
-              <div className="flex flex-col gap-3 lg:flex-row">
-                <Button
-                  variant="destructive"
-                  className="h-11 w-full lg:h-8 lg:w-auto"
-                  disabled={busy}
-                  onClick={() => {
-                    const run = pending === 'offboard' ? offboard : erase
-                    run.mutate(member.id, {
-                      onSuccess: () => {
-                        setPending(null)
-                      },
-                    })
-                  }}
-                >
-                  <FormattedMessage
-                    id={
-                      pending === 'offboard'
-                        ? 'members.admin.offboard.confirm'
-                        : 'members.admin.erase.confirm'
-                    }
-                  />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-11 w-full lg:h-8 lg:w-auto"
-                  disabled={busy}
-                  onClick={() => {
-                    setPending(null)
-                  }}
-                >
-                  <FormattedMessage id="members.admin.cancel" />
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {offboard.isError && (
           <p role="alert" className="text-sm text-destructive">
