@@ -10,7 +10,7 @@ RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend
 WORKDIR /src
-COPY global.json Directory.Build.props Directory.Packages.props ./
+COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
 COPY src/backend/ src/backend/
 RUN dotnet publish src/backend/BabysittingPool.Api/BabysittingPool.Api.csproj -c Release -o /app /p:UseAppHost=false
 

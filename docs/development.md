@@ -35,11 +35,10 @@ One multi-stage image (ADR 0018) builds the SPA, publishes the API and copies th
 
 ```sh
 docker build -t babysitting-pool .
-docker run --rm -p 8080:8080 -v babysitting-data:/data \
-  -e App__BaseUrl=http://localhost:8080 -e Bootstrap__AdminEmail=you@example.com babysitting-pool
+docker run --rm -p 8080:8080 -v babysitting-data:/data -e ASPNETCORE_ENVIRONMENT=Development babysitting-pool
 ```
 
-The database and the rate-limit file live in `/data` (`ConnectionStrings__Default`). `App__BaseUrl` is required in Production. Set `Email__Smtp__Address` and `Email__Smtp__Password`; without them sending an email fails in Production (ADR 0018).
+The database and the rate-limit file live in `/data` (`ConnectionStrings__Default`). The image defaults to Production, which refuses to start without `App__BaseUrl`, `Bootstrap__AdminEmail` and working `Email__Smtp__Address` and `Email__Smtp__Password` (the first Admin is invited by email, ADR 0018). To try the image locally without email, run it as `Development` as above: it seeds the Members and logs the Admin's sign-in link.
 
 ## Checks
 
