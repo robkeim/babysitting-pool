@@ -72,4 +72,13 @@ npm run test:e2e                  # or: npx playwright test
 
 ## Deployment
 
-Production is one always-on Fly.io Machine in `iad` (ADR 0018). Deploys are local: `scripts/deploy.sh` (#147) refuses to run unless the full-gate stamp matches the tree, then runs `fly deploy`. There is no GitHub workflow (ADR 0015). Backups, the restore drill and the production runbook are tracked in #148 and #149.
+Production is one always-on Fly.io Machine in `iad` (ADR 0018), configured in `fly.toml`: shared-cpu 256MB, `auto_stop_machines = false`, `min_machines_running = 1`, a 1GB `data` volume mounted at `/data`, and a `/health` check. Never scale past one Machine (SQLite is single-instance).
+
+Deploys are local and deliberate; there is no GitHub workflow (ADR 0015):
+
+```sh
+scripts/check.sh all --full   # writes .git/check-stamp-full for this exact tree
+scripts/deploy.sh             # extra arguments go to `fly deploy`
+```
+
+`scripts/deploy.sh` exits non-zero without deploying if the full-gate stamp is missing or does not match the current tree (any edit after the gate makes it stale), then runs `fly deploy`. First-time setup (`fly apps create`, `fly volumes create data`, secrets) is in the production runbook (#149). Backups and the restore drill are tracked in #148.
