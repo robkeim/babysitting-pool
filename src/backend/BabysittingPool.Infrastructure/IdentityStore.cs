@@ -27,6 +27,14 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         return record is null ? null : ToDomain(record);
     }
 
+    public async Task<IReadOnlyList<Member>> ListMembersAsync(CancellationToken cancellationToken)
+    {
+        var records = await db.Members.AsNoTracking()
+            .OrderBy(m => m.ClosedAt != null).ThenBy(m => m.DisplayName).ThenBy(m => m.Id)
+            .ToListAsync(cancellationToken);
+        return records.Select(ToDomain).ToList();
+    }
+
     public async Task CloseMemberAsync(Guid memberId, DateTime now, CancellationToken cancellationToken)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
