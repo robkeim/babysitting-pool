@@ -119,6 +119,26 @@ public class EraseMemberHandlerTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Erasing_replaces_the_email_on_the_accepted_invitation_and_leaves_other_invitations_alone()
+    {
+        var email = (await MemberAsync(_leaver)).Email;
+        await AddInvitationAsync(email);
+        await AddInvitationAsync("someone.else@example.test");
+        await using (var scope = _database.CreateScope())
+        {
+            await _database.NewContext(scope).Invitations
+                .ExecuteUpdateAsync(i => i.SetProperty(x => x.ConsumedAt, (DateTime?)Now));
+        }
+
+        await OffboardAsync(_leaver);
+        await EraseAsync(_leaver);
+
+        await using var after = _database.CreateScope();
+        var emails = await _database.NewContext(after).Invitations.AsNoTracking().Select(i => i.Email).ToListAsync();
+        emails.Should().BeEquivalentTo(["Former member", "someone.else@example.test"]);
+    }
+
+    [Fact]
     public async Task An_open_member_cannot_be_erased()
     {
         var before = await MemberAsync(_leaver);
