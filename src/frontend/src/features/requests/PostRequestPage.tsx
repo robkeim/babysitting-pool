@@ -27,7 +27,7 @@ function defaultStartsAt(): string {
 }
 
 const selectClass =
-  'h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 lg:h-8 lg:text-sm dark:bg-input/30'
+  'h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 lg:h-8 lg:text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30'
 
 const POST_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   below_minimum_lead_time: 'error.below_minimum_lead_time',
@@ -92,6 +92,8 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
       { rate: formatCredits(rate), count: childCount },
     )
   }
+
+  const transportLocked = location === 'RequestingFamilysHouse'
 
   function changeLocation(next: BabysittingLocation) {
     setLocation(next)
@@ -229,7 +231,8 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                 id="transport"
                 className={selectClass}
                 value={transport}
-                disabled={location === 'RequestingFamilysHouse'}
+                disabled={transportLocked}
+                aria-describedby={transportLocked ? 'transport-hint' : undefined}
                 onChange={(event) => {
                   setTransport(event.target.value as TransportOption)
                 }}
@@ -250,6 +253,11 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   )}
                 </option>
               </select>
+              {transportLocked && (
+                <p id="transport-hint" className="text-sm text-muted-foreground">
+                  <FormattedMessage id="requests.post.transport.unavailable" />
+                </p>
+              )}
             </div>
           </div>
           <fieldset className="space-y-2">

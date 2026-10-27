@@ -79,6 +79,7 @@
   "requests.post.transport.None": "Aucun transport",
   "requests.post.transport.OneWay": "Aller simple",
   "requests.post.transport.RoundTrip": "Aller-retour",
+  "requests.post.transport.unavailable": "Indisponible lorsque la garde a lieu au domicile de la famille demandeuse.",
   "requests.post.meals": "Repas",
   "requests.post.meals.lunch": "Déjeuner",
   "requests.post.meals.snack": "Goûter",

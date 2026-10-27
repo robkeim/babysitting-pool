@@ -118,6 +118,9 @@ describe('PostRequestPage', () => {
 
     expect(screen.getByLabelText('Transport')).toBeDisabled()
     expect(screen.getByLabelText('Transport')).toHaveValue('None')
+    expect(screen.getByLabelText('Transport')).toHaveAccessibleDescription(
+      /not available when the babysitting is at the requesting family/i,
+    )
   })
 
   it('explains a start time that is inside the minimum lead time', async () => {
