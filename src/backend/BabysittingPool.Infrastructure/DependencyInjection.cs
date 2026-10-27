@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddDbContext<BabysittingPoolDbContext>(options => options
             .UseSqlite(connectionString)
             .AddInterceptors(new SqliteConnectionSetup()));
+        services.AddSingleton(sp => new SqliteRateLimitStore(connectionString, sp.GetRequiredService<TimeProvider>()));
         services.AddScoped<ICreditAccountReader, CreditAccountReader>();
         services.AddScoped<IIdentityStore, IdentityStore>();
         services.AddScoped<IRequestStore, RequestStore>();
