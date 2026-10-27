@@ -110,7 +110,7 @@ The total cost of a request is calculated deterministically using the following 
    - The exact address is shown only to the counterparty once the Request is Claimed, and hidden again if the claim is dropped. Posted Requests show Members only a rough area.
    - Editing a Claimed Request drops the claim. Every field the Sitter relies on (all cost drivers, address and drop-off point) does this; only free-text notes are exempt. The Request returns to Posted with the new terms and its Escrow adjusted to the new cost. The former Sitter may claim it again like any other Member, first claim wins. Future: first rights for the former Sitter to reconfirm (backlog: #5).
    - After the Claim Cutoff, a Claimed Request can only have its free-text notes edited. An edit that would drop the claim is blocked with an explanation, so the Request does not silently expire.
-7. **Sitter overlap (v1):** A Sitter may hold overlapping Claimed Requests; Sitter capacity is not modelled (backlog: #3).
+7. **Sitter overlap:** A Sitter cannot hold two Claimed Requests that share any time; a claim that would is rejected (422 `sitter_overlap`). Requests that touch end to start (3-5 PM and 5-7 PM) do not overlap. Withdrawing a claim frees the time. Sitter capacity is not modelled: a Sitter looks after one family at a time.
 8. **Children (v1):** A Request records only the number of children (backlog for child profiles: #4). Any further child data needs its own ADR and privacy review first (ADR 0014).
 9. **Known v1 trade-off (Future Backlog):** Payout happens at the start time, so a no-show Sitter is still paid. Disputes and no-show handling are deferred.
 

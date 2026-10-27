@@ -42,6 +42,8 @@ public sealed class Request
 
     public DateTime StartsAt { get; }
 
+    public DateTime EndsAt => StartsAt.AddMinutes(Details.DurationMinutes);
+
     /// <summary>The rough neighbourhood, which is all other Members see while the Request is Posted (spec §4.6).</summary>
     public string Area { get; }
 
@@ -123,8 +125,11 @@ public sealed class Request
 
     public RequestStatus StatusNow(DateTime now) => StatusAt(Status, ClaimCutoffAt, StartsAt, now);
 
-    /// <summary>The first Sitter to claim wins; there is no approval step (spec §4.4).</summary>
-    public void Claim(Guid sitterId, DateTime now)
+    /// <summary>
+    /// The first Sitter to claim wins; there is no approval step (spec §4.4). <paramref name="sitterClaims"/> are
+    /// the Requests the Sitter already holds: sharing any time with one is refused, back-to-back is fine (spec §4.7).
+    /// </summary>
+    public void Claim(Guid sitterId, DateTime now, IEnumerable<Request> sitterClaims)
     {
         RequireStatus(RequestStatus.Posted, "claimed");
         if (sitterId == RequesterId)
@@ -135,6 +140,12 @@ public sealed class Request
         if (now >= ClaimCutoffAt)
         {
             throw new DomainException("The Claim Cutoff has passed.", "claim_cutoff_passed");
+        }
+
+        ArgumentNullException.ThrowIfNull(sitterClaims);
+        if (sitterClaims.Any(c => c.StartsAt < EndsAt && StartsAt < c.EndsAt))
+        {
+            throw new DomainException("The Sitter already has a claim during that time.", "sitter_overlap");
         }
 
         SitterId = sitterId;

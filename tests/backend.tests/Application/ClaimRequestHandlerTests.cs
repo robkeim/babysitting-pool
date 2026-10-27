@@ -124,6 +124,67 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task A_sitter_cannot_claim_a_request_that_overlaps_one_they_hold()
+    {
+        await ClaimAsync((await PostAsync(_requester, hoursAhead: 10)).Id, _sitter);
+        var overlapping = await PostAsync(_requester, hoursAhead: 11);
+
+        var act = () => ClaimAsync(overlapping.Id, _sitter);
+
+        (await act.Should().ThrowAsync<DomainException>()).Which.Code.Should().Be("sitter_overlap");
+    }
+
+    [Fact]
+    public async Task A_sitter_can_claim_a_request_that_starts_when_their_other_claim_ends()
+    {
+        await ClaimAsync((await PostAsync(_requester, hoursAhead: 10)).Id, _sitter);
+        var adjacent = await PostAsync(_requester, hoursAhead: 12);
+
+        var claimed = await ClaimAsync(adjacent.Id, _sitter);
+
+        claimed!.Status.Should().Be(RequestStatus.Claimed);
+    }
+
+    [Fact]
+    public async Task Two_sitters_can_claim_overlapping_requests()
+    {
+        var other = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await ClaimAsync((await PostAsync(_requester, hoursAhead: 10)).Id, _sitter);
+
+        var claimed = await ClaimAsync((await PostAsync(_requester, hoursAhead: 11)).Id, other);
+
+        claimed!.Status.Should().Be(RequestStatus.Claimed);
+    }
+
+    [Fact]
+    public async Task One_sitter_racing_for_two_overlapping_requests_wins_only_one()
+    {
+        var first = await PostAsync(_requester, hoursAhead: 10);
+        var second = await PostAsync(_requester, hoursAhead: 11);
+
+        var results = await Task.WhenAll(
+            Attempt(first.Id), Attempt(second.Id));
+
+        results.Count(claimed => claimed).Should().Be(1);
+        await using var scope = _database.CreateScope();
+        (await _database.NewContext(scope).Requests.AsNoTracking().CountAsync(r => r.Status == RequestStatus.Claimed))
+            .Should().Be(1);
+
+        async Task<bool> Attempt(Guid requestId)
+        {
+            try
+            {
+                await ClaimAsync(requestId, _sitter);
+                return true;
+            }
+            catch (DomainException ex) when (ex.Code == "sitter_overlap")
+            {
+                return false;
+            }
+        }
+    }
+
+    [Fact]
     public async Task Two_sitters_racing_for_the_same_request_cannot_both_win()
     {
         var posted = await PostAsync(_requester);
@@ -134,8 +195,8 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
         var secondStore = second.ServiceProvider.GetRequiredService<IRequestStore>();
         var firstRequest = (await firstStore.FindRequestAsync(posted.Id, default))!;
         var secondRequest = (await secondStore.FindRequestAsync(posted.Id, default))!;
-        firstRequest.Claim(_sitter, Now);
-        secondRequest.Claim(other, Now);
+        firstRequest.Claim(_sitter, Now, []);
+        secondRequest.Claim(other, Now, []);
         await firstStore.SaveClaimedAsync(firstRequest, default);
 
         var act = () => secondStore.SaveClaimedAsync(secondRequest, default);

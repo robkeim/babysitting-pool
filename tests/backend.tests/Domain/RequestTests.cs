@@ -24,7 +24,7 @@ public class RequestTests
     private Request Claimed(CreditAccount account)
     {
         var request = Post(account);
-        request.Claim(_sitterId, Now);
+        request.Claim(_sitterId, Now, []);
         return request;
     }
 
@@ -136,7 +136,7 @@ public class RequestTests
     {
         var request = Post(CreditAccount.Open());
 
-        request.Claim(_sitterId, Now);
+        request.Claim(_sitterId, Now, []);
 
         request.Status.Should().Be(RequestStatus.Claimed);
         request.SitterId.Should().Be(_sitterId);
@@ -147,7 +147,7 @@ public class RequestTests
     {
         var request = Claimed(CreditAccount.Open());
 
-        var act = () => request.Claim(Guid.NewGuid(), Now);
+        var act = () => request.Claim(Guid.NewGuid(), Now, []);
 
         act.Should().Throw<DomainException>().Which.Code.Should().Be("invalid_state");
     }
@@ -157,7 +157,7 @@ public class RequestTests
     {
         var request = Post(CreditAccount.Open());
 
-        var act = () => request.Claim(_requesterId, Now);
+        var act = () => request.Claim(_requesterId, Now, []);
 
         act.Should().Throw<DomainException>().Which.Code.Should().Be("own_request");
         request.Status.Should().Be(RequestStatus.Posted);
@@ -168,7 +168,7 @@ public class RequestTests
     {
         var request = Post(CreditAccount.Open());
 
-        var act = () => request.Claim(_sitterId, request.ClaimCutoffAt);
+        var act = () => request.Claim(_sitterId, request.ClaimCutoffAt, []);
 
         act.Should().Throw<DomainException>().Which.Code.Should().Be("claim_cutoff_passed");
     }
@@ -384,7 +384,7 @@ public class RequestTests
         request.Cancel(_requesterId, requester, Now);
 
         var complete = () => request.Complete(requester, CreditAccount.Open(), Start);
-        var claim = () => request.Claim(Guid.NewGuid(), Now);
+        var claim = () => request.Claim(Guid.NewGuid(), Now, []);
 
         complete.Should().Throw<DomainException>();
         claim.Should().Throw<DomainException>();
