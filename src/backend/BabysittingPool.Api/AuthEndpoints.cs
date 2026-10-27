@@ -1,6 +1,6 @@
-using System.Threading.RateLimiting;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Identity;
+using BabysittingPool.Infrastructure;
 
 namespace BabysittingPool.Api;
 
@@ -10,7 +10,7 @@ internal static class AuthEndpoints
     {
         app.MapPost("/api/auth/sign-in-links", async (
             HttpContext context, SignInLinkRequest request, RequestSignInLinkHandler handler,
-            PartitionedRateLimiter<string> emailLimiter, CancellationToken cancellationToken) =>
+            SqliteRateLimitStore rateLimits, CancellationToken cancellationToken) =>
         {
             if (!EmailAddress.TryParse(request.Email, out var email))
             {
@@ -18,10 +18,10 @@ internal static class AuthEndpoints
             }
 
             // Per address, known or not, so the answer reveals nothing about who is a Member (ADR 0012).
-            using var lease = await emailLimiter.AcquireAsync(email.Value, 1, cancellationToken);
-            if (!lease.IsAcquired)
+            var decision = await rateLimits.HitSignInLinkEmailAsync(email.Value, cancellationToken);
+            if (!decision.Allowed)
             {
-                return RateLimiting.Reject(context, lease.TryGetMetadata(MetadataName.RetryAfter, out var delay) ? delay : TimeSpan.FromMinutes(15));
+                return RateLimiting.Reject(context, decision.RetryAfter);
             }
 
             await handler.HandleAsync(email, cancellationToken);

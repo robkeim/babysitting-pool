@@ -120,7 +120,7 @@ app.UseHttpsRedirection();
 app.UseSecurityHeaders();
 app.UseCsrfHeaderCheck();
 app.UseAuthentication();
-app.UseRateLimiter();
+app.UseApiRateLimiting();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
