@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Identity;
 using BabysittingPool.Domain.Requests;
 
 namespace backend.tests.Domain;
@@ -17,9 +18,12 @@ public class RequestTests
     // Two hours for one child at the sitter's house costs 2.0 credits.
     private static CreditRequestDetails TwoHours => new(durationMinutes: 120, childCount: 1);
 
+    private static CreditRequestDetails AtFamilyHouse =>
+        new(durationMinutes: 120, childCount: 1, BabysittingLocation.RequestingFamilysHouse);
+
     private Request Post(CreditAccount account, DateTime? startsAt = null) =>
         Request.Post(
-            _requesterId, account, TwoHours, startsAt ?? Start, " Riverside ", "12 River Rd", Now, LeadTime, Cutoff);
+            _requesterId, account, TwoHours, startsAt ?? Start, null, Now, LeadTime, Cutoff);
 
     private Request Claimed(CreditAccount account)
     {
@@ -39,7 +43,8 @@ public class RequestTests
         request.Cost.Value.Should().Be(2.0m);
         request.ClaimCutoffAt.Should().Be(Start.AddHours(-3));
         request.PostedAt.Should().Be(Now);
-        request.Area.Should().Be("Riverside");
+        request.Area.Should().BeNull();
+        request.Address.Should().BeNull();
         account.Available.Should().Be(8.0m);
         account.Escrowed.Should().Be(2.0m);
     }
@@ -118,17 +123,39 @@ public class RequestTests
         account.Available.Should().Be(0m);
     }
 
-    [Theory]
-    [InlineData("", "12 River Rd", "invalid_area")]
-    [InlineData("Riverside", "  ", "invalid_address")]
-    public void Posting_requires_an_area_and_an_address(string area, string address, string code)
+    [Fact]
+    public void Posting_at_the_requesting_familys_house_copies_the_requesters_area_and_address()
     {
         var account = CreditAccount.Open();
 
-        var act = () => Request.Post(_requesterId, account, TwoHours, Start, area, address, Now, LeadTime, Cutoff);
+        var request = Request.Post(
+            _requesterId, account, AtFamilyHouse, Start, HomeLocation.Create(" Riverside ", "12 River Rd"), Now, LeadTime, Cutoff);
 
-        act.Should().Throw<DomainException>().Which.Code.Should().Be(code);
+        request.Area.Should().Be("Riverside");
+        request.Address.Should().Be("12 River Rd");
+    }
+
+    [Fact]
+    public void Posting_at_the_requesting_familys_house_needs_a_home_location()
+    {
+        var account = CreditAccount.Open();
+
+        var act = () => Request.Post(_requesterId, account, AtFamilyHouse, Start, null, Now, LeadTime, Cutoff);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("home_location_required");
         account.Escrowed.Should().Be(0m);
+    }
+
+    [Fact]
+    public void Posting_at_the_sitters_house_records_no_location_even_if_the_requester_has_one()
+    {
+        var account = CreditAccount.Open();
+
+        var request = Request.Post(
+            _requesterId, account, TwoHours, Start, HomeLocation.Create("Riverside", "12 River Rd"), Now, LeadTime, Cutoff);
+
+        request.Area.Should().BeNull();
+        request.Address.Should().BeNull();
     }
 
     [Fact]

@@ -153,6 +153,12 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Area")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("TEXT");
 
@@ -192,11 +198,9 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Area")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ChildCount")

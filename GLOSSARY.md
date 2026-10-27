@@ -77,8 +77,12 @@ The period of care itself, from the Request's start time onward.
 _Avoid_: Booking, hosting session
 
 **Location**:
-Where a Session takes place: *Sitter's House* or *Requesting Family's House*.
+Where a Session takes place: *Sitter's House* or *Requesting Family's House*. Only a Request at the Requesting Family's House carries an Area and address.
 _Avoid_: Venue, host's house
+
+**Area**:
+The rough neighbourhood a Member lives in, kept with their exact address on their profile. Other Members see the Area of a Posted Request at the Requesting Family's House; the exact address goes only to the Requester and the Sitter who claimed it.
+_Avoid_: Neighbourhood, region, zone
 
 ### Credits
 

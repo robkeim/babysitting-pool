@@ -18,7 +18,7 @@ internal static class RequestEndpoints
             try
             {
                 var command = new PostRequestCommand(
-                    member.MemberId, body.StartsAt.UtcDateTime, body.ToDetails(), body.Area ?? "", body.Address ?? "");
+                    member.MemberId, body.StartsAt.UtcDateTime, body.ToDetails());
                 return await handler.HandleAsync(command, cancellationToken) is { } view
                     ? Results.Created($"/api/me/requests#{view.Id}", view)
                     : Problems.AccountNotFound();
@@ -225,9 +225,7 @@ internal static class RequestEndpoints
         TransportOption Transport,
         bool Lunch,
         bool Snack,
-        bool Dinner,
-        string? Area,
-        string? Address)
+        bool Dinner)
     {
         public CreditRequestDetails ToDetails() =>
             new(DurationMinutes, ChildCount, Location, Transport, Meals(Lunch, Snack, Dinner));

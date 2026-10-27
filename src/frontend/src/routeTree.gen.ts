@@ -16,6 +16,7 @@ import { Route as AuthedClaimsRouteImport } from './routes/_authed/claims'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as AuthedHowItWorksRouteImport } from './routes/_authed/how-it-works'
 import { Route as AuthedOpenRequestsRouteImport } from './routes/_authed/open-requests'
+import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
 import { Route as AuthedAdminFeatureFlagsRouteImport } from './routes/_authed/admin.feature-flags'
@@ -57,6 +58,11 @@ const AuthedOpenRequestsRoute = AuthedOpenRequestsRouteImport.update({
   path: '/open-requests',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedProfileRoute = AuthedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const SignInIndexRoute = SignInIndexRouteImport.update({
   id: '/sign-in/',
   path: '/sign-in/',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/credits': typeof AuthedCreditsRoute
   '/how-it-works': typeof AuthedHowItWorksRoute
   '/open-requests': typeof AuthedOpenRequestsRoute
+  '/profile': typeof AuthedProfileRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
   '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthedCreditsRoute
   '/how-it-works': typeof AuthedHowItWorksRoute
   '/open-requests': typeof AuthedOpenRequestsRoute
+  '/profile': typeof AuthedProfileRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in': typeof SignInIndexRoute
   '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/_authed/credits': typeof AuthedCreditsRoute
   '/_authed/how-it-works': typeof AuthedHowItWorksRoute
   '/_authed/open-requests': typeof AuthedOpenRequestsRoute
+  '/_authed/profile': typeof AuthedProfileRoute
   '/sign-in/verify': typeof SignInVerifyRoute
   '/sign-in/': typeof SignInIndexRoute
   '/_authed/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/how-it-works'
     | '/open-requests'
+    | '/profile'
     | '/sign-in/verify'
     | '/sign-in/'
     | '/admin/feature-flags'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/how-it-works'
     | '/open-requests'
+    | '/profile'
     | '/sign-in/verify'
     | '/sign-in'
     | '/admin/feature-flags'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/_authed/credits'
     | '/_authed/how-it-works'
     | '/_authed/open-requests'
+    | '/_authed/profile'
     | '/sign-in/verify'
     | '/sign-in/'
     | '/_authed/admin/feature-flags'
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOpenRequestsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/profile': {
+      id: '/_authed/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthedProfileRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/sign-in/': {
       id: '/sign-in/'
       path: '/sign-in'
@@ -287,6 +306,7 @@ interface AuthedRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRoute
   AuthedHowItWorksRoute: typeof AuthedHowItWorksRoute
   AuthedOpenRequestsRoute: typeof AuthedOpenRequestsRoute
+  AuthedProfileRoute: typeof AuthedProfileRoute
   AuthedAdminFeatureFlagsRoute: typeof AuthedAdminFeatureFlagsRoute
   AuthedAdminInvitationsRoute: typeof AuthedAdminInvitationsRoute
   AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
@@ -298,6 +318,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRoute,
   AuthedHowItWorksRoute: AuthedHowItWorksRoute,
   AuthedOpenRequestsRoute: AuthedOpenRequestsRoute,
+  AuthedProfileRoute: AuthedProfileRoute,
   AuthedAdminFeatureFlagsRoute: AuthedAdminFeatureFlagsRoute,
   AuthedAdminInvitationsRoute: AuthedAdminInvitationsRoute,
   AuthedRequestsNewRoute: AuthedRequestsNewRoute,

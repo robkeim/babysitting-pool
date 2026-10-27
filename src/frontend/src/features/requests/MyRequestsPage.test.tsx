@@ -32,6 +32,21 @@ describe('MyRequestsPage', () => {
     expect(within(other).getByText('Expired')).toBeInTheDocument()
   })
 
+  it('shows the sitter’s house instead of an area for a Request without a location', async () => {
+    server.use(
+      myRequestsHandler({
+        items: [{ ...sampleRequest, area: null, address: null }],
+        nextCursor: null,
+      }),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+
+    const card = await screen.findByRole('listitem')
+    expect(card).toHaveTextContent(/sitter's house/i)
+    expect(card).not.toHaveTextContent(/river/i)
+  })
+
   it('says so when nothing has been posted', async () => {
     server.use(myRequestsHandler({ items: [], nextCursor: null }))
 

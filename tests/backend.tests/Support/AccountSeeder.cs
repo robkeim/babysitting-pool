@@ -78,5 +78,7 @@ internal static class AccountSeeder
         Email = $"{id:N}@example.test",
         DisplayName = "Test Member",
         CreatedAt = clock.GetUtcNow().UtcDateTime,
+        Area = "Riverside",
+        Address = "12 River Rd",
     };
 }

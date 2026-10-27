@@ -12,7 +12,7 @@ public static class MemberSeeder
 {
     /// <summary>
     /// Adds a Member whose Credit Account is the sum of <paramref name="grants"/>, with one Grant Ledger entry per
-    /// amount, one hour apart starting now. Does nothing if the address already belongs to a Member.
+    /// amount, one hour apart starting now, and optionally a profile <paramref name="home"/>. Does nothing if the address already belongs to a Member.
     /// </summary>
     public static async Task<Guid> SeedMemberAsync(
         this IServiceProvider services,
@@ -20,6 +20,7 @@ public static class MemberSeeder
         string displayName,
         bool isAdmin,
         IReadOnlyList<Credits> grants,
+        HomeLocation? home = null,
         CancellationToken cancellationToken = default)
     {
         await using var scope = services.CreateAsyncScope();
@@ -39,6 +40,8 @@ public static class MemberSeeder
             DisplayName = displayName,
             IsAdmin = isAdmin,
             CreatedAt = now,
+            Area = home?.Area,
+            Address = home?.Address,
         });
         db.CreditAccounts.Add(new CreditAccountRecord
         {
@@ -81,11 +84,11 @@ public static class MemberSeeder
 
         adminEmail ??= Address("admin", "admin@example.test");
         var admin = Credits.FromDecimal(CreditAccount.StartingBalance);
-        await services.SeedMemberAsync(adminEmail, "Dev Admin", true, [admin], cancellationToken);
-        await services.SeedMemberAsync(Address("user1", "ada@example.test"), "Ada (10.0)", false, [admin], cancellationToken);
-        await services.SeedMemberAsync(Address("user2", "ben@example.test"), "Ben (0.0)", false, [], cancellationToken);
+        await services.SeedMemberAsync(adminEmail, "Dev Admin", true, [admin], cancellationToken: cancellationToken);
+        await services.SeedMemberAsync(Address("user1", "ada@example.test"), "Ada (10.0)", false, [admin], cancellationToken: cancellationToken);
+        await services.SeedMemberAsync(Address("user2", "ben@example.test"), "Ben (0.0)", false, [], cancellationToken: cancellationToken);
         await services.SeedMemberAsync(
-            Address("user3", "cleo@example.test"), "Cleo (25.5)", false, [admin, Credits.FromDecimal(15.5m)], cancellationToken);
+            Address("user3", "cleo@example.test"), "Cleo (25.5)", false, [admin, Credits.FromDecimal(15.5m)], cancellationToken: cancellationToken);
 
         if (EmailAddress.TryParse(adminEmail, out var address))
         {

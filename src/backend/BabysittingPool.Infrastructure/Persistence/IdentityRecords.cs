@@ -15,6 +15,10 @@ public sealed class MemberRecord
     public DateTime CreatedAt { get; set; }
 
     public DateTime? ClosedAt { get; set; }
+
+    public string? Area { get; set; }
+
+    public string? Address { get; set; }
 }
 
 public sealed class InvitationRecord

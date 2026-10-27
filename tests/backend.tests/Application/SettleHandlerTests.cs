@@ -30,7 +30,7 @@ public class SettleHandlerTests : IAsyncLifetime
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            requester, Now.AddHours(hoursAhead), new CreditRequestDetails(120, 1), "Riverside", "12 River Rd");
+            requester, Now.AddHours(hoursAhead), new CreditRequestDetails(120, 1));
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!;
     }
 
@@ -167,8 +167,6 @@ public class SettleHandlerTests : IAsyncLifetime
                 StartsAt = Now.AddHours(10),
                 DurationMinutes = 120,
                 ChildCount = 1,
-                Area = "Hilltop",
-                Address = "1 Hill St",
                 Cost = Credits.FromDecimal(2m),
                 ClaimCutoffAt = Now.AddHours(7),
                 PostedAt = Now,

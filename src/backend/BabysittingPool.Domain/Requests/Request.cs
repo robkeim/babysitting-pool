@@ -1,4 +1,5 @@
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Identity;
 
 namespace BabysittingPool.Domain.Requests;
 
@@ -12,12 +13,9 @@ public sealed class Request
     /// <summary>Start times fall on a boundary of this many minutes, with no seconds (spec §4.1).</summary>
     public const int StartIncrementMinutes = 5;
 
-    public const int MaxAreaLength = 100;
-    public const int MaxAddressLength = 200;
-
     private Request(
         Guid id, Guid requesterId, Guid? sitterId, CreditRequestDetails details, DateTime startsAt,
-        string area, string address, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt, RequestStatus status)
+        string? area, string? address, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt, RequestStatus status)
     {
         Id = id;
         RequesterId = requesterId;
@@ -44,11 +42,14 @@ public sealed class Request
 
     public DateTime EndsAt => StartsAt.AddMinutes(Details.DurationMinutes);
 
-    /// <summary>The rough neighbourhood, which is all other Members see while the Request is Posted (spec §4.6).</summary>
-    public string Area { get; }
+    /// <summary>
+    /// The rough neighbourhood, which is all other Members see while the Request is Posted (spec §4.6). Null when
+    /// the babysitting is at the Sitter's house, where the Requester's location is irrelevant (spec §4.1).
+    /// </summary>
+    public string? Area { get; }
 
     /// <summary>The exact address; only the Requester, and the Sitter once Claimed, may see it (spec §4.6).</summary>
-    public string Address { get; }
+    public string? Address { get; }
 
     /// <summary>The cost taken into Escrow when the Request was posted.</summary>
     public Credits.Credits Cost { get; }
@@ -61,15 +62,16 @@ public sealed class Request
     public RequestStatus Status { get; private set; }
 
     /// <summary>
-    /// Posts a Request and escrows its cost from the Requester's Available Balance (spec §4.1).
+    /// Posts a Request and escrows its cost from the Requester's Available Balance (spec §4.1). At the Requesting
+    /// Family's House it copies <paramref name="requesterHome"/>, which must be set (<c>home_location_required</c>);
+    /// at the Sitter's House it records no location.
     /// </summary>
     public static Request Post(
         Guid requesterId,
         CreditAccount requester,
         CreditRequestDetails details,
         DateTime startsAt,
-        string area,
-        string address,
+        HomeLocation? requesterHome,
         DateTime now,
         TimeSpan minimumLeadTime,
         TimeSpan claimCutoff)
@@ -77,8 +79,14 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(requester);
         ArgumentNullException.ThrowIfNull(details);
 
-        var cleanArea = RequireText(area, MaxAreaLength, "area");
-        var cleanAddress = RequireText(address, MaxAddressLength, "address");
+        var atFamilyHouse = details.Location == BabysittingLocation.RequestingFamilysHouse;
+        if (atFamilyHouse && requesterHome is null)
+        {
+            throw new DomainException(
+                "Add your area and address to your profile before posting a request at your house.",
+                "home_location_required");
+        }
+
         if (startsAt.Ticks % TimeSpan.FromMinutes(StartIncrementMinutes).Ticks != 0)
         {
             throw new DomainException(
@@ -101,14 +109,15 @@ public sealed class Request
         requester.Escrow(cost.Value);
 
         return new Request(
-            Guid.NewGuid(), requesterId, null, details, startsAt, cleanArea, cleanAddress, cost,
+            Guid.NewGuid(), requesterId, null, details, startsAt,
+            atFamilyHouse ? requesterHome!.Area : null, atFamilyHouse ? requesterHome!.Address : null, cost,
             startsAt - claimCutoff, now, RequestStatus.Posted);
     }
 
     /// <summary>Rehydrates a Request from persisted state.</summary>
     public static Request Restore(
         Guid id, Guid requesterId, Guid? sitterId, CreditRequestDetails details, DateTime startsAt,
-        string area, string address, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt, RequestStatus status) =>
+        string? area, string? address, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt, RequestStatus status) =>
         new(id, requesterId, sitterId, details, startsAt, area, address, cost, claimCutoffAt, postedAt, status);
 
     /// <summary>
@@ -242,16 +251,5 @@ public sealed class Request
         {
             throw new DomainException("The start time has passed.", "start_passed");
         }
-    }
-
-    private static string RequireText(string? value, int maxLength, string field)
-    {
-        var trimmed = value?.Trim();
-        if (string.IsNullOrEmpty(trimmed) || trimmed.Length > maxLength)
-        {
-            throw new DomainException($"The {field} is required and at most {maxLength} characters.", $"invalid_{field}");
-        }
-
-        return trimmed;
     }
 }

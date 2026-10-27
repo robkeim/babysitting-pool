@@ -27,11 +27,12 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
 
     private DateTime Now => _database.Clock.GetUtcNow().UtcDateTime;
 
-    private async Task<RequestView> PostAsync(Guid requester, int hoursAhead = 10, string area = "Riverside")
+    private async Task<RequestView> PostAsync(Guid requester, int hoursAhead = 10, bool atHome = false)
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            requester, Now.AddHours(hoursAhead), new CreditRequestDetails(120, 1), area, "12 River Rd");
+            requester, Now.AddHours(hoursAhead), new CreditRequestDetails(
+                120, 1, atHome ? BabysittingLocation.RequestingFamilysHouse : BabysittingLocation.SittersHouse));
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!;
     }
 
@@ -59,7 +60,7 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
     [Fact]
     public async Task Claiming_records_the_sitter_and_shows_the_exact_address_to_them()
     {
-        var posted = await PostAsync(_requester);
+        var posted = await PostAsync(_requester, atHome: true);
 
         var claimed = await ClaimAsync(posted.Id, _sitter);
 
@@ -209,8 +210,8 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
     [Fact]
     public async Task Open_requests_list_the_earliest_start_first_with_the_rough_area_and_without_own_requests()
     {
-        var later = await PostAsync(_requester, hoursAhead: 20, area: "Hilltop");
-        var sooner = await PostAsync(_requester, hoursAhead: 8, area: "Riverside");
+        var later = await PostAsync(_requester, hoursAhead: 20);
+        var sooner = await PostAsync(_requester, hoursAhead: 8, atHome: true);
         var mine = await PostAsync(_sitter, hoursAhead: 9);
 
         var page = await OpenAsync(_sitter);
@@ -218,7 +219,8 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
         page.Items.Select(r => r.Id).Should().Equal(sooner.Id, later.Id);
         page.Items.Select(r => r.Id).Should().NotContain(mine.Id);
         page.Items[0].Area.Should().Be("Riverside");
-        page.Items[0].CostQuarterCredits.Should().Be(8);
+        page.Items[0].CostQuarterCredits.Should().Be(10);
+        page.Items[1].Area.Should().BeNull();
     }
 
     [Fact]
@@ -266,7 +268,7 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
     [Fact]
     public async Task My_claims_list_the_sitters_claimed_requests_with_the_address_and_their_state()
     {
-        var posted = await PostAsync(_requester);
+        var posted = await PostAsync(_requester, atHome: true);
         await PostAsync(_requester, hoursAhead: 12);
         await ClaimAsync(posted.Id, _sitter);
 

@@ -33,7 +33,7 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            requester, Now.AddHours(hoursAhead), new CreditRequestDetails(120, 1), "Riverside", "12 River Rd");
+            requester, Now.AddHours(hoursAhead), new CreditRequestDetails(120, 1));
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!;
     }
 

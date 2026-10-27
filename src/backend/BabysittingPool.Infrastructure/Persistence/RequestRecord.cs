@@ -24,9 +24,9 @@ public sealed class RequestRecord
 
     public MealOption Meals { get; set; }
 
-    public string Area { get; set; } = "";
+    public string? Area { get; set; }
 
-    public string Address { get; set; } = "";
+    public string? Address { get; set; }
 
     public Credits Cost { get; set; }
 

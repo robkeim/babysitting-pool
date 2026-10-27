@@ -95,7 +95,9 @@ internal static class TestEndpoints
 
             var grants = request.GrantsQuarterCredits.Select(Credits.FromQuarterCredits).ToList();
             var email = request.Email ?? $"member-{Guid.NewGuid():N}@example.test";
-            var memberId = await services.SeedMemberAsync(email, request.DisplayName ?? "Test Member", false, grants, cancellationToken);
+            var home = request.Area is null || request.Address is null ? null : HomeLocation.Create(request.Area, request.Address);
+            var memberId = await services.SeedMemberAsync(
+                email, request.DisplayName ?? "Test Member", false, grants, home, cancellationToken);
             return Results.Created($"/api/test/members/{memberId}", new SeedMemberResponse(memberId, email));
         });
 
@@ -163,7 +165,8 @@ internal static class TestEndpoints
         List<Guid>? DeniedMemberIds,
         List<RoleRollout>? RoleRollouts);
 
-    private sealed record SeedMemberRequest(long[]? GrantsQuarterCredits, string? Email, string? DisplayName);
+    private sealed record SeedMemberRequest(
+        long[]? GrantsQuarterCredits, string? Email, string? DisplayName, string? Area, string? Address);
 
     private sealed record SeedMemberResponse(Guid MemberId, string Email);
 

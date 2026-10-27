@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { formatCredits, useMyAccount } from '@/features/credits'
+import { useMyProfile } from '@/features/profile'
 import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useQuote, usePostRequest } from './api'
@@ -34,6 +35,7 @@ const POST_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   no_available_credits: 'error.no_available_credits',
   insufficient_credits: 'error.insufficient_credits',
   concurrent_update: 'error.concurrent_update',
+  home_location_required: 'error.home_location_required',
 }
 
 function postFailure(error: unknown): MessageId {
@@ -46,6 +48,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const intl = useIntl()
   const account = useMyAccount()
   const post = usePostRequest()
+  const profile = useMyProfile()
   const [startsAt, setStartsAt] = useState(defaultStartsAt)
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [childCount, setChildCount] = useState(1)
@@ -54,8 +57,6 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const [lunch, setLunch] = useState(false)
   const [snack, setSnack] = useState(false)
   const [dinner, setDinner] = useState(false)
-  const [area, setArea] = useState('')
-  const [address, setAddress] = useState('')
 
   const details: QuoteDetails = {
     durationMinutes,
@@ -94,6 +95,9 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   }
 
   const transportLocked = location === 'RequestingFamilysHouse'
+  // Only a request at the family's house has a location; it comes from the profile, not from this form (spec §4.1).
+  const home = profile.data?.area && profile.data.address ? profile.data : undefined
+  const homeMissing = transportLocked && profile.isSuccess && !home
 
   function changeLocation(next: BabysittingLocation) {
     setLocation(next)
@@ -103,10 +107,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
 
   function submit(event: SyntheticEvent) {
     event.preventDefault()
-    post.mutate(
-      { ...details, startsAt: new Date(startsAt).toISOString(), area, address },
-      { onSuccess: onPosted },
-    )
+    post.mutate({ ...details, startsAt: new Date(startsAt).toISOString() }, { onSuccess: onPosted })
   }
 
   return (
@@ -328,36 +329,40 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               </span>
             </label>
           </fieldset>
-          <div className="space-y-2">
-            <label htmlFor="area" className="text-sm font-medium">
-              <FormattedMessage id="requests.post.area" />
-            </label>
-            <Input
-              id="area"
-              className="h-11 lg:h-8"
-              required
-              maxLength={100}
-              value={area}
-              onChange={(event) => {
-                setArea(event.target.value)
-              }}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="address" className="text-sm font-medium">
-              <FormattedMessage id="requests.post.address" />
-            </label>
-            <Input
-              id="address"
-              className="h-11 lg:h-8"
-              required
-              maxLength={200}
-              value={address}
-              onChange={(event) => {
-                setAddress(event.target.value)
-              }}
-            />
-          </div>
+          {transportLocked && home && (
+            <p className="text-sm text-muted-foreground">
+              <FormattedMessage
+                id="requests.post.home.using"
+                values={{ area: home.area, address: home.address }}
+              />
+              <a
+                href="/profile"
+                target="_blank"
+                rel="noreferrer"
+                className="block text-primary underline underline-offset-4"
+              >
+                <FormattedMessage id="requests.post.home.change" />
+              </a>
+            </p>
+          )}
+          {homeMissing && (
+            <Alert variant="destructive">
+              <AlertTitle>
+                <FormattedMessage id="requests.post.home.missing.title" />
+              </AlertTitle>
+              <AlertDescription>
+                <FormattedMessage id="requests.post.home.missing.body" />
+                <a
+                  href="/profile"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block underline underline-offset-4"
+                >
+                  <FormattedMessage id="requests.post.home.missing.link" />
+                </a>
+              </AlertDescription>
+            </Alert>
+          )}
           <CostReceipt
             quote={currentQuote}
             details={details}
@@ -388,7 +393,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
           <Button
             type="submit"
             className="h-11 w-full lg:h-8 lg:w-auto"
-            disabled={post.isPending || !detailsValid || cannotAfford}
+            disabled={post.isPending || !detailsValid || cannotAfford || homeMissing}
           >
             <FormattedMessage id="requests.post.submit" />
           </Button>
