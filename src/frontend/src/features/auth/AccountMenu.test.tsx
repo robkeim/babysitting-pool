@@ -43,6 +43,15 @@ describe('AccountMenu', () => {
     )
   })
 
+  it("links the Member's initial to their profile", async () => {
+    server.use(meHandler(ada))
+    renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
+
+    const profile = await screen.findByRole('link', { name: 'Profile' })
+    expect(profile).toHaveAttribute('href', '/profile')
+    expect(profile).toHaveTextContent('A')
+  })
+
   it('saves the Language the Member picks and shows it selected', async () => {
     let saved: unknown
     server.use(

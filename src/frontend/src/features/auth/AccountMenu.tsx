@@ -1,4 +1,4 @@
-import { CircleHelp, LogOut, UserRound } from 'lucide-react'
+import { CircleHelp, LogOut } from 'lucide-react'
 import { useIntl } from 'react-intl'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { choosableLanguages } from '@/lib/i18n'
@@ -18,20 +18,14 @@ export function AccountMenu({ onSignedOut }: AccountMenuProps) {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span
-        aria-hidden
-        title={me.data.displayName}
-        className="hidden size-8 shrink-0 place-items-center rounded-full bg-accent font-semibold text-accent-foreground uppercase sm:grid"
-      >
-        {Array.from(me.data.displayName)[0]}
-      </span>
       <span className="sr-only">{me.data.displayName}</span>
       <a
         href="/profile"
         aria-label={intl.formatMessage({ id: 'auth.accountMenu.profile' })}
-        className={buttonVariants({ variant: 'ghost', size: 'icon-lg' })}
+        title={me.data.displayName}
+        className="grid size-9 shrink-0 place-items-center rounded-full bg-accent font-semibold text-accent-foreground uppercase transition-colors hover:bg-accent/80"
       >
-        <UserRound />
+        {Array.from(me.data.displayName)[0]}
       </a>
       <a
         href="/how-it-works"
