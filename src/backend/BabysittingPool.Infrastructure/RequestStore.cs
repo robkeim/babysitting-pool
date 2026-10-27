@@ -60,11 +60,11 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             record.StartsAt, record.Area, record.Address, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status)).ToList();
     }
 
-    public async Task SaveClaimedAsync(Request request, DateTime now, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<NotificationDelivery>> SaveClaimedAsync(Request request, DateTime now, CancellationToken cancellationToken)
     {
         await SetRequestStateAsync(request, cancellationToken);
         // Same SaveChanges as the Claim, so a lost race or a failure leaves no Notification (ADR 0019).
-        db.Notifications.Add(new NotificationRecord
+        var notification = new NotificationRecord
         {
             Id = Guid.NewGuid(),
             MemberId = request.RequesterId,
@@ -72,13 +72,16 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             CreatedAt = now,
             RequestId = request.Id,
             SitterId = request.SitterId,
-        });
+        };
+        db.Notifications.Add(notification);
         await SaveAsync(cancellationToken);
         if (_claimTransaction is { } transaction)
         {
             await transaction.CommitAsync(cancellationToken);
             _claimTransaction = null;
         }
+
+        return [new NotificationDelivery(notification.MemberId, notification.ToView())];
     }
 
     public async Task SaveExpiredAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
@@ -169,7 +172,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         await SaveAsync(cancellationToken);
     }
 
-    public async Task AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<NotificationDelivery>> AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
     {
         var account = await db.CreditAccounts.FindAsync([request.RequesterId], cancellationToken)
             ?? throw new InvalidOperationException("The Requester's account must be read before it is saved.");
@@ -206,8 +209,10 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         });
 
         // Same SaveChanges as the Post, so the fan-out commits or rolls back with it (ADR 0004, ADR 0019).
-        db.Notifications.AddRange(await PostedNotificationsAsync(request, now, cancellationToken));
+        var notifications = await PostedNotificationsAsync(request, now, cancellationToken);
+        db.Notifications.AddRange(notifications);
         await SaveAsync(cancellationToken);
+        return notifications.Select(n => new NotificationDelivery(n.MemberId, n.ToView())).ToList();
     }
 
     /// <summary>

@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<ListMemberRequestsHandler>();
         services.AddScoped<GetPoolOverviewHandler>();
         services.AddScoped<ListDormantMembersHandler>();
+        services.AddScoped<NotificationAnnouncer>();
         services.AddScoped<ListNotificationsHandler>();
         services.AddScoped<DismissNotificationHandler>();
         services.AddScoped<DismissAllNotificationsHandler>();

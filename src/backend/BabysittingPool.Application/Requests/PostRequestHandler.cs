@@ -1,4 +1,5 @@
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Notifications;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
 using DomainCredits = BabysittingPool.Domain.Credits.Credits;
@@ -11,7 +12,8 @@ public sealed record PostRequestCommand(
     CreditRequestDetails Details);
 
 /// <summary>Posts a Request and escrows its cost from the Requester's Available Balance (spec §4.1).</summary>
-public sealed class PostRequestHandler(IRequestStore store, TimeProvider clock, CoopSettings settings)
+public sealed class PostRequestHandler(
+    IRequestStore store, TimeProvider clock, CoopSettings settings, NotificationAnnouncer announcer)
 {
     /// <summary>Null when the Requester has no Credit Account. Rule violations throw <see cref="DomainException"/>.</summary>
     public async Task<RequestView?> HandleAsync(PostRequestCommand command, CancellationToken cancellationToken)
@@ -29,7 +31,7 @@ public sealed class PostRequestHandler(IRequestStore store, TimeProvider clock, 
         var request = Request.Post(
             command.RequesterId, account, command.Details, command.StartsAt, home,
             now, settings.MinimumLeadTime, settings.ClaimCutoff);
-        await store.AddPostedAsync(request, account, now, cancellationToken);
+        announcer.Created(await store.AddPostedAsync(request, account, now, cancellationToken));
 
         return RequestRead.From(request).ToView(now);
     }

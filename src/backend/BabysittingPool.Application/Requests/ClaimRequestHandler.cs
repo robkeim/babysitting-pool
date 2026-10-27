@@ -1,3 +1,4 @@
+using BabysittingPool.Application.Notifications;
 using BabysittingPool.Domain.Credits;
 
 namespace BabysittingPool.Application.Requests;
@@ -5,7 +6,7 @@ namespace BabysittingPool.Application.Requests;
 public sealed record ClaimRequestCommand(Guid RequestId, Guid SitterId);
 
 /// <summary>The first Sitter to claim a Posted Request wins; there is no approval step (spec §4.4).</summary>
-public sealed class ClaimRequestHandler(IRequestStore store, TimeProvider clock)
+public sealed class ClaimRequestHandler(IRequestStore store, TimeProvider clock, NotificationAnnouncer announcer)
 {
     /// <summary>
     /// The claimed Request as its Sitter sees it, or null when it does not exist. Rule violations throw
@@ -23,7 +24,7 @@ public sealed class ClaimRequestHandler(IRequestStore store, TimeProvider clock)
 
         var sitterClaims = await store.FindClaimedBySitterAsync(command.SitterId, cancellationToken);
         request.Claim(command.SitterId, now, sitterClaims);
-        await store.SaveClaimedAsync(request, now, cancellationToken);
+        announcer.Created(await store.SaveClaimedAsync(request, now, cancellationToken));
 
         return RequestRead.From(request).ToView(now);
     }
