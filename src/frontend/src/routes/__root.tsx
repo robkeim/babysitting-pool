@@ -1,5 +1,14 @@
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import { ClipboardList, Flag, HandHeart, HeartHandshake, MailPlus, Wallet } from 'lucide-react'
+import {
+  ClipboardList,
+  Flag,
+  HandHeart,
+  HeartHandshake,
+  MailPlus,
+  Users,
+  Wallet,
+  Waves,
+} from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
 import { AppShell, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
@@ -22,6 +31,8 @@ const ADMIN_TABS: readonly ShellTab[] = [
     label: <FormattedMessage id="common.nav.invitations" />,
     icon: MailPlus,
   },
+  { to: '/admin/members', label: <FormattedMessage id="common.nav.members" />, icon: Users },
+  { to: '/admin/pool', label: <FormattedMessage id="common.nav.pool" />, icon: Waves },
   { to: '/admin/feature-flags', label: <FormattedMessage id="common.nav.flags" />, icon: Flag },
 ]
 

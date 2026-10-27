@@ -20,8 +20,11 @@ import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as SignInVerifyRouteImport } from './routes/sign-in/verify'
 import { Route as AuthedAdminFeatureFlagsRouteImport } from './routes/_authed/admin.feature-flags'
 import { Route as AuthedAdminInvitationsRouteImport } from './routes/_authed/admin.invitations'
+import { Route as AuthedAdminPoolRouteImport } from './routes/_authed/admin.pool'
 import { Route as AuthedRequestsIndexRouteImport } from './routes/_authed/requests/index'
 import { Route as AuthedRequestsNewRouteImport } from './routes/_authed/requests/new'
+import { Route as AuthedAdminMembersIndexRouteImport } from './routes/_authed/admin.members.index'
+import { Route as AuthedAdminMembersMemberIdRouteImport } from './routes/_authed/admin.members.$memberId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +80,11 @@ const AuthedAdminInvitationsRoute = AuthedAdminInvitationsRouteImport.update({
   path: '/admin/invitations',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminPoolRoute = AuthedAdminPoolRouteImport.update({
+  id: '/admin/pool',
+  path: '/admin/pool',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedRequestsIndexRoute = AuthedRequestsIndexRouteImport.update({
   id: '/requests/',
   path: '/requests/',
@@ -87,6 +95,17 @@ const AuthedRequestsNewRoute = AuthedRequestsNewRouteImport.update({
   path: '/requests/new',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminMembersIndexRoute = AuthedAdminMembersIndexRouteImport.update({
+  id: '/admin/members/',
+  path: '/admin/members/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminMembersMemberIdRoute =
+  AuthedAdminMembersMemberIdRouteImport.update({
+    id: '/admin/members/$memberId',
+    path: '/admin/members/$memberId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -99,8 +118,11 @@ export interface FileRoutesByFullPath {
   '/sign-in/': typeof SignInIndexRoute
   '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
   '/admin/invitations': typeof AuthedAdminInvitationsRoute
+  '/admin/pool': typeof AuthedAdminPoolRoute
   '/requests/new': typeof AuthedRequestsNewRoute
   '/requests/': typeof AuthedRequestsIndexRoute
+  '/admin/members/$memberId': typeof AuthedAdminMembersMemberIdRoute
+  '/admin/members/': typeof AuthedAdminMembersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -113,8 +135,11 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInIndexRoute
   '/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
   '/admin/invitations': typeof AuthedAdminInvitationsRoute
+  '/admin/pool': typeof AuthedAdminPoolRoute
   '/requests/new': typeof AuthedRequestsNewRoute
   '/requests': typeof AuthedRequestsIndexRoute
+  '/admin/members/$memberId': typeof AuthedAdminMembersMemberIdRoute
+  '/admin/members': typeof AuthedAdminMembersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,8 +154,11 @@ export interface FileRoutesById {
   '/sign-in/': typeof SignInIndexRoute
   '/_authed/admin/feature-flags': typeof AuthedAdminFeatureFlagsRoute
   '/_authed/admin/invitations': typeof AuthedAdminInvitationsRoute
+  '/_authed/admin/pool': typeof AuthedAdminPoolRoute
   '/_authed/requests/new': typeof AuthedRequestsNewRoute
   '/_authed/requests/': typeof AuthedRequestsIndexRoute
+  '/_authed/admin/members/$memberId': typeof AuthedAdminMembersMemberIdRoute
+  '/_authed/admin/members/': typeof AuthedAdminMembersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,8 +173,11 @@ export interface FileRouteTypes {
     | '/sign-in/'
     | '/admin/feature-flags'
     | '/admin/invitations'
+    | '/admin/pool'
     | '/requests/new'
     | '/requests/'
+    | '/admin/members/$memberId'
+    | '/admin/members/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,8 +190,11 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/admin/feature-flags'
     | '/admin/invitations'
+    | '/admin/pool'
     | '/requests/new'
     | '/requests'
+    | '/admin/members/$memberId'
+    | '/admin/members'
   id:
     | '__root__'
     | '/'
@@ -174,8 +208,11 @@ export interface FileRouteTypes {
     | '/sign-in/'
     | '/_authed/admin/feature-flags'
     | '/_authed/admin/invitations'
+    | '/_authed/admin/pool'
     | '/_authed/requests/new'
     | '/_authed/requests/'
+    | '/_authed/admin/members/$memberId'
+    | '/_authed/admin/members/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -265,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAdminInvitationsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/pool': {
+      id: '/_authed/admin/pool'
+      path: '/admin/pool'
+      fullPath: '/admin/pool'
+      preLoaderRoute: typeof AuthedAdminPoolRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/requests/': {
       id: '/_authed/requests/'
       path: '/requests'
@@ -279,6 +323,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRequestsNewRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/members/': {
+      id: '/_authed/admin/members/'
+      path: '/admin/members'
+      fullPath: '/admin/members/'
+      preLoaderRoute: typeof AuthedAdminMembersIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin/members/$memberId': {
+      id: '/_authed/admin/members/$memberId'
+      path: '/admin/members/$memberId'
+      fullPath: '/admin/members/$memberId'
+      preLoaderRoute: typeof AuthedAdminMembersMemberIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -289,8 +347,11 @@ interface AuthedRouteChildren {
   AuthedOpenRequestsRoute: typeof AuthedOpenRequestsRoute
   AuthedAdminFeatureFlagsRoute: typeof AuthedAdminFeatureFlagsRoute
   AuthedAdminInvitationsRoute: typeof AuthedAdminInvitationsRoute
+  AuthedAdminPoolRoute: typeof AuthedAdminPoolRoute
   AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
   AuthedRequestsIndexRoute: typeof AuthedRequestsIndexRoute
+  AuthedAdminMembersMemberIdRoute: typeof AuthedAdminMembersMemberIdRoute
+  AuthedAdminMembersIndexRoute: typeof AuthedAdminMembersIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -300,8 +361,11 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedOpenRequestsRoute: AuthedOpenRequestsRoute,
   AuthedAdminFeatureFlagsRoute: AuthedAdminFeatureFlagsRoute,
   AuthedAdminInvitationsRoute: AuthedAdminInvitationsRoute,
+  AuthedAdminPoolRoute: AuthedAdminPoolRoute,
   AuthedRequestsNewRoute: AuthedRequestsNewRoute,
   AuthedRequestsIndexRoute: AuthedRequestsIndexRoute,
+  AuthedAdminMembersMemberIdRoute: AuthedAdminMembersMemberIdRoute,
+  AuthedAdminMembersIndexRoute: AuthedAdminMembersIndexRoute,
 }
 
 const AuthedRouteWithChildren =

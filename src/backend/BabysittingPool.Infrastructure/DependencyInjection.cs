@@ -1,3 +1,4 @@
+using BabysittingPool.Application.Admin;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Requests;
@@ -26,6 +27,7 @@ public static class DependencyInjection
         services.AddScoped<IIdentityStore, IdentityStore>();
         services.AddScoped<IRequestStore, RequestStore>();
         services.AddScoped<IRequestReader, RequestReader>();
+        services.AddScoped<IAdminReader, AdminReader>();
         services.AddScoped<IDemurrageStore, DemurrageStore>();
         services.AddScoped<IDemurrageReader, DemurrageStore>();
         return services;
