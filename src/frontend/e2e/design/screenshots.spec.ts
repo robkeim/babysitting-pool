@@ -26,13 +26,15 @@ const SCREENS = [
   { name: 'post-request', path: '/requests/new' },
 ]
 
+const CLOCK = '2026-03-01T09:00:00Z'
+
 test.use({ timezoneId: 'UTC' })
 
 test('screenshots of the key screens', async ({ browser, backend }) => {
   test.setTimeout(300_000)
   await rm(OUTPUT, { recursive: true, force: true })
 
-  await backend.setClock('2026-03-01T09:00:00Z')
+  await backend.setClock(CLOCK)
   const requesterId = await backend.seedMember([80])
   const viewerId = await backend.seedMember([40, 1, 12])
 
@@ -109,21 +111,23 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   const adminCookies = await joining.cookies()
   await joining.close()
 
+  let minutes = 0
   for (const language of LANGUAGES) {
     for (const who of ['member', 'admin']) {
       const setup = await browser.newContext({ timezoneId: 'UTC' })
       if (who === 'admin') await setup.addCookies(adminCookies)
       else await backend.signIn(setup, viewerId)
       const setupPage = await setup.newPage()
-      await setupPage.goto(`${backend.appUrl}/credits`)
-      await setupPage
-        .getByRole('combobox', { name: 'Language' })
-        .selectOption({ label: language.label })
+      await setupPage.goto(`${backend.appUrl}/profile`)
+      await setupPage.getByRole('combobox').selectOption({ label: language.label })
       await expect(setupPage.getByRole('heading', { level: 1 })).toHaveText(language.heading)
       await setup.close()
     }
 
     for (const scheme of SCHEMES) {
+      // The viewer is limited to 120 API requests a minute on the backend's clock, which is frozen here, so
+      // each colour scheme steps it a minute to get a fresh window (a 429 shows up as a list that never loads).
+      await backend.setClock(new Date(Date.parse(CLOCK) + minutes++ * 60_000).toISOString())
       for (const viewport of VIEWPORTS) {
         const context = await browser.newContext({
           colorScheme: scheme,
@@ -153,6 +157,18 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
         await adminPage.goto(`${backend.appUrl}/admin/feature-flags`)
         await expect(adminPage.getByRole('heading', { level: 2 })).toBeVisible()
         await capture(adminPage, 'feature-flags', `${language.tag}-${scheme}-${viewport.name}`)
+        // The Admin tab's sheet (mobile) or dropdown (desktop), open over the page.
+        await adminPage.getByRole('navigation').getByRole('button').click()
+        const menu = adminPage.getByRole('dialog').or(adminPage.getByRole('menu'))
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveAttribute('data-starting-style')
+        // Not `capture`: resizing the viewport closes it.
+        await mkdir(path.join(OUTPUT, 'admin-menu'), { recursive: true })
+        await adminPage.screenshot({
+          animations: 'disabled',
+          path: path.join(OUTPUT, 'admin-menu', `${language.tag}-${scheme}-${viewport.name}.png`),
+        })
+        await adminPage.keyboard.press('Escape')
         // The rules are the same for every Member; the Admin's context spares the viewer's rate limit.
         await adminPage.goto(`${backend.appUrl}/how-it-works`)
         await expect(adminPage.locator('#demurrage')).toBeVisible()

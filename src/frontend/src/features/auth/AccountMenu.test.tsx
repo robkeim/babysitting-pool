@@ -43,26 +43,6 @@ describe('AccountMenu', () => {
     )
   })
 
-  it('saves the Language the Member picks and shows it selected', async () => {
-    let saved: unknown
-    server.use(
-      meHandler(ada),
-      http.put('*/api/me/language', async ({ request }) => {
-        saved = await request.json()
-        return new HttpResponse(null, { status: 204 })
-      }),
-    )
-    renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
-
-    const dropdown = await screen.findByRole('combobox', { name: 'Language' })
-    await userEvent.selectOptions(dropdown, '🏴‍☠️ Ünïcödé Tëst')
-
-    await waitFor(() => {
-      expect(dropdown).toHaveValue('en-XA')
-    })
-    expect(saved).toEqual({ language: 'en-XA' })
-  })
-
   it('renders nothing when nobody is signed in', async () => {
     server.use(signedOutHandler())
 
