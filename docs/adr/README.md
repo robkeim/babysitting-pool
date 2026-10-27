@@ -21,3 +21,4 @@ One line per ADR so you can pick what to open (ADR 0013). Read an ADR only if it
 | [0015](0015-local-two-level-gate-replaces-github-ci.md) | Verification runs locally at two levels (fast, full); GitHub CI removed | ops |
 | [0016](0016-feature-flags.md) | Backend-defined, server-evaluated, runtime-toggleable feature flags with per-flag rollout cohorts | backend, frontend, testing |
 | [0017](0017-design-tokens-and-visual-check-loop.md) | UI themed by semantic tokens, dark mode from the system setting, checked by screenshots | frontend |
+| [0018](0018-deployment-on-fly-io.md) | One always-on Fly.io container in iad, daily off-host backups, local deploy script, Gmail SMTP | ops |
