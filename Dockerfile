@@ -16,7 +16,12 @@ RUN dotnet publish src/backend/BabysittingPool.Api/BabysittingPool.Api.csproj -c
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
+# sqlite3 and rclone run the daily off-host backup (ADR 0018).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends sqlite3 rclone \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=backend /app ./
+COPY scripts/backup.sh scripts/backup-daily.sh scripts/restore-drill.sh scripts/entrypoint.sh ./scripts/
 COPY --from=frontend /src/frontend/dist ./wwwroot
 # The database and the rate-limit file live on the mounted volume.
 ENV ASPNETCORE_ENVIRONMENT=Production \
@@ -24,4 +29,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production \
     ConnectionStrings__Default="Data Source=/data/babysitting.db"
 VOLUME /data
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "BabysittingPool.Api.dll"]
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]
