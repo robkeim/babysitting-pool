@@ -319,6 +319,104 @@
         }
       }
     },
+    "/api/me/profile": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "GetMyProfile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "UpdateMyProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rules": {
       "get": {
         "tags": [
@@ -1948,7 +2046,10 @@
             "type": "boolean"
           },
           "area": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "costQuarterCredits": {
             "type": "integer",
@@ -2095,9 +2196,7 @@
           "transport",
           "lunch",
           "snack",
-          "dinner",
-          "area",
-          "address"
+          "dinner"
         ],
         "type": "object",
         "properties": {
@@ -2127,18 +2226,6 @@
           },
           "dinner": {
             "type": "boolean"
-          },
-          "area": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "address": {
-            "type": [
-              "null",
-              "string"
-            ]
           }
         }
       },
@@ -2219,6 +2306,48 @@
           }
         }
       },
+      "ProfileBody": {
+        "required": [
+          "area",
+          "address"
+        ],
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ProfileView": {
+        "required": [
+          "area",
+          "address"
+        ],
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "RequestStatus": {
         "enum": [
           "Posted",
@@ -2280,10 +2409,16 @@
             "type": "boolean"
           },
           "area": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "address": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "costQuarterCredits": {
             "type": "integer",

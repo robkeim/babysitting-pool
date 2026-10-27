@@ -15,8 +15,14 @@ export interface Backend {
   appUrl: string
   /** The API's own origin, for tests that front it with something other than the dev server. */
   apiUrl: string
-  /** Seeds a Member whose Credit Account holds the given Grants (quarter-credits, ADR 0001). */
-  seedMember(grantsQuarterCredits: number[]): Promise<string>
+  /**
+   * Seeds a Member whose Credit Account holds the given Grants (quarter-credits, ADR 0001), with the area and
+   * address on their profile when `home` is given.
+   */
+  seedMember(
+    grantsQuarterCredits: number[],
+    home?: { area: string; address: string },
+  ): Promise<string>
   /** The newest link (Invitation or sign-in) emailed to the address, read from the fake outbox. */
   latestLink(email: string): Promise<string>
   /** Signs the browser context in as a seeded Member without going through email. */
@@ -111,8 +117,8 @@ async function launchBackend(): Promise<{ backend: Backend; dispose: () => Promi
   const backend: Backend = {
     appUrl,
     apiUrl,
-    async seedMember(grantsQuarterCredits) {
-      const response = await post(`${apiUrl}/api/test/members`, { grantsQuarterCredits })
+    async seedMember(grantsQuarterCredits, home) {
+      const response = await post(`${apiUrl}/api/test/members`, { grantsQuarterCredits, ...home })
       return ((await response.json()) as { memberId: string }).memberId
     },
     async latestLink(email) {

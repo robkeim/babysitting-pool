@@ -1,5 +1,7 @@
 using BabysittingPool.Application;
 using BabysittingPool.Application.Credits;
+using BabysittingPool.Application.Identity;
+using BabysittingPool.Domain.Credits;
 
 namespace BabysittingPool.Api;
 
@@ -33,10 +35,45 @@ internal static class AccountEndpoints
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound);
 
+        app.MapGet("/api/me/profile", async (
+            HttpContext context, GetMyProfileHandler handler, CancellationToken cancellationToken) =>
+            await handler.HandleAsync(context.CurrentMember().MemberId, cancellationToken) is { } profile
+                ? Results.Ok(profile)
+                : Problems.MemberNotFound())
+        .RequireAuthorization()
+        .WithName("GetMyProfile")
+        .Produces<ProfileView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound);
+
+        app.MapPut("/api/me/profile", async (
+            HttpContext context, ProfileBody body, UpdateMyProfileHandler handler, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var command = new UpdateMyProfileCommand(context.CurrentMember().MemberId, body.Area, body.Address);
+                return await handler.HandleAsync(command, cancellationToken) is { } profile
+                    ? Results.Ok(profile)
+                    : Problems.MemberNotFound();
+            }
+            catch (DomainException ex)
+            {
+                return Problems.DomainRule(ex);
+            }
+        })
+        .RequireAuthorization()
+        .WithName("UpdateMyProfile")
+        .Produces<ProfileView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
         app.MapGet("/api/rules", (GetRulesHandler handler) => Results.Ok(handler.Handle()))
         .RequireAuthorization()
         .WithName("GetRules")
         .Produces<RulesView>()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
+
+    private sealed record ProfileBody(string? Area, string? Address);
 }

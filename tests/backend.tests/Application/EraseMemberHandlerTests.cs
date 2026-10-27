@@ -51,7 +51,7 @@ public class EraseMemberHandlerTests : IAsyncLifetime
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            requester, Now.AddHours(10), new CreditRequestDetails(120, 1), "Riverside", "12 River Rd");
+            requester, Now.AddHours(10), new CreditRequestDetails(120, 1, BabysittingLocation.RequestingFamilysHouse));
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!.Id;
     }
 
@@ -80,7 +80,7 @@ public class EraseMemberHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Erasing_clears_the_address_of_the_members_requests_and_leaves_other_members_alone()
+    public async Task Erasing_clears_the_profile_and_the_address_of_the_members_requests_and_leaves_other_members_alone()
     {
         var other = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         var theirs = await PostAsync(_leaver);
@@ -91,7 +91,10 @@ public class EraseMemberHandlerTests : IAsyncLifetime
 
         await using var scope = _database.CreateScope();
         var requests = _database.NewContext(scope).Requests.AsNoTracking();
-        (await requests.SingleAsync(r => r.Id == theirs)).Address.Should().BeEmpty();
+        (await requests.SingleAsync(r => r.Id == theirs)).Address.Should().BeNull();
+        var erased = await _database.NewContext(scope).Members.AsNoTracking().SingleAsync(m => m.Id == _leaver);
+        erased.Area.Should().BeNull();
+        erased.Address.Should().BeNull();
         (await requests.SingleAsync(r => r.Id == others)).Address.Should().Be("12 River Rd");
     }
 

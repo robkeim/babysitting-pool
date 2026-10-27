@@ -3,7 +3,7 @@ using BabysittingPool.Domain.Requests;
 
 namespace BabysittingPool.Application.Requests;
 
-/// <summary>A Request as its Requester sees it, exact address included (spec §4.6).</summary>
+/// <summary>A Request as its Requester sees it, exact address included when it has one (spec §4.6).</summary>
 public sealed record RequestView(
     Guid Id,
     DateTime StartsAt,
@@ -14,16 +14,16 @@ public sealed record RequestView(
     bool Lunch,
     bool Snack,
     bool Dinner,
-    string Area,
-    string Address,
+    string? Area,
+    string? Address,
     long CostQuarterCredits,
     DateTime ClaimCutoffAt,
     DateTime PostedAt,
     RequestStatus Status);
 
 /// <summary>
-/// A Posted Request as other Members browse it: the rough area only, never the exact address or the Requester
-/// (spec §4.6).
+/// A Posted Request as other Members browse it: the rough area only (none at the Sitter's house), never the exact
+/// address or the Requester (spec §4.6).
 /// </summary>
 public sealed record OpenRequestView(
     Guid Id,
@@ -35,7 +35,7 @@ public sealed record OpenRequestView(
     bool Lunch,
     bool Snack,
     bool Dinner,
-    string Area,
+    string? Area,
     long CostQuarterCredits,
     DateTime ClaimCutoffAt);
 
@@ -48,8 +48,8 @@ public sealed record RequestRead(
     BabysittingLocation Location,
     TransportOption Transport,
     MealOption Meals,
-    string Area,
-    string Address,
+    string? Area,
+    string? Address,
     long CostQuarterCredits,
     DateTime ClaimCutoffAt,
     DateTime PostedAt,

@@ -73,7 +73,12 @@ export function OpenRequestsPage() {
                     disabled={claim.isPending}
                     aria-label={intl.formatMessage(
                       { id: 'requests.open.claimAria' },
-                      { area: request.area, starts: formatInstant(request.startsAt) },
+                      {
+                        area:
+                          request.area ??
+                          intl.formatMessage({ id: 'requests.post.location.SittersHouse' }),
+                        starts: formatInstant(request.startsAt),
+                      },
                     )}
                     onClick={() => {
                       claim.mutate(request.id)

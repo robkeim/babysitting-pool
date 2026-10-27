@@ -8,9 +8,7 @@ namespace BabysittingPool.Application.Requests;
 public sealed record PostRequestCommand(
     Guid RequesterId,
     DateTime StartsAt,
-    CreditRequestDetails Details,
-    string Area,
-    string Address);
+    CreditRequestDetails Details);
 
 /// <summary>Posts a Request and escrows its cost from the Requester's Available Balance (spec §4.1).</summary>
 public sealed class PostRequestHandler(IRequestStore store, TimeProvider clock, CoopSettings settings)
@@ -25,8 +23,11 @@ public sealed class PostRequestHandler(IRequestStore store, TimeProvider clock, 
             return null;
         }
 
+        var home = command.Details.Location == BabysittingLocation.RequestingFamilysHouse
+            ? await store.FindHomeLocationAsync(command.RequesterId, cancellationToken)
+            : null;
         var request = Request.Post(
-            command.RequesterId, account, command.Details, command.StartsAt, command.Area, command.Address,
+            command.RequesterId, account, command.Details, command.StartsAt, home,
             now, settings.MinimumLeadTime, settings.ClaimCutoff);
         await store.AddPostedAsync(request, account, now, cancellationToken);
 

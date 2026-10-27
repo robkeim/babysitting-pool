@@ -165,6 +165,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetMyProfile"];
+        put: operations["UpdateMyProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules": {
         parameters: {
             query?: never;
@@ -593,7 +609,7 @@ export interface components {
             lunch: boolean;
             snack: boolean;
             dinner: boolean;
-            area: string;
+            area: null | string;
             /** Format: int64 */
             costQuarterCredits: number;
             /** Format: date-time */
@@ -635,8 +651,6 @@ export interface components {
             lunch: boolean;
             snack: boolean;
             dinner: boolean;
-            area: null | string;
-            address: null | string;
         };
         PricingExample: {
             /** Format: int32 */
@@ -658,6 +672,14 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        ProfileBody: {
+            area: null | string;
+            address: null | string;
+        };
+        ProfileView: {
+            area: null | string;
+            address: null | string;
+        };
         /** @enum {unknown} */
         RequestStatus: "Posted" | "Claimed" | "Completed" | "Cancelled" | "Expired";
         RequestView: {
@@ -674,8 +696,8 @@ export interface components {
             lunch: boolean;
             snack: boolean;
             dinner: boolean;
-            area: string;
-            address: string;
+            area: null | string;
+            address: null | string;
             /** Format: int64 */
             costQuarterCredits: number;
             /** Format: date-time */
@@ -1009,6 +1031,95 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

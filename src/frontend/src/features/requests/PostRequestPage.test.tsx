@@ -7,7 +7,9 @@ import {
   availableBalanceHandler,
   postRequestHandler,
   postRequestRejectedHandler,
+  profileHandler,
   quoteHandler,
+  sampleProfile,
 } from './mocks'
 import type { PostRequestBody } from './types'
 
@@ -15,9 +17,11 @@ async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
   const startsAt = screen.getByLabelText(/start time/i)
   await user.clear(startsAt)
   await user.type(startsAt, '2026-03-02T10:00')
-  await user.type(screen.getByLabelText(/^area/i), 'Riverside')
-  await user.type(screen.getByLabelText(/exact address/i), '12 River Rd')
 }
+
+beforeEach(() => {
+  server.use(profileHandler(sampleProfile))
+})
 
 describe('PostRequestPage', () => {
   it('defaults the start time to the next 5-minute mark', () => {
@@ -57,9 +61,9 @@ describe('PostRequestPage', () => {
       lunch: false,
       snack: false,
       dinner: false,
-      area: 'Riverside',
-      address: '12 River Rd',
     })
+    expect(posted[0]).not.toHaveProperty('area')
+    expect(posted[0]).not.toHaveProperty('address')
     expect(new Date(posted[0]?.startsAt ?? '').getTime()).toBe(
       new Date('2026-03-02T10:00').getTime(),
     )
@@ -121,6 +125,52 @@ describe('PostRequestPage', () => {
     expect(screen.getByLabelText('Transport')).toHaveAccessibleDescription(
       /not available when the babysitting is at the requesting family/i,
     )
+  })
+
+  it('asks for no area or address, and shows the profile’s only at the requesting family’s house', async () => {
+    const user = userEvent.setup()
+    server.use(availableBalanceHandler(40), quoteHandler({ costQuarterCredits: 6 }))
+
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+
+    expect(screen.queryByLabelText(/area/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/address/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/12 River Rd/)).not.toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('Location'), 'RequestingFamilysHouse')
+
+    expect(await screen.findByText(/Riverside, 12 River Rd/)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/area/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/address/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /change them in your profile/i })).toHaveAttribute(
+      'href',
+      '/profile',
+    )
+    expect(screen.getByRole('button', { name: /post request/i })).toBeEnabled()
+  })
+
+  it('blocks a request at the requesting family’s house until the profile has an address', async () => {
+    const user = userEvent.setup()
+    server.use(
+      availableBalanceHandler(40),
+      quoteHandler({ costQuarterCredits: 6 }),
+      profileHandler({ area: null, address: null }),
+    )
+
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+    await user.selectOptions(screen.getByLabelText('Location'), 'RequestingFamilysHouse')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/add your address to your profile/i)
+    expect(screen.getByRole('link', { name: /open your profile/i })).toHaveAttribute(
+      'href',
+      '/profile',
+    )
+    expect(screen.getByRole('button', { name: /post request/i })).toBeDisabled()
+
+    await user.selectOptions(screen.getByLabelText('Location'), 'SittersHouse')
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /post request/i })).toBeEnabled()
   })
 
   it('explains a start time that is inside the minimum lead time', async () => {

@@ -21,7 +21,7 @@ public class PostRequestHandlerTests : IAsyncLifetime
     private DateTime Start => _database.Clock.GetUtcNow().UtcDateTime.AddHours(10);
 
     private PostRequestCommand Command(Guid memberId, DateTime? startsAt = null, int durationMinutes = 120) => new(
-        memberId, startsAt ?? Start, new CreditRequestDetails(durationMinutes, 1), "Riverside", "12 River Rd");
+        memberId, startsAt ?? Start, new CreditRequestDetails(durationMinutes, 1));
 
     [Fact]
     public async Task Posting_takes_the_cost_into_escrow_and_records_the_request_and_the_ledger_entry()
@@ -42,11 +42,48 @@ public class PostRequestHandlerTests : IAsyncLifetime
         var stored = await db.Requests.AsNoTracking().SingleAsync();
         stored.Id.Should().Be(view.Id);
         stored.RequesterId.Should().Be(memberId);
-        stored.Address.Should().Be("12 River Rd");
+        stored.Area.Should().BeNull();
+        stored.Address.Should().BeNull();
         var ledger = await db.LedgerEntries.AsNoTracking().SingleAsync(e => e.Kind == LedgerEntryKind.Escrow);
         ledger.RequestId.Should().Be(view.Id);
         ledger.MemberId.Should().Be(memberId);
         ledger.Amount.QuarterCredits.Should().Be(8);
+    }
+
+    [Fact]
+    public async Task Posting_at_the_requesting_familys_house_copies_the_area_and_address_from_the_profile()
+    {
+        var memberId = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var command = new PostRequestCommand(
+            memberId, Start, new CreditRequestDetails(120, 1, BabysittingLocation.RequestingFamilysHouse));
+
+        var view = await PostAsync(command);
+
+        view!.Area.Should().Be("Riverside");
+        view.Address.Should().Be("12 River Rd");
+        await using var scope = _database.CreateScope();
+        var stored = await _database.NewContext(scope).Requests.AsNoTracking().SingleAsync();
+        stored.Area.Should().Be("Riverside");
+        stored.Address.Should().Be("12 River Rd");
+    }
+
+    [Fact]
+    public async Task Posting_at_the_requesting_familys_house_without_a_profile_location_is_refused()
+    {
+        var memberId = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await using (var scope = _database.CreateScope())
+        {
+            await _database.NewContext(scope).Members.Where(m => m.Id == memberId)
+                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Area, (string?)null).SetProperty(x => x.Address, (string?)null));
+        }
+
+        var command = new PostRequestCommand(
+            memberId, Start, new CreditRequestDetails(120, 1, BabysittingLocation.RequestingFamilysHouse));
+        var act = () => PostAsync(command);
+
+        (await act.Should().ThrowAsync<DomainException>()).Which.Code.Should().Be("home_location_required");
+        await using var check = _database.CreateScope();
+        (await _database.NewContext(check).Requests.CountAsync()).Should().Be(0);
     }
 
     [Theory]
@@ -96,9 +133,9 @@ public class PostRequestHandlerTests : IAsyncLifetime
         var firstAccount = (await firstStore.FindAccountAsync(memberId, default))!;
         var secondAccount = (await secondStore.FindAccountAsync(memberId, default))!;
         var firstRequest = Request.Post(
-            memberId, firstAccount, new CreditRequestDetails(120, 1), Start, "A", "A", now, TimeSpan.FromHours(6), TimeSpan.FromHours(3));
+            memberId, firstAccount, new CreditRequestDetails(120, 1), Start, null, now, TimeSpan.FromHours(6), TimeSpan.FromHours(3));
         var secondRequest = Request.Post(
-            memberId, secondAccount, new CreditRequestDetails(120, 1), Start, "B", "B", now, TimeSpan.FromHours(6), TimeSpan.FromHours(3));
+            memberId, secondAccount, new CreditRequestDetails(120, 1), Start, null, now, TimeSpan.FromHours(6), TimeSpan.FromHours(3));
         await firstStore.AddPostedAsync(firstRequest, firstAccount, now, default);
 
         var act = () => secondStore.AddPostedAsync(secondRequest, secondAccount, now, default);

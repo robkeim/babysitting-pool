@@ -8,7 +8,10 @@ test('Settle pays a Claimed Request out to the Sitter when its start time arrive
   backend,
 }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
-  const requesterId = await backend.seedMember([40])
+  const requesterId = await backend.seedMember([40], {
+    area: 'Payout Park',
+    address: '12 River Rd',
+  })
   const sitterId = await backend.seedMember([40])
   const [requester, sitter] = await Promise.all(
     [requesterId, sitterId].map(async (memberId) => {
@@ -22,8 +25,7 @@ test('Settle pays a Claimed Request out to the Sitter when its start time arrive
   await requester.goto(`${backend.appUrl}/requests/new`)
   await requester.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await requester.getByLabel(/duration/i).fill('120')
-  await requester.getByLabel(/^area/i).fill('Payout Park')
-  await requester.getByLabel(/exact address/i).fill('12 River Rd')
+  await requester.getByLabel('Location').selectOption('RequestingFamilysHouse')
   await requester.getByRole('button', { name: /post request/i }).click()
   await expect(requester.getByRole('listitem').filter({ hasText: /payout park/i })).toContainText(
     'Posted',
@@ -36,16 +38,16 @@ test('Settle pays a Claimed Request out to the Sitter when its start time arrive
 
   // The Escrow stays put until the start time, then Settle releases it to the Sitter.
   await requester.goto(`${backend.appUrl}/credits`)
-  await expect(requester.getByRole('group', { name: 'In escrow' })).toContainText('2.00')
+  await expect(requester.getByRole('group', { name: 'In escrow' })).toContainText('2.50')
   await backend.setClock('2026-03-02T10:00:00Z')
   await backend.settle()
 
   await requester.goto(`${backend.appUrl}/credits`)
-  await expect(requester.getByRole('group', { name: 'Available' })).toContainText('8.00')
+  await expect(requester.getByRole('group', { name: 'Available' })).toContainText('7.50')
   await expect(requester.getByRole('group', { name: 'In escrow' })).toContainText('0.00')
   await sitter.goto(`${backend.appUrl}/credits`)
-  await expect(sitter.getByRole('group', { name: 'Available' })).toContainText('12.00')
-  await expect(sitter.getByRole('listitem').filter({ hasText: /payout/i })).toContainText('2.00')
+  await expect(sitter.getByRole('group', { name: 'Available' })).toContainText('12.50')
+  await expect(sitter.getByRole('listitem').filter({ hasText: /payout/i })).toContainText('2.50')
 
   await requester.goto(`${backend.appUrl}/requests`)
   await expect(requester.getByRole('listitem').filter({ hasText: /payout park/i })).toContainText(
@@ -58,13 +60,15 @@ test('Settle refunds a Request nobody claimed once its Claim Cutoff passes', asy
   backend,
 }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
-  await backend.signIn(page.context(), await backend.seedMember([40]))
+  await backend.signIn(
+    page.context(),
+    await backend.seedMember([40], { area: 'Expiry Heights', address: '12 River Rd' }),
+  )
 
   await page.goto('/requests/new')
   await page.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await page.getByLabel(/duration/i).fill('120')
-  await page.getByLabel(/^area/i).fill('Expiry Heights')
-  await page.getByLabel(/exact address/i).fill('12 River Rd')
+  await page.getByLabel('Location').selectOption('RequestingFamilysHouse')
   await page.getByRole('button', { name: /post request/i }).click()
   await expect(page.getByRole('listitem').filter({ hasText: /expiry heights/i })).toContainText(
     'Posted',
@@ -77,7 +81,7 @@ test('Settle refunds a Request nobody claimed once its Claim Cutoff passes', asy
   await page.goto('/credits')
   await expect(page.getByRole('group', { name: 'Available' })).toContainText('10.00')
   await expect(page.getByRole('group', { name: 'In escrow' })).toContainText('0.00')
-  await expect(page.getByRole('listitem').filter({ hasText: /refund/i })).toContainText('2.00')
+  await expect(page.getByRole('listitem').filter({ hasText: /refund/i })).toContainText('2.50')
   await page.goto('/requests')
   await expect(page.getByRole('listitem').filter({ hasText: /expiry heights/i })).toContainText(
     'Expired',

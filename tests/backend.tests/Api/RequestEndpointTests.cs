@@ -3,7 +3,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AwesomeAssertions;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Infrastructure.Persistence;
 using backend.tests.Support;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.tests.Api;
 
@@ -13,19 +16,18 @@ public class RequestEndpointTests : IDisposable
 
     public void Dispose() => _factory.Dispose();
 
-    private object Body(int hoursAhead = 10, int durationMinutes = 120, string transport = "None") => new
-    {
-        startsAt = _factory.Clock.GetUtcNow().AddHours(hoursAhead),
-        durationMinutes,
-        childCount = 1,
-        location = "SittersHouse",
-        transport,
-        lunch = false,
-        snack = false,
-        dinner = false,
-        area = "Riverside",
-        address = "12 River Rd",
-    };
+    private object Body(
+        int hoursAhead = 10, int durationMinutes = 120, string transport = "None", string location = "SittersHouse") => new
+        {
+            startsAt = _factory.Clock.GetUtcNow().AddHours(hoursAhead),
+            durationMinutes,
+            childCount = 1,
+            location,
+            transport,
+            lunch = false,
+            snack = false,
+            dinner = false,
+        };
 
     [Fact]
     public async Task Posting_returns_201_with_the_request_and_it_appears_in_my_requests_and_the_balance()
@@ -33,20 +35,52 @@ public class RequestEndpointTests : IDisposable
         var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0), Credits.FromDecimal(10m));
         using var client = _factory.CreateMemberClient(memberId);
 
-        var response = await client.PostAsJsonAsync("/api/requests", Body());
+        var response = await client.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var posted = await response.Content.ReadFromJsonAsync<JsonElement>();
         posted.GetProperty("status").GetString().Should().Be("Posted");
-        posted.GetProperty("costQuarterCredits").GetInt64().Should().Be(8);
+        posted.GetProperty("costQuarterCredits").GetInt64().Should().Be(10);
         posted.GetProperty("claimCutoffAt").GetString().Should().Be("2026-03-01T16:00:00Z");
         var list = await client.GetFromJsonAsync<JsonElement>("/api/me/requests");
         var item = list.GetProperty("items").EnumerateArray().Single();
         item.GetProperty("id").GetString().Should().Be(posted.GetProperty("id").GetString());
         item.GetProperty("address").GetString().Should().Be("12 River Rd");
         var account = await client.GetFromJsonAsync<JsonElement>("/api/me/account");
-        account.GetProperty("availableQuarterCredits").GetInt64().Should().Be(32);
-        account.GetProperty("escrowedQuarterCredits").GetInt64().Should().Be(8);
+        account.GetProperty("availableQuarterCredits").GetInt64().Should().Be(30);
+        account.GetProperty("escrowedQuarterCredits").GetInt64().Should().Be(10);
+    }
+
+    [Fact]
+    public async Task Posting_at_the_sitters_house_records_no_area_or_address()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.PostAsJsonAsync("/api/requests", Body());
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var item = (await client.GetFromJsonAsync<JsonElement>("/api/me/requests")).GetProperty("items").EnumerateArray().Single();
+        item.TryGetProperty("area", out var area).Should().BeTrue();
+        area.ValueKind.Should().Be(JsonValueKind.Null);
+        item.GetProperty("address").ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
+    public async Task Posting_at_the_requesting_familys_house_without_a_profile_location_answers_422()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>().Members.Where(m => m.Id == memberId)
+                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Area, (string?)null).SetProperty(x => x.Address, (string?)null));
+        }
+
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"));
+
+        await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "home_location_required");
     }
 
     [Fact]
@@ -106,8 +140,6 @@ public class RequestEndpointTests : IDisposable
             lunch = false,
             snack = false,
             dinner = false,
-            area = "Riverside",
-            address = "12 River Rd",
         };
 
         var response = await client.PostAsJsonAsync("/api/requests", body);
@@ -142,14 +174,14 @@ public class RequestEndpointTests : IDisposable
         var browser = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var ownerClient = _factory.CreateMemberClient(owner);
         using var browserClient = _factory.CreateMemberClient(browser);
-        (await ownerClient.PostAsJsonAsync("/api/requests", Body())).EnsureSuccessStatusCode();
+        (await ownerClient.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"))).EnsureSuccessStatusCode();
 
         var seen = await browserClient.GetFromJsonAsync<JsonElement>("/api/requests/open");
         var own = await ownerClient.GetFromJsonAsync<JsonElement>("/api/requests/open");
 
         var item = seen.GetProperty("items").EnumerateArray().Single();
         item.GetProperty("area").GetString().Should().Be("Riverside");
-        item.GetProperty("costQuarterCredits").GetInt64().Should().Be(8);
+        item.GetProperty("costQuarterCredits").GetInt64().Should().Be(10);
         item.TryGetProperty("address", out _).Should().BeFalse();
         item.TryGetProperty("requesterId", out _).Should().BeFalse();
         own.GetProperty("items").GetArrayLength().Should().Be(0);
@@ -162,7 +194,7 @@ public class RequestEndpointTests : IDisposable
         var sitter = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var ownerClient = _factory.CreateMemberClient(owner);
         using var sitterClient = _factory.CreateMemberClient(sitter);
-        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"))).Content.ReadFromJsonAsync<JsonElement>();
         var id = posted.GetProperty("id").GetString();
 
         var response = await sitterClient.PostAsync($"/api/requests/{id}/claim", null);
@@ -271,7 +303,7 @@ public class RequestEndpointTests : IDisposable
         var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var ownerClient = _factory.CreateMemberClient(owner);
         using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
-        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"))).Content.ReadFromJsonAsync<JsonElement>();
         var id = posted.GetProperty("id").GetString();
         (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
 
@@ -280,7 +312,8 @@ public class RequestEndpointTests : IDisposable
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var withdrawn = await response.Content.ReadFromJsonAsync<JsonElement>();
         withdrawn.GetProperty("status").GetString().Should().Be("Posted");
-        withdrawn.GetProperty("address").GetString().Should().BeEmpty();
+        withdrawn.GetProperty("address").ValueKind.Should().Be(JsonValueKind.Null);
+        withdrawn.GetProperty("area").GetString().Should().Be("Riverside");
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").GetArrayLength().Should().Be(1);
     }

@@ -7,9 +7,10 @@ import type { RequestStatus } from './types'
 
 interface RequestCardProps {
   startsAt: string
-  area: string
+  /** The rough area; null when the babysitting is at the Sitter's house, where it does not apply. */
+  area?: string | null
   /** The exact address, only for the Requester and the Sitter who claimed it (spec §4.6). */
-  address?: string
+  address?: string | null
   durationMinutes: number
   childCount: number
   costQuarterCredits: number
@@ -60,7 +61,7 @@ export function RequestCard({
             {formatInstant(startsAt)}
           </Line>
           <Line icon={MapPin} className="text-muted-foreground">
-            {area}
+            {area ?? <FormattedMessage id="requests.post.location.SittersHouse" />}
           </Line>
           {address && (
             <Line icon={House} className="text-muted-foreground">

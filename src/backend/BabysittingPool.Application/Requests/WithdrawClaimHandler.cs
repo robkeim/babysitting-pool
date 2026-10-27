@@ -30,6 +30,6 @@ public sealed class WithdrawClaimHandler(IRequestStore store, TimeProvider clock
         await store.SaveReleasedAsync(request, requester, now, cancellationToken);
 
         // The exact address is the Sitter's only while the claim stands (spec §4.6): answer with the area alone.
-        return RequestRead.From(request).ToView(now) with { Address = "" };
+        return RequestRead.From(request).ToView(now) with { Address = null };
     }
 }

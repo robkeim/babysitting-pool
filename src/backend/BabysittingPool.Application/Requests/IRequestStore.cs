@@ -1,4 +1,5 @@
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Domain.Identity;
 using BabysittingPool.Domain.Requests;
 
 namespace BabysittingPool.Application.Requests;
@@ -11,6 +12,9 @@ public interface IRequestStore
 {
     /// <summary>The Member's Credit Account, or null. The store remembers the version it read.</summary>
     Task<CreditAccount?> FindAccountAsync(Guid memberId, CancellationToken cancellationToken);
+
+    /// <summary>The Member's area and address from their profile, or null if they have not set them.</summary>
+    Task<HomeLocation?> FindHomeLocationAsync(Guid memberId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Saves a newly posted Request, the Requester's updated account and the Escrow Ledger entry in one

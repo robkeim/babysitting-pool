@@ -135,7 +135,7 @@ public class DemurrageSettleTests : IAsyncLifetime
         await using (var scope = _database.CreateScope())
         {
             var posted = (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(
-                new PostRequestCommand(requester, Utc(3, 10, 10).UtcDateTime, new CreditRequestDetails(120, 1), "Riverside", "12 River Rd"),
+                new PostRequestCommand(requester, Utc(3, 10, 10).UtcDateTime, new CreditRequestDetails(120, 1)),
                 default))!;
             await using var claimScope = _database.CreateScope();
             await claimScope.ServiceProvider.GetRequiredService<ClaimRequestHandler>()
