@@ -29,6 +29,17 @@ cd src/frontend && npm run dev                                               # S
 - **API contract:** after changing an endpoint, run `UPDATE_OPENAPI=1 dotnet test --filter OpenApiDocumentTests`, then `npm run generate:api` and `npm run generate:postman` in `src/frontend` and commit the generated files (`schema.gen.ts`, `docs/api/postman_collection.json`).
 - **Migrations:** `dotnet dotnet-ef migrations add <Name> --project src/backend/BabysittingPool.Infrastructure --output-dir Persistence/Migrations`. For the rate-limit file add `--context RateLimitDbContext` and `--output-dir Persistence/RateLimitMigrations`.
 
+## Docker image
+
+One multi-stage image (ADR 0018) builds the SPA, publishes the API and copies the SPA into `wwwroot`; the API serves both on port 8080. Without an `index.html` in `wwwroot` (`dotnet run`, tests) the API serves no SPA.
+
+```sh
+docker build -t babysitting-pool .
+docker run --rm -p 8080:8080 -v babysitting-data:/data -e ASPNETCORE_ENVIRONMENT=Development babysitting-pool
+```
+
+The database and the rate-limit file live in `/data` (`ConnectionStrings__Default`). The image defaults to Production, which refuses to start without `App__BaseUrl`, `Bootstrap__AdminEmail` and working `Email__Smtp__Address` and `Email__Smtp__Password` (the first Admin is invited by email, ADR 0018). To try the image locally without email, run it as `Development` as above: it seeds the Members and logs the Admin's sign-in link.
+
 ## Checks
 
 ```sh
