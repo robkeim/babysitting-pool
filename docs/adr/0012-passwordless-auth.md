@@ -15,3 +15,5 @@ Sessions are rows (hash of a random cookie value, member, last used), not self-c
 Development seed data is written by an Infrastructure seeder rather than through Invitations, because the seeded balances (0.0 and 25.5) are not reachable through the Starting Balance alone. It is idempotent by email and Development-only. E2E creates sessions through `POST /api/test/sessions`, so the real sign-in path is exercised only by its own journey.
 
 **Amendment, 2026-10-25 (#123):** `IEmailSender` now has a real implementation, `SmtpEmailSender`, used in Development when SMTP secrets exist (ADR 0011) and in Production when `Email:Smtp:*` is set; Production with nothing configured still throws (#23). Bodies are plain text, English only: one line explaining the link and its expiry, a blank line, then the link. HTML and i18n are left to #23.
+
+**Amendment (2026-10-27, #23).** The production email provider is Gmail SMTP through `SmtpEmailSender` and the `Email:Smtp:*` settings (ADR 0018); no new sender is written. HTML and i18n remain open.
