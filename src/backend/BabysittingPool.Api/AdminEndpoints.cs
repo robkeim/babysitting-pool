@@ -24,6 +24,13 @@ internal static class AdminEndpoints
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status403Forbidden);
 
+        group.MapGet("/members", async (ListMembersHandler handler, CancellationToken cancellationToken) =>
+            Results.Ok(new Page<AdminMemberView>(await handler.HandleAsync(cancellationToken), null)))
+        .WithName("ListMembers")
+        .Produces<Page<AdminMemberView>>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden);
+
         // Closes the account, releases the Member's open Requests and burns their balance; repeating it finishes
         // anything an earlier failed run left (spec §2A).
         group.MapPost("/members/{id:guid}/offboard", async (
