@@ -81,4 +81,19 @@ scripts/check.sh all --full   # writes .git/check-stamp-full for this exact tree
 scripts/deploy.sh             # extra arguments go to `fly deploy`
 ```
 
-`scripts/deploy.sh` exits non-zero without deploying if the full-gate stamp is missing or does not match the current tree (any edit after the gate makes it stale), then runs `fly deploy`. First-time setup (`fly apps create`, `fly volumes create data`, secrets) is in the production runbook (#149). Backups and the restore drill are tracked in #148.
+`scripts/deploy.sh` exits non-zero without deploying if the full-gate stamp is missing or does not match the current tree (any edit after the gate makes it stale), then runs `fly deploy`. First-time setup (`fly apps create`, `fly volumes create data`, secrets) is in the production runbook (#149).
+
+### Backups and the restore drill
+
+The container's entrypoint (`scripts/entrypoint.sh`) starts `scripts/backup-daily.sh` beside the API when `BACKUP_REMOTE` is set. Daily at 03:00 UTC (`BACKUP_HOUR_UTC`) it runs `scripts/backup.sh`: a consistent `sqlite3 .backup` of the main database only, an integrity check, gzip, upload with `rclone` as `babysitting-<UTC timestamp>.db.gz`, then pruning to the newest 30 (`BACKUP_KEEP`). A failed run is retried hourly and never stops the API.
+
+Configure a free-tier Cloudflare R2 (or Backblaze B2) bucket with Fly secrets; rclone reads a remote named `offhost` from the environment, so there is no config file:
+
+```sh
+fly secrets set BACKUP_REMOTE=offhost:<bucket> \
+  RCLONE_CONFIG_OFFHOST_TYPE=s3 RCLONE_CONFIG_OFFHOST_PROVIDER=Cloudflare \
+  RCLONE_CONFIG_OFFHOST_ENDPOINT=https://<account>.r2.cloudflarestorage.com \
+  RCLONE_CONFIG_OFFHOST_ACCESS_KEY_ID=... RCLONE_CONFIG_OFFHOST_SECRET_ACCESS_KEY=...
+```
+
+**Restore drill.** `fly ssh console -C /app/scripts/restore-drill.sh` restores the latest snapshot into a scratch database and checks that it opens, passes `integrity_check` and has the Ledger triggers (`LedgerEntries_no_update`, `LedgerEntries_no_delete`). It exits non-zero on any failure. Run it once before launch, then quarterly; keep a calendar reminder. To try the scripts locally, set `BACKUP_REMOTE` to a plain directory (rclone accepts local paths) inside the Docker image.
