@@ -198,9 +198,9 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
         var secondRequest = (await secondStore.FindRequestAsync(posted.Id, default))!;
         firstRequest.Claim(_sitter, Now, []);
         secondRequest.Claim(other, Now, []);
-        await firstStore.SaveClaimedAsync(firstRequest, default);
+        await firstStore.SaveClaimedAsync(firstRequest, Now, default);
 
-        var act = () => secondStore.SaveClaimedAsync(secondRequest, default);
+        var act = () => secondStore.SaveClaimedAsync(secondRequest, Now, default);
 
         await act.Should().ThrowAsync<ConcurrencyConflictException>();
         await using var scope = _database.CreateScope();

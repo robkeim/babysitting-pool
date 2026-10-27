@@ -191,6 +191,43 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.ToTable("Members", (string)null);
                 });
 
+            modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.NotificationRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Area")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SitterId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("StartsAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("MemberId", "CreatedAt", "Id");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.RequestRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -321,6 +358,15 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.LedgerEntryRecord", b =>
                 {
                     b.HasOne("BabysittingPool.Infrastructure.Persistence.CreditAccountRecord", null)
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BabysittingPool.Infrastructure.Persistence.NotificationRecord", b =>
+                {
+                    b.HasOne("BabysittingPool.Infrastructure.Persistence.MemberRecord", null)
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)

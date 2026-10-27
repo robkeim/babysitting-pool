@@ -113,6 +113,7 @@
   "error.member_not_found": "Ce membre n’existe plus.",
   "error.cannot_offboard_admin": "L’administrateur ne peut pas être retiré.",
   "error.feature_off": "Cette fonctionnalité n’est pas disponible pour le moment.",
+  "error.notification_not_found": "Cette notification n’existe plus.",
   "error.feature_flag_not_found": "Cet indicateur de fonctionnalité n’existe plus.",
   "requests.open.title": "Demandes ouvertes",
   "requests.open.loadFailed.title": "Nous n’avons pas pu charger les demandes ouvertes",

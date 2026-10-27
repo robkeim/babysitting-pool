@@ -1,6 +1,7 @@
 using BabysittingPool.Application.Admin;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Notifications;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
@@ -27,6 +28,9 @@ public static class DependencyInjection
         services.AddScoped<IIdentityStore, IdentityStore>();
         services.AddScoped<IRequestStore, RequestStore>();
         services.AddScoped<IRequestReader, RequestReader>();
+        services.AddScoped<NotificationStore>();
+        services.AddScoped<INotificationStore>(sp => sp.GetRequiredService<NotificationStore>());
+        services.AddScoped<INotificationReader>(sp => sp.GetRequiredService<NotificationStore>());
         services.AddScoped<IAdminReader, AdminReader>();
         services.AddScoped<IDemurrageStore, DemurrageStore>();
         services.AddScoped<IDemurrageReader, DemurrageStore>();

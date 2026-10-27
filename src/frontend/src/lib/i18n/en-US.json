@@ -111,6 +111,7 @@
   "error.member_not_found": "That member no longer exists.",
   "error.cannot_offboard_admin": "The Admin can't be offboarded.",
   "error.feature_off": "That feature isn't available right now.",
+  "error.notification_not_found": "That notification no longer exists.",
   "error.feature_flag_not_found": "That feature flag no longer exists.",
   "requests.open.title": "Open Requests",
   "requests.open.loadFailed.title": "We couldn't load the open requests",

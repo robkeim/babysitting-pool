@@ -64,6 +64,9 @@ internal static class Problems
     public static IResult MemberNotFound() =>
         Problem(StatusCodes.Status404NotFound, "member_not_found", "There is no such Member.");
 
+    public static IResult NotificationNotFound() =>
+        Problem(StatusCodes.Status404NotFound, "notification_not_found", "There is no such Notification.");
+
     public static IResult FeatureOff() =>
         Problem(StatusCodes.Status404NotFound, "feature_off", "This feature is not available.");
 

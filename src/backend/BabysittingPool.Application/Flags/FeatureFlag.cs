@@ -17,8 +17,12 @@ public sealed class FeatureFlagRegistry
         _byName = All.ToDictionary(f => f.Name, StringComparer.Ordinal);
     }
 
-    /// <summary>The flags in production code. Empty until the first flagged slice lands.</summary>
-    public static FeatureFlagRegistry Production { get; } = new([]);
+    /// <summary>The flags in production code.</summary>
+    public static FeatureFlagRegistry Production { get; } = new(
+    [
+        // In-app Notifications (ADR 0019); removed by #160 once fully on in production.
+        new FeatureFlag("notifications", false, 160),
+    ]);
 
     public IReadOnlyList<FeatureFlag> All { get; }
 

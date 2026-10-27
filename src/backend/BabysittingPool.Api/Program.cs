@@ -127,6 +127,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapRequestEndpoints();
+app.MapNotificationEndpoints();
 app.MapAdminEndpoints();
 app.MapFeatureFlagEndpoints();
 
