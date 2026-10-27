@@ -1,3 +1,5 @@
+using BabysittingPool.Application.Notifications;
+
 namespace BabysittingPool.Infrastructure.Persistence;
 
 /// <summary>
@@ -25,4 +27,6 @@ public sealed class NotificationRecord
 
     /// <summary>Claimed only.</summary>
     public Guid? SitterId { get; set; }
+
+    public NotificationView ToView() => new(Id, Kind, CreatedAt, RequestId, Area, StartsAt, SitterId);
 }

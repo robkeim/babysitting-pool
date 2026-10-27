@@ -29,6 +29,6 @@ internal sealed class NotificationStore(BabysittingPoolDbContext db) : INotifica
         return page.ToPage(
             rows,
             n => new KeysetPosition(n.CreatedAt, n.Id),
-            n => new NotificationView(n.Id, n.Kind, n.CreatedAt, n.RequestId, n.Area, n.StartsAt, n.SitterId));
+            n => n.ToView());
     }
 }
