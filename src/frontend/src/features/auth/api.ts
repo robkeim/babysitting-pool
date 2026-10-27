@@ -75,9 +75,8 @@ export function useSignOut() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: () => apiFetch<undefined>('/api/auth/sessions/current', { method: 'DELETE' }),
-    // Nothing cached for the Member may outlive their session.
-    onSuccess: () => {
-      client.clear()
-    },
+    // Nothing cached for the Member may outlive their session. Reset rather than clear: clear()
+    // detaches mounted observers (the shell's `useMe`) so they keep showing the old Member.
+    onSuccess: () => client.resetQueries(),
   })
 }
