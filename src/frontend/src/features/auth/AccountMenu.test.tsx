@@ -5,6 +5,7 @@ import { vi } from 'vitest'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { AccountMenu } from './AccountMenu'
+import { useMe } from './api'
 import { meHandler, signedOutHandler } from './mocks'
 import { RequireMember } from './RequireMember'
 
@@ -30,6 +31,36 @@ describe('AccountMenu', () => {
 
     await waitFor(() => {
       expect(onSignedOut).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('stops showing the Member once they have signed out', async () => {
+    let signedOut = false
+    server.use(
+      http.get('*/api/me', () =>
+        signedOut ? new HttpResponse(null, { status: 401 }) : HttpResponse.json(ada),
+      ),
+      http.delete('*/api/auth/sessions/current', () => {
+        signedOut = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    // Like the root layout: the shell owns `useMe`, the menu is a child that signs out.
+    function Shell() {
+      const me = useMe()
+      return (
+        <>
+          {me.data ? <nav>Member tabs</nav> : null}
+          <AccountMenu onSignedOut={vi.fn()} />
+        </>
+      )
+    }
+    renderWithProviders(<Shell />)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Member tabs')).not.toBeInTheDocument()
     })
   })
 
