@@ -1,6 +1,9 @@
 using AwesomeAssertions;
 using BabysittingPool.Infrastructure;
+using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
 namespace backend.tests.Infrastructure;
@@ -13,7 +16,14 @@ public class SqliteRateLimitStoreTests : IDisposable
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-limits-{Guid.NewGuid():N}.db");
     private readonly FakeTimeProvider _clock = new(new DateTimeOffset(2026, 3, 1, 9, 0, 0, TimeSpan.Zero));
 
-    private SqliteRateLimitStore NewStore() => new($"Data Source={_path}", _clock);
+    /// <summary>A store over the file as a freshly started process would find it: migrated, with whatever counters are on disk.</summary>
+    private SqliteRateLimitStore NewStore()
+    {
+        var services = new ServiceCollection().AddInfrastructure($"Data Source={_path}").BuildServiceProvider();
+        using var db = services.GetRequiredService<IDbContextFactory<RateLimitDbContext>>().CreateDbContext();
+        db.Database.Migrate();
+        return new SqliteRateLimitStore(services.GetRequiredService<IDbContextFactory<RateLimitDbContext>>(), _clock);
+    }
 
     public void Dispose()
     {

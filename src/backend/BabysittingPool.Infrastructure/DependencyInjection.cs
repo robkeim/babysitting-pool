@@ -2,6 +2,7 @@ using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,12 @@ public static class DependencyInjection
         services.AddDbContext<BabysittingPoolDbContext>(options => options
             .UseSqlite(connectionString)
             .AddInterceptors(new SqliteConnectionSetup()));
-        services.AddSingleton(sp => new SqliteRateLimitStore(connectionString, sp.GetRequiredService<TimeProvider>()));
+        var rateLimits = new SqliteConnectionStringBuilder(connectionString);
+        rateLimits.DataSource += ".rate-limits";
+        services.AddDbContextFactory<RateLimitDbContext>(options => options
+            .UseSqlite(rateLimits.ToString())
+            .AddInterceptors(new SqliteConnectionSetup()));
+        services.AddSingleton<SqliteRateLimitStore>();
         services.AddScoped<ICreditAccountReader, CreditAccountReader>();
         services.AddScoped<IIdentityStore, IdentityStore>();
         services.AddScoped<IRequestStore, RequestStore>();
@@ -64,5 +70,9 @@ public static class DependencyInjection
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
         await db.Database.MigrateAsync(cancellationToken);
+
+        await using var rateLimits = await scope.ServiceProvider
+            .GetRequiredService<IDbContextFactory<RateLimitDbContext>>().CreateDbContextAsync(cancellationToken);
+        await rateLimits.Database.MigrateAsync(cancellationToken);
     }
 }
