@@ -125,7 +125,7 @@ internal sealed class ApiFactory(
     {
         base.Dispose(disposing);
         SqliteConnection.ClearAllPools();
-        foreach (var file in new[] { _path, _path + "-wal", _path + "-shm" })
+        foreach (var file in new[] { _path, _path + "-wal", _path + "-shm", _path + ".rate-limits", _path + ".rate-limits-wal", _path + ".rate-limits-shm" })
         {
             if (File.Exists(file))
             {

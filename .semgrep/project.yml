@@ -1,0 +1,21 @@
+rules:
+- id: project.csharp.raw-sql-outside-migrations
+  languages: [csharp]
+  severity: ERROR
+  message: >-
+    Data access goes through EF Core (LINQ, ExecuteUpdate, ExecuteDelete), not hand-written SQL (ADR 0004).
+    Raw SQL is for schema and connection setup only. Suppress with
+    "// nosemgrep: project.csharp.raw-sql-outside-migrations -- <reason>".
+  pattern-either:
+  - pattern: $DB.FromSql(...)
+  - pattern: $DB.FromSqlRaw(...)
+  - pattern: $DB.FromSqlInterpolated(...)
+  - pattern: $DB.ExecuteSql(...)
+  - pattern: $DB.ExecuteSqlAsync(...)
+  - pattern: $DB.ExecuteSqlRaw(...)
+  - pattern: $DB.ExecuteSqlRawAsync(...)
+  - pattern: $DB.ExecuteSqlInterpolated(...)
+  - pattern: $DB.ExecuteSqlInterpolatedAsync(...)
+  - pattern: $DB.SqlQuery<$T>(...)
+  - pattern: $DB.SqlQueryRaw<$T>(...)
+  - pattern: $CMD.CommandText = ...;

@@ -6,6 +6,9 @@ dist/
 *.db
 *.db-shm
 *.db-wal
+*.rate-limits
+*.rate-limits-shm
+*.rate-limits-wal
 
 # Claude Code local state; the shared settings and hooks are committed (ADR 0008)
 .claude/*

@@ -1067,6 +1067,46 @@
         }
       }
     },
+    "/api/admin/members": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "ListMembers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfAdminMemberView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/members/{id}/offboard": {
       "post": {
         "tags": [
@@ -1544,6 +1584,47 @@
           }
         }
       },
+      "AdminMemberView": {
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "isAdmin",
+          "createdAt",
+          "closedAt",
+          "isErased"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isErased": {
+            "type": "boolean"
+          }
+        }
+      },
       "BabysittingLocation": {
         "enum": [
           "SittersHouse",
@@ -1977,6 +2058,27 @@
           "claimCutoffAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "PageOfAdminMemberView": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminMemberView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },

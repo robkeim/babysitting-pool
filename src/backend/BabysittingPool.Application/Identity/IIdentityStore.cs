@@ -14,6 +14,9 @@ public interface IIdentityStore
 
     Task<Member?> FindMemberAsync(Guid memberId, CancellationToken cancellationToken);
 
+    /// <summary>Every Member, open ones first, then closed ones, each group by name.</summary>
+    Task<IReadOnlyList<Member>> ListMembersAsync(CancellationToken cancellationToken);
+
     /// <summary>Closes the Member and ends all their Sessions. Does nothing if they are already closed.</summary>
     Task CloseMemberAsync(Guid memberId, DateTime now, CancellationToken cancellationToken);
 

@@ -1,14 +1,13 @@
 using System.Globalization;
 using System.Net;
 using System.Security.Claims;
-using System.Threading.RateLimiting;
+using BabysittingPool.Infrastructure;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace BabysittingPool.Api;
 
 /// <summary>
-/// Rate limits (ADR 0014): the built-in limiter with in-memory state (one instance; a persistent store is #54).
+/// Rate limits (ADR 0014): counters in a SQLite file next to the database, so they survive a restart.
 /// Over a limit is <c>429</c> ProblemDetails with <c>Retry-After</c>. The client IP comes from forwarded headers,
 /// trusted only from the proxies listed in <c>ForwardedHeaders:KnownProxies</c>.
 /// </summary>
@@ -29,9 +28,9 @@ internal static class RateLimiting
     private const int MemberLimit = 120;
 
     /// <summary>Sign-in link request, per email, so a Member's inbox cannot be flooded. Checked by the endpoint.</summary>
-    public static PartitionedRateLimiter<string> CreateSignInLinkEmailLimiter() =>
-        PartitionedRateLimiter.Create<string, string>(
-            email => Fixed(email, SignInLinkLimit, AuthWindow));
+    public static Task<RateLimitDecision> HitSignInLinkEmailAsync(
+        this SqliteRateLimitStore store, string email, CancellationToken cancellationToken) =>
+        store.HitAsync($"sign-in-link-email:{email}", SignInLinkLimit, AuthWindow, cancellationToken);
 
     public static void AddApiRateLimiting(this IServiceCollection services, IConfiguration configuration)
     {
@@ -47,20 +46,30 @@ internal static class RateLimiting
                 options.KnownProxies.Add(IPAddress.Parse(proxy));
             }
         });
-
-        services.AddSingleton(_ => CreateSignInLinkEmailLimiter());
-        services.AddRateLimiter(options =>
-        {
-            options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
-                PartitionedRateLimiter.Create<HttpContext, string>(ByIp),
-                PartitionedRateLimiter.Create<HttpContext, string>(ByMember));
-            options.OnRejected = async (context, cancellationToken) =>
-            {
-                var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var delay) ? delay : AuthWindow;
-                await Reject(context.HttpContext, retryAfter).ExecuteAsync(context.HttpContext);
-            };
-        });
     }
+
+    /// <summary>Counts each request against its IP and Member limits; the first one over answers <c>429</c>.</summary>
+    public static IApplicationBuilder UseApiRateLimiting(this IApplicationBuilder app) =>
+        app.Use(async (context, next) =>
+        {
+            var store = context.RequestServices.GetRequiredService<SqliteRateLimitStore>();
+            foreach (var rule in new[] { ByIp(context), ByMember(context) })
+            {
+                if (rule is not { } limit)
+                {
+                    continue;
+                }
+
+                var decision = await store.HitAsync(limit.Key, limit.Limit, limit.Window, context.RequestAborted);
+                if (!decision.Allowed)
+                {
+                    await Reject(context, decision.RetryAfter).ExecuteAsync(context);
+                    return;
+                }
+            }
+
+            await next();
+        });
 
     /// <summary>
     /// Forwarded headers are honoured only when a proxy is configured: with no known proxy the middleware
@@ -80,44 +89,38 @@ internal static class RateLimiting
         return Problems.TooManyRequests();
     }
 
-    private static RateLimitPartition<string> ByIp(HttpContext context)
+    private readonly record struct Rule(string Key, int Limit, TimeSpan Window);
+
+    private static Rule? ByIp(HttpContext context)
     {
         var request = context.Request;
         if (!HttpMethods.IsPost(request.Method))
         {
-            return RateLimitPartition.GetNoLimiter("none");
+            return null;
         }
 
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return request.Path.Value switch
         {
-            "/api/auth/sign-in-links" => Fixed($"sign-in-link:{ip}", SignInLinkLimit, AuthWindow),
-            "/api/invitations/accept" => Fixed($"redeem:{ip}", TokenLimit, AuthWindow),
-            "/api/auth/sessions" => Fixed($"verify:{ip}", TokenLimit, AuthWindow),
-            _ => RateLimitPartition.GetNoLimiter("none"),
+            "/api/auth/sign-in-links" => new Rule($"sign-in-link:{ip}", SignInLinkLimit, AuthWindow),
+            "/api/invitations/accept" => new Rule($"redeem:{ip}", TokenLimit, AuthWindow),
+            "/api/auth/sessions" => new Rule($"verify:{ip}", TokenLimit, AuthWindow),
+            _ => null,
         };
     }
 
-    private static RateLimitPartition<string> ByMember(HttpContext context)
+    private static Rule? ByMember(HttpContext context)
     {
         var path = context.Request.Path;
         if (context.User.FindFirstValue(ClaimTypes.NameIdentifier) is not { } member
             || !path.StartsWithSegments("/api", StringComparison.Ordinal))
         {
-            return RateLimitPartition.GetNoLimiter("none");
+            return null;
         }
 
         // Client logs are batched by the SPA, so a Member sending them faster than this is a bug or abuse.
         return path.StartsWithSegments("/api/client-logs", StringComparison.Ordinal)
-            ? Fixed($"client-logs:{member}", ClientLogLimit, MemberWindow)
-            : Fixed($"member:{member}", MemberLimit, MemberWindow);
+            ? new Rule($"client-logs:{member}", ClientLogLimit, MemberWindow)
+            : new Rule($"member:{member}", MemberLimit, MemberWindow);
     }
-
-    private static RateLimitPartition<string> Fixed(string key, int limit, TimeSpan window) =>
-        RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
-        {
-            PermitLimit = limit,
-            Window = window,
-            QueueLimit = 0,
-        });
 }

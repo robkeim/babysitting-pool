@@ -357,6 +357,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ListMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/members/{id}/offboard": {
         parameters: {
             query?: never;
@@ -451,6 +467,18 @@ export interface components {
             /** Format: int64 */
             escrowedQuarterCredits: number;
             ledger: components["schemas"]["PageOfLedgerEntryView"];
+        };
+        AdminMemberView: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            email: string;
+            isAdmin: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            closedAt: null | string;
+            isErased: boolean;
         };
         /** @enum {unknown} */
         BabysittingLocation: "SittersHouse" | "RequestingFamilysHouse";
@@ -586,6 +614,10 @@ export interface components {
             costQuarterCredits: number;
             /** Format: date-time */
             claimCutoffAt: string;
+        };
+        PageOfAdminMemberView: {
+            items: components["schemas"]["AdminMemberView"][];
+            nextCursor: null | string;
         };
         PageOfFeatureFlagView: {
             items: components["schemas"]["FeatureFlagView"][];
@@ -1574,6 +1606,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettleResult"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ListMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageOfAdminMemberView"];
                 };
             };
             /** @description Unauthorized */

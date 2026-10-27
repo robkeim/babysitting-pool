@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<GetRulesHandler>();
         services.AddScoped<IssueInvitationHandler>();
         services.AddScoped<ListInvitationsHandler>();
+        services.AddScoped<ListMembersHandler>();
         services.AddScoped<InviteMemberHandler>();
         services.AddScoped<ResendInvitationHandler>();
         services.AddScoped<PreviewInvitationHandler>();
