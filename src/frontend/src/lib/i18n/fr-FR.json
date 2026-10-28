@@ -280,5 +280,19 @@
   "members.dormant.empty": "Aucun membre n'est inactif.",
   "members.dormant.lastActivity": "Dernière activité le {when}",
   "members.dormant.available": "{available} disponibles",
-  "members.admin.request.line": "{role} · {status} · {area}"
+  "members.admin.request.line": "{role} · {status} · {area}",
+  "notifications.bell.label": "{count, plural, =0 {Notifications} one {Notifications, # en attente} other {Notifications, # en attente}}",
+  "notifications.badge.more": "{count}+",
+  "notifications.panel.title": "Notifications",
+  "notifications.panel.empty": "Vous êtes à jour.",
+  "notifications.panel.loadFailed": "Nous n’avons pas pu charger vos notifications.",
+  "notifications.panel.loadMore": "Voir plus",
+  "notifications.panel.dismissAll": "Tout ignorer",
+  "notifications.posted.withArea": "Nouvelle demande à {area} le {date}",
+  "notifications.posted.noArea": "Nouvelle demande le {date}",
+  "notifications.claimed.named": "{sitter} a pris votre demande du {date}",
+  "notifications.claimed.unnamed": "Un baby-sitter a pris votre demande du {date}",
+  "notifications.claimed.generic": "Un baby-sitter a pris votre demande.",
+  "notifications.row.unavailable": "Plus disponible",
+  "notifications.row.dismiss": "Ignorer : {summary}"
 }

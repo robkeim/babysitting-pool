@@ -14,7 +14,12 @@ internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReade
         var rows = await db.Requests.AsNoTracking().Where(r => r.RequesterId == requesterId)
             .ToKeysetPageAsync(page, r => r.PostedAt, r => r.Id, descending: true, cancellationToken);
 
-        return page.ToPage(rows, r => new KeysetPosition(r.PostedAt, r.Id), r => ToRead(r).ToView(now));
+        var sitterIds = rows.Where(r => r.SitterId is not null).Select(r => r.SitterId!.Value).Distinct().ToList();
+        var sitterNames = await db.Members.AsNoTracking().Where(m => sitterIds.Contains(m.Id))
+            .ToDictionaryAsync(m => m.Id, m => m.DisplayName, cancellationToken);
+
+        return page.ToPage(rows, r => new KeysetPosition(r.PostedAt, r.Id), r =>
+            ToRead(r).ToView(now, r.SitterId is { } sitterId ? sitterNames.GetValueOrDefault(sitterId) : null));
     }
 
     public async Task<Page<OpenRequestView>> ListOpenAsync(

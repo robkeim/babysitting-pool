@@ -27,12 +27,17 @@ interface AppShellProps {
   /** Rendered as the navigation when present: a bottom bar below `lg`, in the top bar from `lg` up. */
   tabs?: readonly ShellTab[]
   more?: ShellMore
+  /** Controls that are not links, such as the notification bell, shown after the tabs in the same navigation. */
+  navExtra?: ReactNode
   account?: ReactNode
   children: ReactNode
 }
 
-// Labels wrap between words and never inside one; a single word too long for a tab on mobile is clipped, not split, and from `lg` up a tab is never narrower than its longest word.
-const TAB_CLASS =
+/** How one item in the navigation looks: a labelled icon in the bottom bar, an icon and label in the top bar.
+ * Labels wrap between words and never inside one; a single word too long for a tab on mobile is clipped, not split,
+ * and from `lg` up a tab is never narrower than its longest word.
+ */
+export const shellTabClass =
   'flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 text-center text-[0.6875rem] leading-tight font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-primary lg:min-w-min lg:flex-initial lg:flex-row lg:gap-2 lg:rounded-lg lg:px-3 lg:text-sm lg:data-[status=active]:bg-accent'
 const TAB_LABEL_CLASS = 'line-clamp-2 min-w-0 lg:min-w-min'
 
@@ -63,7 +68,7 @@ function MoreTab({ label, icon: Icon, items }: ShellMore) {
       <span className={TAB_LABEL_CLASS}>{label}</span>
     </>
   )
-  const triggerClass = `${TAB_CLASS} ${active ? 'text-primary lg:bg-accent' : ''}`
+  const triggerClass = `${shellTabClass} ${active ? 'text-primary lg:bg-accent' : ''}`
 
   if (isDesktop) {
     return (
@@ -109,7 +114,7 @@ function MoreTab({ label, icon: Icon, items }: ShellMore) {
 }
 
 /** The frame every page sits in: a top bar with the wordmark and account, tab navigation, one content column. */
-export function AppShell({ tabs, more, account, children }: AppShellProps) {
+export function AppShell({ tabs, more, navExtra, account, children }: AppShellProps) {
   const intl = useIntl()
   const shell = useRef<HTMLDivElement>(null)
   const nav = useRef<HTMLElement>(null)
@@ -157,12 +162,13 @@ export function AppShell({ tabs, more, account, children }: AppShellProps) {
               className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card pb-[env(safe-area-inset-bottom)] lg:static lg:min-w-0 lg:flex-1 lg:border-t-0 lg:pb-0"
             >
               {tabs.map(({ to, label, icon: Icon }) => (
-                <Link key={to} to={to} className={TAB_CLASS}>
+                <Link key={to} to={to} className={shellTabClass}>
                   <Icon className="size-5 shrink-0 lg:size-4" aria-hidden />
                   <span className={TAB_LABEL_CLASS}>{label}</span>
                 </Link>
               ))}
               {more && <MoreTab {...more} />}
+              {navExtra}
             </nav>
           )}
           {account && <div className="ml-auto shrink-0">{account}</div>}

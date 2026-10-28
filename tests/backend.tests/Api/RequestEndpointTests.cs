@@ -211,6 +211,26 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task My_requests_name_the_sitter_of_a_claimed_request_and_nobody_for_a_posted_one()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var sitter = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(sitter);
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+
+        (await ownerClient.GetFromJsonAsync<JsonElement>("/api/me/requests"))
+            .GetProperty("items").EnumerateArray().Single().GetProperty("sitterDisplayName").ValueKind
+            .Should().Be(JsonValueKind.Null);
+
+        await sitterClient.PostAsync($"/api/requests/{posted.GetProperty("id").GetString()}/claim", null);
+
+        (await ownerClient.GetFromJsonAsync<JsonElement>("/api/me/requests"))
+            .GetProperty("items").EnumerateArray().Single().GetProperty("sitterDisplayName").GetString()
+            .Should().Be("Test Member");
+    }
+
+    [Fact]
     public async Task A_second_claim_on_the_same_request_answers_409()
     {
         var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
