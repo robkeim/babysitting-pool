@@ -1,5 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { delay, http, HttpResponse } from 'msw'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { InvitationsAdminPage } from './InvitationsAdminPage'
@@ -40,6 +41,25 @@ describe('InvitationsAdminPage', () => {
     const accepted = screen.getByRole('group', { name: 'cleo@example.com' })
     expect(within(accepted).getByText('Accepted')).toBeInTheDocument()
     expect(within(accepted).queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('shows an invitation sent while the first list is still loading', async () => {
+    let invited: string | undefined
+    server.use(
+      http.get('*/api/admin/invitations', async () => {
+        // The list is read before the invitation exists and answers after it was sent.
+        const items = invited ? [{ ...sampleInvitation, email: invited }] : []
+        await delay(500)
+        return HttpResponse.json({ items, nextCursor: null })
+      }),
+      inviteHandler((email) => (invited = email)),
+    )
+
+    renderWithProviders(<InvitationsAdminPage />)
+    await userEvent.type(screen.getByLabelText(/email address/i), 'new@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Send invitation' }))
+
+    expect(await screen.findByRole('group', { name: 'new@example.com' })).toBeInTheDocument()
   })
 
   it('says so when there are no invitations', async () => {

@@ -26,15 +26,20 @@ const SCREENS = [
   { name: 'post-request', path: '/requests/new' },
 ]
 
+const CLOCK = '2026-03-01T09:00:00Z'
+
 test.use({ timezoneId: 'UTC' })
 
 test('screenshots of the key screens', async ({ browser, backend }) => {
-  test.setTimeout(300_000)
+  test.setTimeout(600_000)
   await rm(OUTPUT, { recursive: true, force: true })
 
-  await backend.setClock('2026-03-01T09:00:00Z')
+  await backend.setClock(CLOCK)
   const requesterId = await backend.seedMember([80])
   const viewerId = await backend.seedMember([40, 1, 12])
+  // Seeded before anything is posted, so they hold a Notification for each Request posted below; a Member of
+  // their own keeps the panel's extra page loads clear of the viewer's rate limit.
+  const readerId = await backend.seedMember([40])
 
   const requester = await browser.newContext({ timezoneId: 'UTC' })
   await backend.signIn(requester, requesterId)
@@ -107,23 +112,39 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   await joiningPage.getByRole('button').click()
   await expect(joiningPage.getByRole('heading', { level: 2 })).toBeVisible()
   const adminCookies = await joining.cookies()
+  // The bell and its panel are behind the `notifications` flag (ADR 0019). Only the reader gets it: the bell polls,
+  // and on every screen the viewer would exceed the per-minute rate limit at this speed.
+  const flagResponse = await joining.request.put(`${backend.appUrl}/api/admin/feature-flags`, {
+    headers: { 'x-requested-with': 'fetch' },
+    data: {
+      name: 'notifications',
+      enabled: true,
+      rolloutPercent: 0,
+      allowedMemberIds: [readerId],
+      deniedMemberIds: [],
+      roleRollouts: [],
+    },
+  })
+  expect(flagResponse.ok()).toBe(true)
   await joining.close()
 
+  let minutes = 0
   for (const language of LANGUAGES) {
-    for (const who of ['member', 'admin']) {
+    for (const who of ['member', 'reader', 'admin']) {
       const setup = await browser.newContext({ timezoneId: 'UTC' })
       if (who === 'admin') await setup.addCookies(adminCookies)
-      else await backend.signIn(setup, viewerId)
+      else await backend.signIn(setup, who === 'reader' ? readerId : viewerId)
       const setupPage = await setup.newPage()
-      await setupPage.goto(`${backend.appUrl}/credits`)
-      await setupPage
-        .getByRole('combobox', { name: 'Language' })
-        .selectOption({ label: language.label })
+      await setupPage.goto(`${backend.appUrl}/profile`)
+      await setupPage.getByRole('combobox').selectOption({ label: language.label })
       await expect(setupPage.getByRole('heading', { level: 1 })).toHaveText(language.heading)
       await setup.close()
     }
 
     for (const scheme of SCHEMES) {
+      // The viewer is limited to 120 API requests a minute on the backend's clock, which is frozen here, so
+      // each colour scheme steps it a minute to get a fresh window (a 429 shows up as a list that never loads).
+      await backend.setClock(new Date(Date.parse(CLOCK) + minutes++ * 60_000).toISOString())
       for (const viewport of VIEWPORTS) {
         const context = await browser.newContext({
           colorScheme: scheme,
@@ -143,6 +164,25 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
         }
         await context.close()
 
+        const readerContext = await browser.newContext({
+          colorScheme: scheme,
+          viewport,
+          timezoneId: 'UTC',
+        })
+        await backend.signIn(readerContext, readerId)
+        const readerPage = await readerContext.newPage()
+        await readerPage.goto(`${backend.appUrl}/credits`)
+        await readerPage.locator('[data-slot="popover-trigger"]').click()
+        const panel = readerPage.getByRole('dialog')
+        await expect(panel.getByRole('listitem').first()).toBeVisible()
+        await expect(panel).toHaveCSS('opacity', '1')
+        await capture(
+          readerPage,
+          'notifications-panel',
+          `${language.tag}-${scheme}-${viewport.name}`,
+        )
+        await readerContext.close()
+
         const adminContext = await browser.newContext({
           colorScheme: scheme,
           viewport,
@@ -153,6 +193,18 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
         await adminPage.goto(`${backend.appUrl}/admin/feature-flags`)
         await expect(adminPage.getByRole('heading', { level: 2 })).toBeVisible()
         await capture(adminPage, 'feature-flags', `${language.tag}-${scheme}-${viewport.name}`)
+        // The Admin tab's sheet (mobile) or dropdown (desktop), open over the page.
+        await adminPage.getByRole('navigation').getByRole('button').click()
+        const menu = adminPage.getByRole('dialog').or(adminPage.getByRole('menu'))
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveAttribute('data-starting-style')
+        // Not `capture`: resizing the viewport closes it.
+        await mkdir(path.join(OUTPUT, 'admin-menu'), { recursive: true })
+        await adminPage.screenshot({
+          animations: 'disabled',
+          path: path.join(OUTPUT, 'admin-menu', `${language.tag}-${scheme}-${viewport.name}.png`),
+        })
+        await adminPage.keyboard.press('Escape')
         // The rules are the same for every Member; the Admin's context spares the viewer's rate limit.
         await adminPage.goto(`${backend.appUrl}/how-it-works`)
         await expect(adminPage.locator('#demurrage')).toBeVisible()

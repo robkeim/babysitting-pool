@@ -26,4 +26,6 @@ Authentication, CSRF, CORS, secrets and logging are already decided (ADRs 0006, 
 
 **Amendment (2026-10-27, #23).** The only secret is still the email credential, now the Gmail app password, held as a Fly secret (ADR 0018). Behind Fly the app trusts Fly's proxy network for forwarded headers instead of one `KnownProxies` address, so limits apply per real client; the exact addresses and header are verified in #149.
 
+**Amendment (2026-10-28).** The per-Member limit (120 a minute) can be overridden with `RateLimits:MemberPerMinute`. Only the e2e stack sets it, because the design-screenshot run drives one Member through hundreds of page loads a minute. Production leaves it unset, so the default applies.
+
 **Amendment (2026-10-27, #149).** `ForwardedHeaders:KnownNetworks` (CIDR ranges) joins `KnownProxies`, and `ForwardedHeaders:ForwardedForHeaderName` names the header to read when it is not `X-Forwarded-For`. Forwarded headers are read when either list is non-empty. On Fly the proxy network is `172.16.0.0/16` and `fdaa::/16` and the header is `Fly-Client-IP`, set in `fly.toml`; `X-Forwarded-For` is not used because a client can send it. Confirm the ranges after the first deploy (runbook in `docs/development.md`) and amend this note if they differ.

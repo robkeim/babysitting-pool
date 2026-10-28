@@ -3,7 +3,11 @@ using BabysittingPool.Domain.Requests;
 
 namespace BabysittingPool.Application.Requests;
 
-/// <summary>A Request as its Requester sees it, exact address included when it has one (spec §4.6).</summary>
+/// <summary>
+/// A Request as its Requester sees it, exact address included when it has one (spec §4.6). <see cref="SitterDisplayName"/>
+/// names the Sitter of a Claimed Request and is set only when the Requester lists their Requests; it is how the
+/// Claimed Notification shows who claimed (ADR 0019).
+/// </summary>
 public sealed record RequestView(
     Guid Id,
     DateTime StartsAt,
@@ -19,7 +23,8 @@ public sealed record RequestView(
     long CostQuarterCredits,
     DateTime ClaimCutoffAt,
     DateTime PostedAt,
-    RequestStatus Status);
+    RequestStatus Status,
+    string? SitterDisplayName = null);
 
 /// <summary>
 /// A Posted Request as other Members browse it: the rough area only (none at the Sitter's house), never the exact
@@ -60,11 +65,11 @@ public sealed record RequestRead(
         request.Details.Location, request.Details.Transport, request.Details.Meals, request.Area, request.Address,
         request.Cost.QuarterCredits, request.ClaimCutoffAt, request.PostedAt, request.Status);
 
-    public RequestView ToView(DateTime now) => new(
+    public RequestView ToView(DateTime now, string? sitterDisplayName = null) => new(
         Id, StartsAt, DurationMinutes, ChildCount, Location, Transport,
         Meals.HasFlag(MealOption.Lunch), Meals.HasFlag(MealOption.Snack), Meals.HasFlag(MealOption.Dinner),
         Area, Address, CostQuarterCredits, ClaimCutoffAt, PostedAt,
-        Request.StatusAt(Status, ClaimCutoffAt, StartsAt, now));
+        Request.StatusAt(Status, ClaimCutoffAt, StartsAt, now), sitterDisplayName);
 
     public OpenRequestView ToOpenView() => new(
         Id, StartsAt, DurationMinutes, ChildCount, Location, Transport,

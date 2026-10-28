@@ -21,6 +21,9 @@ internal static class RateLimiting
 
     public const string ForwardedForHeaderNameSetting = "ForwardedHeaders:ForwardedForHeaderName";
 
+    /// <summary>Overrides the per-Member limit; only the e2e stack sets it, so a fast browser run is not throttled.</summary>
+    public const string MemberLimitSetting = "RateLimits:MemberPerMinute";
+
     private static readonly TimeSpan AuthWindow = TimeSpan.FromMinutes(15);
 
     private static readonly TimeSpan MemberWindow = TimeSpan.FromMinutes(1);
@@ -73,7 +76,9 @@ internal static class RateLimiting
         app.Use(async (context, next) =>
         {
             var store = context.RequestServices.GetRequiredService<SqliteRateLimitStore>();
-            foreach (var rule in new[] { ByIp(context), ByMember(context) })
+            var memberLimit = context.RequestServices.GetRequiredService<IConfiguration>()
+                .GetValue(MemberLimitSetting, MemberLimit);
+            foreach (var rule in new[] { ByIp(context), ByMember(context, memberLimit) })
             {
                 if (rule is not { } limit)
                 {
@@ -134,7 +139,7 @@ internal static class RateLimiting
         };
     }
 
-    private static Rule? ByMember(HttpContext context)
+    private static Rule? ByMember(HttpContext context, int memberLimit)
     {
         var path = context.Request.Path;
         if (context.User.FindFirstValue(ClaimTypes.NameIdentifier) is not { } member
@@ -153,6 +158,6 @@ internal static class RateLimiting
         // Client logs are batched by the SPA, so a Member sending them faster than this is a bug or abuse.
         return path.StartsWithSegments("/api/client-logs", StringComparison.Ordinal)
             ? new Rule($"client-logs:{member}", ClientLogLimit, MemberWindow)
-            : new Rule($"member:{member}", MemberLimit, MemberWindow);
+            : new Rule($"member:{member}", memberLimit, MemberWindow);
     }
 }

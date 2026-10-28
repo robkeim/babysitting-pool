@@ -14,4 +14,6 @@ An agent checks a screen against the design with three layers:
 
 Pixel-diff baselines were rejected: they fail on every font or date change and say nothing about whether the change is bad. The screenshot script is outside the gate (it is slow and a judgement, not a pass/fail) and runs when a change touches how something looks.
 
+**Amendment (2026-10-27, navigation overflow).** Eight tabs for an Admin did not fit the bar and broke label by letter. The bar now holds four Member tabs and, for Admins, a More tab holding the Admin pages: a bottom sheet below `lg`, a dropdown menu from `lg` up. It is still one `nav` element. The Language picker moved from the top bar to the Profile page to give the tabs room. The shell never splits a word, so `overflow-wrap:anywhere` is gone from navigation labels.
+
 Related: ADR 0003 (stack; shadcn stays vanilla except for tokens), ADR 0005 (`components/` holds shared composed components such as the shell), ADR 0009 (the test Language is the layout stress test).

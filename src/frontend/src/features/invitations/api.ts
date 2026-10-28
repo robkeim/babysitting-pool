@@ -20,7 +20,12 @@ export function useInviteMember() {
   return useMutation({
     mutationFn: (email: string) =>
       apiFetch<InvitationView>('/api/admin/invitations', { method: 'POST', body: { email } }),
-    onSuccess: () => client.invalidateQueries({ queryKey: invitationKeys.all() }),
+    onSuccess: async () => {
+      // A list still loading for the first time has no data, so invalidating alone would reuse that request,
+      // which was sent before this Invitation existed.
+      await client.cancelQueries({ queryKey: invitationKeys.all() })
+      await client.invalidateQueries({ queryKey: invitationKeys.all() })
+    },
   })
 }
 

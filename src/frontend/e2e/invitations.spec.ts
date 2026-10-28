@@ -14,7 +14,8 @@ test('the Admin invites a person, re-sends the invitation and the person joins w
   await page.getByRole('button', { name: 'Create my account' }).click()
   await expect(page).toHaveURL(/\/credits$/)
 
-  await page.getByRole('link', { name: 'Invitations' }).first().click()
+  await page.getByRole('button', { name: 'Admin' }).click()
+  await page.getByRole('menuitem', { name: 'Invitations' }).click()
   await page.getByLabel('Email address').fill(email)
   await page.getByRole('button', { name: 'Send invitation' }).click()
   await expect(page.getByRole('status')).toContainText(`Invitation sent to ${email}.`)

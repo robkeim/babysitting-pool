@@ -95,6 +95,8 @@ async function launchBackend(): Promise<{ backend: Backend; dispose: () => Promi
       ASPNETCORE_URLS: apiUrl,
       App__BaseUrl: appUrl,
       Bootstrap__AdminEmail: BOOTSTRAP_ADMIN_EMAIL,
+      // Browser runs click faster than any Member; the limit itself is covered by backend tests.
+      RateLimits__MemberPerMinute: '100000',
       ConnectionStrings__Default: `Data Source=${path.join(dataDirectory, 'babysitting.db')}`,
     },
   })
