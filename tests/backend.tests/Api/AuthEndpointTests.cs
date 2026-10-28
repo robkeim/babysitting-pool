@@ -187,7 +187,7 @@ public class AuthEndpointTests : IDisposable
 
         using var spa = development.CreateSpaClient();
         var members = new Dictionary<string, long>();
-        foreach (var email in new[] { "ada@example.test", "ben@example.test", "cleo@example.test" })
+        foreach (var email in new[] { "ryan@example.test", "sarah@example.test", "oscar@example.test" })
         {
             await spa.PostAsJsonAsync("/api/auth/sign-in-links", new { email });
             var token = TokenIn((await client.GetFromJsonAsync<JsonElement>($"/api/dev/outbox?to={email}"))[0].GetProperty("link").GetString()!);
@@ -200,9 +200,9 @@ public class AuthEndpointTests : IDisposable
 
         members.Should().Equal(new Dictionary<string, long>
         {
-            ["ada@example.test"] = 40,
-            ["ben@example.test"] = 0,
-            ["cleo@example.test"] = 102,
+            ["ryan@example.test"] = 40,
+            ["sarah@example.test"] = 0,
+            ["oscar@example.test"] = 102,
         });
     }
 
