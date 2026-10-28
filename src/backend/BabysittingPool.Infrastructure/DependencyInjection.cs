@@ -66,13 +66,6 @@ public static class DependencyInjection
         return services;
     }
 
-    /// <summary>Production until an email provider exists.</summary>
-    public static IServiceCollection AddUnconfiguredEmailSender(this IServiceCollection services)
-    {
-        services.AddSingleton<IEmailSender, UnconfiguredEmailSender>();
-        return services;
-    }
-
     /// <summary>Applies the checked-in migrations; called at API startup (ADR 0004).</summary>
     public static async Task MigrateDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
     {

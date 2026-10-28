@@ -147,6 +147,28 @@ public class RateLimitTests : IDisposable
     }
 
     [Fact]
+    public async Task A_trusted_network_and_forwarded_for_header_name_set_the_client_IP()
+    {
+        // Fly's proxy sits in a network, not at one address, and sends the client in Fly-Client-IP (ADR 0018).
+        using var host = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseSetting("ForwardedHeaders:KnownNetworks:0", "10.0.0.0/24");
+            builder.UseSetting("ForwardedHeaders:ForwardedForHeaderName", "Fly-Client-IP");
+            builder.ConfigureServices(services => services.AddSingleton<IStartupFilter, PeerAddressFilter>());
+        });
+
+        for (var i = 0; i < 6; i++)
+        {
+            using var client = host.CreateClient();
+            client.DefaultRequestHeaders.Add("X-Requested-With", "fetch");
+            client.DefaultRequestHeaders.Add("Fly-Client-IP", $"203.0.113.{i}");
+            client.DefaultRequestHeaders.Add("X-Forwarded-For", "198.51.100.1");
+            (await client.PostAsJsonAsync("/api/auth/sign-in-links", new { email = $"member{i}@example.com" }))
+                .StatusCode.Should().Be(HttpStatusCode.Accepted);
+        }
+    }
+
+    [Fact]
     public async Task Client_logs_are_limited_to_30_per_minute_per_Member()
     {
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());

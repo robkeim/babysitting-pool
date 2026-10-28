@@ -24,7 +24,7 @@ cd src/frontend && npm run dev                                               # S
   ```
 
   The seed then uses plus-addresses of that base address, all landing in one inbox: `<local>+admin@<domain>` (Admin) and `+ryan`, `+sarah`, `+oscar` (10.0, 0.0 and 25.5 credits). The startup Admin link is never emailed, so restarts send nothing; request one at `/sign-in`. Delete `babysitting.db` to reseed after switching. `Email:Smtp:Host` and `Email:Smtp:Port` override `smtp.gmail.com:587` (STARTTLS). E2E and backend tests ignore these secrets and always use the fake outbox; without them Development behaves as above.
-- **Configuration:** `appsettings*.json`, then environment variables (`Section__Key`), then `dotnet user-secrets`; no `.env` files. Only deployment values go here (`Bootstrap:AdminEmail`, email provider, database path, `ForwardedHeaders:KnownProxies` set to the reverse proxy's address, otherwise every client is limited under the proxy's IP). Co-op rules such as Minimum Lead Time are defaults in the `CoopSettings` record, not configuration (ADR 0011).
+- **Configuration:** `appsettings*.json`, then environment variables (`Section__Key`), then `dotnet user-secrets`; no `.env` files. Only deployment values go here (`Bootstrap:AdminEmail`, email provider, database path, `ForwardedHeaders:KnownProxies` or `ForwardedHeaders:KnownNetworks` (CIDR) set to the reverse proxy, and `ForwardedHeaders:ForwardedForHeaderName` when it does not use `X-Forwarded-For`; otherwise every client is limited under the proxy's IP). Co-op rules such as Minimum Lead Time are defaults in the `CoopSettings` record, not configuration (ADR 0011).
 - **Feature flags:** declared in `FeatureFlagRegistry.Production` (ADR 0016). `Features__<Name>=true|false` sets a flag's first value and is ignored once the flag has a row; an undeclared name stops startup. After that an Admin changes it with `PUT /api/admin/feature-flags`, with no restart. Gate an endpoint with `.RequireFeature("name")`; in `E2E` each declared flag also gets `GET /api/test/gated/{name}`. The SPA reads `GET /api/feature-flags` (resolved for the caller, anonymous-safe, ETag/304 for clients that send `If-None-Match`; `/api` stays `no-store`, ADR 0014) with `useFeatureFlag("name")` from `features/flags`, which is off while loading or for an unknown name. Unit tests wrap components in `FeatureFlagsTestProvider flags={{ name: true }}`.
 - **API contract:** after changing an endpoint, run `UPDATE_OPENAPI=1 dotnet test --filter OpenApiDocumentTests`, then `npm run generate:api` and `npm run generate:postman` in `src/frontend` and commit the generated files (`schema.gen.ts`, `docs/api/postman_collection.json`).
 - **Migrations:** `dotnet dotnet-ef migrations add <Name> --project src/backend/BabysittingPool.Infrastructure --output-dir Persistence/Migrations`. For the rate-limit file add `--context RateLimitDbContext` and `--output-dir Persistence/RateLimitMigrations`.
@@ -81,7 +81,7 @@ scripts/check.sh all --full   # writes .git/check-stamp-full for this exact tree
 scripts/deploy.sh             # extra arguments go to `fly deploy`
 ```
 
-`scripts/deploy.sh` exits non-zero without deploying if the full-gate stamp is missing or does not match the current tree (any edit after the gate makes it stale), then runs `fly deploy`. First-time setup (`fly apps create`, `fly volumes create data`, secrets) is in the production runbook (#149).
+`scripts/deploy.sh` exits non-zero without deploying if the full-gate stamp is missing or does not match the current tree (any edit after the gate makes it stale), then runs `fly deploy`. First-time setup is in the production runbook below.
 
 ### Backups and the restore drill
 
@@ -97,3 +97,22 @@ fly secrets set BACKUP_REMOTE=offhost:<bucket> \
 ```
 
 **Restore drill.** `fly ssh console -C /app/scripts/restore-drill.sh` restores the latest snapshot into a scratch database and checks that it opens, passes `integrity_check` and has the Ledger triggers (`LedgerEntries_no_update`, `LedgerEntries_no_delete`). It exits non-zero on any failure. Run it once before launch, then quarterly; keep a calendar reminder. To try the scripts locally, set `BACKUP_REMOTE` to a plain directory (rclone accepts local paths) inside the Docker image.
+
+### Production runbook
+
+**First start.** Needs a Fly account with a card (a trial Machine is stopped after 5 minutes).
+
+```sh
+fly apps create babysitting-pool
+fly volumes create data --region iad --size 1
+fly secrets set App__BaseUrl=https://babysitting-pool.fly.dev \
+  Bootstrap__AdminEmail=<first admin's address> \
+  Email__Smtp__Address=<gmail address> Email__Smtp__Password=<app password>
+scripts/check.sh all --full && scripts/deploy.sh
+```
+
+- `App__BaseUrl` is the origin magic links point to; change it (and redeploy) when a custom domain arrives. `Bootstrap__AdminEmail` receives the first Admin Invitation at startup, once, while no Admin exists.
+- The Gmail app password needs 2-Step Verification ([how](https://support.google.com/accounts/answer/185833)). Production refuses to start when `Email__Smtp__Address` or `Email__Smtp__Password` is missing, as it does for `App__BaseUrl` and `Bootstrap__AdminEmail`. Gmail rewrites the sender to the account address and may route mail to spam; tell invitees to check.
+- `fly.toml` `[env]` trusts Fly's proxy networks (`172.16.0.0/16`, `fdaa::/16`) and reads the client from `Fly-Client-IP`, so rate limits (ADR 0014) count real client IPs. Do not trust `X-Forwarded-For` here: a client can send it.
+
+**Verify after the first deploy** (Done when #149): (1) `fly logs` shows no startup exception, and the Admin Invitation email arrives at `Bootstrap__AdminEmail`. (2) Rate limits are per client IP: from two networks (say your phone off Wi-Fi and your laptop), request six sign-in links to different addresses with `curl -X POST https://<app>.fly.dev/api/auth/sign-in-links -H 'X-Requested-With: fetch' -H 'Content-Type: application/json' -d '{"email":"a@example.com"}'`; the first network gets `429` on the sixth, the other still gets `202`. (3) If every client is limited together, the proxy is not trusted: `fly secrets set Logging__LogLevel__Microsoft.AspNetCore.HttpOverrides=Debug`, make a request, read `Unknown proxy: <ip>` in `fly logs`, put that range in `ForwardedHeaders__KnownNetworks__n`, amend ADR 0014 and unset the log level.

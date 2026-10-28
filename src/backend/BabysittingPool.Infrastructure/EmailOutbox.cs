@@ -38,10 +38,3 @@ public sealed partial class EmailOutbox(ILogger<EmailOutbox> logger, IEmailSende
     [LoggerMessage(Level = LogLevel.Information, Message = "Outbox email to {To}: {Subject} {Link}")]
     private static partial void LogMessage(ILogger logger, string to, string subject, Uri link);
 }
-
-/// <summary>Production placeholder until an email provider is chosen (#23): sending fails loudly.</summary>
-internal sealed class UnconfiguredEmailSender : IEmailSender
-{
-    public Task SendAsync(EmailMessage message, CancellationToken cancellationToken) =>
-        throw new InvalidOperationException("No email provider is configured for this environment.");
-}
