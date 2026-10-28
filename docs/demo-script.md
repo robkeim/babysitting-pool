@@ -6,11 +6,11 @@ A run-through for pitching the co-op to people: which scenarios to show and in w
 
 1. Start fresh: delete `babysitting.db` next to the API, then run `scripts/dev.sh` ([`development.md`](development.md)).
 2. Open two browser profiles (or one normal and one private window) so two Members stay signed in side by side: **Ryan** (Requester) and **Sarah** (Sitter). **Oscar** (25.5 credits) is the Member the Admin offboards in Scenario 9; before then, have Oscar post one request so there is something to cancel. Use a third window or profile for the Admin.
-3. Keep a terminal visible. In Development nothing is emailed by default: links appear in the API console and at `GET /api/dev/outbox?to=<email>`. To show real emails, set the SMTP secrets first ([`development.md`](development.md)).
-4. Seeded data: Admin `admin@example.test`, and Members `ryan@`, `sarah@`, `oscar@example.test` holding 10.0, 0.0 and 25.5 credits. None has a profile address yet.
+3. Set the SMTP secrets once, before the first start ([`development.md`](development.md)), so invitations and sign-in links arrive in a real inbox. Keep a terminal visible too: links also appear in the API console and at `GET /api/dev/outbox?to=<email>`.
+4. Seeded data, as plus-addresses of the base address you set (`<local>+admin@<domain>`, `+ryan`, `+sarah`, `+oscar`): the Admin, then Ryan, Sarah and Oscar holding 10.0, 0.0 and 25.5 credits. None has a profile address yet. Without the secrets the seed falls back to `admin@`, `ryan@`, `sarah@` and `oscar@example.test`, which can't receive mail.
 5. Sign in as the Admin with the link logged at startup.
 
-> Sarah starts with 0.0 credits, which suits the story: they can't post until they earn by sitting.
+> Sarah starts with 0.0 credits, which suits the story: she can't post until she earns by sitting.
 
 ## Not demoable yet
 
@@ -27,7 +27,7 @@ Present these as roadmap, not live:
 *Shows: no public sign-up, passwordless onboarding, starting balance.*
 
 1. In the Admin window, open **Invitations**.
-2. Enter a new email (for example `dana@example.test`) and select **Send invitation**. The list shows it as Pending.
+2. Enter a new email (a new plus-address of the base address, for example `+dana`) and select **Send invitation**. The list shows it as Pending.
 3. Open `/sign-in` in the new person's window and point out there is no sign-up, only sign-in.
 4. Copy the Invitation link from the console or outbox and open it. The page shows "Join the co-op" with the invited email.
 5. Enter a display name and select **Create my account**.
@@ -41,7 +41,7 @@ Present these as roadmap, not live:
 *Shows: passwordless sign-in, no account enumeration.*
 
 1. Sign out from the header.
-2. Open `/sign-in`, enter `ryan@example.test`, select **Email me a sign-in link**.
+2. Open `/sign-in`, enter Ryan's address (`+ryan`), select **Email me a sign-in link**.
 3. Show the "Check your email" confirmation.
 4. Repeat with an address that isn't a Member and show the identical confirmation.
 5. Copy Ryan's link from the console or outbox and open it.
@@ -65,9 +65,9 @@ Present these as roadmap, not live:
 2. Enter start time and a duration. Try 50 minutes to show the 15-minute rule, then fix it.
 3. Change the number of children, meals and transport and watch the **Cost breakdown** update, including "After posting: … credits left".
 4. Select **How is this calculated?** to show the pricing rules open in a new tab.
-5. Choose the Requesting family's house. Transport is disabled with an explanation, and the form says the request will use the area and address from their profile.
+5. Choose the Requesting family's house. Transport is disabled with an explanation, and the form says the request will use the area and address from his profile.
 6. Post the request.
-7. On **My Requests**, the request is Posted and shows their exact address.
+7. On **My Requests**, the request is Posted and shows his exact address.
 8. Open **Credits**: available dropped by the cost, the cost shows as In escrow, and the Ledger has an Escrow entry.
 
 ## Scenario 5: Sarah finds and claims the request
@@ -97,7 +97,7 @@ Present these as roadmap, not live:
 2. Make the start time pass and run Settle: call `POST /api/admin/settle` as the Admin from Postman ([`development.md`](development.md#postman)). The minimum lead time is 6 hours, so for a live demo run the API in the `E2E` environment and advance its clock, or run this step ahead of time.
 3. As Sarah, open **Credits**: a Payout entry, with a balance above 0.0.
 4. As Ryan, open **My Requests**: the request is Completed and escrow is gone.
-5. As Sarah, who now has credits, post a request of their own to close the loop.
+5. As Sarah, who now has credits, post a request of her own to close the loop.
 
 ## Scenario 8: The rules that protect the pool
 
@@ -105,9 +105,9 @@ Present these as roadmap, not live:
 
 1. As Sarah with 0.0 credits (before Scenario 7), try to post a request. The form shows "Not enough credits" and posting is blocked.
 2. As Ryan, try a start time less than 6 hours from now. Posting is refused.
-3. As Ryan, try to claim their own request in **Open Requests**. The claim is refused, since a Requester and Sitter must differ.
+3. As Ryan, try to claim his own request in **Open Requests**. The claim is refused, since a Requester and Sitter must differ.
 4. As Ryan, post two requests whose times overlap (for example 3-5 PM and 4-6 PM). As Sarah, claim the first, then try the second. The second claim is refused as an overlap, while back-to-back times (3-5 PM and 5-7 PM) are allowed.
-5. As Ryan, try a request at their house after clearing their profile address. The form sends them to the profile first.
+5. As Ryan, try a request at his house after clearing his profile address. The form sends him to the profile first.
 
 Run this scenario right after Scenario 5 if the story flows better that way.
 
@@ -128,7 +128,6 @@ Run this scenario right after Scenario 5 if the story flows better that way.
 
 - **Dark mode:** follows the system appearance setting ([`design.md`](design.md)); flip it in OS settings to show it.
 - **Language:** switch from the account menu to show the app is translated.
-- **Real email:** with SMTP secrets set, show the invitation arriving in an inbox.
 - **Inactivity:** explain Demurrage (-2.0 credits per week after 21 days without activity) with the **How it works** page and the dormant list on **Pool**.
 
 ## Suggested order for a 10-minute pitch
