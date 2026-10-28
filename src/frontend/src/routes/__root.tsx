@@ -5,12 +5,13 @@ import {
   HandHeart,
   HeartHandshake,
   MailPlus,
+  ShieldCheck,
   Users,
   Wallet,
   Waves,
 } from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
-import { AppShell, type ShellTab } from '@/components/AppShell'
+import { AppShell, type ShellMore, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
 import { NotificationBell } from '@/features/notifications'
 import { I18nProvider } from '@/lib/i18n'
@@ -26,7 +27,7 @@ const MEMBER_TABS: readonly ShellTab[] = [
   { to: '/claims', label: <FormattedMessage id="requests.claims.title" />, icon: HeartHandshake },
 ]
 
-const ADMIN_TABS: readonly ShellTab[] = [
+const ADMIN_ITEMS: readonly ShellTab[] = [
   {
     to: '/admin/invitations',
     label: <FormattedMessage id="common.nav.invitations" />,
@@ -37,6 +38,12 @@ const ADMIN_TABS: readonly ShellTab[] = [
   { to: '/admin/feature-flags', label: <FormattedMessage id="common.nav.flags" />, icon: Flag },
 ]
 
+const ADMIN_MORE: ShellMore = {
+  label: <FormattedMessage id="common.nav.admin" />,
+  icon: ShieldCheck,
+  items: ADMIN_ITEMS,
+}
+
 export const Route = createRootRoute({
   component: function Root() {
     const navigate = useNavigate()
@@ -44,9 +51,8 @@ export const Route = createRootRoute({
     return (
       <I18nProvider language={me.data?.language}>
         <AppShell
-          tabs={
-            me.data ? (me.data.isAdmin ? [...MEMBER_TABS, ...ADMIN_TABS] : MEMBER_TABS) : undefined
-          }
+          tabs={me.data ? MEMBER_TABS : undefined}
+          more={me.data?.isAdmin ? ADMIN_MORE : undefined}
           navExtra={me.data ? <NotificationBell /> : undefined}
           account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
         >

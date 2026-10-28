@@ -68,7 +68,7 @@ public static class MemberSeeder
     /// <summary>
     /// Development: one Admin and three Members with different balances (ADR 0011), then logs the Admin's
     /// sign-in link through the outbox, never delivering it. Safe to run on every start. With a
-    /// <paramref name="baseAddress"/> the seed addresses are its plus-addresses (<c>local+user1@domain</c>), so
+    /// <paramref name="baseAddress"/> the seed addresses are its plus-addresses (<c>local+ryan@domain</c>), so
     /// real email reaches one inbox; otherwise they are <c>example.test</c> addresses.
     /// </summary>
     public static async Task SeedDevelopmentAsync(
@@ -85,10 +85,10 @@ public static class MemberSeeder
         adminEmail ??= Address("admin", "admin@example.test");
         var admin = Credits.FromDecimal(CreditAccount.StartingBalance);
         await services.SeedMemberAsync(adminEmail, "Dev Admin", true, [admin], cancellationToken: cancellationToken);
-        await services.SeedMemberAsync(Address("user1", "ada@example.test"), "Ada (10.0)", false, [admin], cancellationToken: cancellationToken);
-        await services.SeedMemberAsync(Address("user2", "ben@example.test"), "Ben (0.0)", false, [], cancellationToken: cancellationToken);
+        await services.SeedMemberAsync(Address("ryan", "ryan@example.test"), "Ryan (10.0)", false, [admin], cancellationToken: cancellationToken);
+        await services.SeedMemberAsync(Address("sarah", "sarah@example.test"), "Sarah (0.0)", false, [], cancellationToken: cancellationToken);
         await services.SeedMemberAsync(
-            Address("user3", "cleo@example.test"), "Cleo (25.5)", false, [admin, Credits.FromDecimal(15.5m)], cancellationToken: cancellationToken);
+            Address("oscar", "oscar@example.test"), "Oscar (25.5)", false, [admin, Credits.FromDecimal(15.5m)], cancellationToken: cancellationToken);
 
         if (EmailAddress.TryParse(adminEmail, out var address))
         {

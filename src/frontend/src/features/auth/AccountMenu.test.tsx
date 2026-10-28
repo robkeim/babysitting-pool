@@ -5,6 +5,7 @@ import { vi } from 'vitest'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { AccountMenu } from './AccountMenu'
+import { useMe } from './api'
 import { meHandler, signedOutHandler } from './mocks'
 import { RequireMember } from './RequireMember'
 
@@ -33,6 +34,36 @@ describe('AccountMenu', () => {
     })
   })
 
+  it('stops showing the Member once they have signed out', async () => {
+    let signedOut = false
+    server.use(
+      http.get('*/api/me', () =>
+        signedOut ? new HttpResponse(null, { status: 401 }) : HttpResponse.json(ada),
+      ),
+      http.delete('*/api/auth/sessions/current', () => {
+        signedOut = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    // Like the root layout: the shell owns `useMe`, the menu is a child that signs out.
+    function Shell() {
+      const me = useMe()
+      return (
+        <>
+          {me.data ? <nav>Member tabs</nav> : null}
+          <AccountMenu onSignedOut={vi.fn()} />
+        </>
+      )
+    }
+    renderWithProviders(<Shell />)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Member tabs')).not.toBeInTheDocument()
+    })
+  })
+
   it('links to the How it works page', async () => {
     server.use(meHandler(ada))
     renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
@@ -43,24 +74,13 @@ describe('AccountMenu', () => {
     )
   })
 
-  it('saves the Language the Member picks and shows it selected', async () => {
-    let saved: unknown
-    server.use(
-      meHandler(ada),
-      http.put('*/api/me/language', async ({ request }) => {
-        saved = await request.json()
-        return new HttpResponse(null, { status: 204 })
-      }),
-    )
+  it("links the Member's initial to their profile", async () => {
+    server.use(meHandler(ada))
     renderWithProviders(<AccountMenu onSignedOut={vi.fn()} />)
 
-    const dropdown = await screen.findByRole('combobox', { name: 'Language' })
-    await userEvent.selectOptions(dropdown, '🏴‍☠️ Ünïcödé Tëst')
-
-    await waitFor(() => {
-      expect(dropdown).toHaveValue('en-XA')
-    })
-    expect(saved).toEqual({ language: 'en-XA' })
+    const profile = await screen.findByRole('link', { name: 'Profile' })
+    expect(profile).toHaveAttribute('href', '/profile')
+    expect(profile).toHaveTextContent('A')
   })
 
   it('renders nothing when nobody is signed in', async () => {

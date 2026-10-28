@@ -14,7 +14,7 @@ cd src/frontend && npm run dev                                               # S
 ```
 
 - **Database:** a SQLite file `babysitting.db` is created next to the API and migrated at startup (ADR 0004). Delete it to start fresh. Rate-limit counters sit in `babysitting.db.rate-limits` beside it (ADR 0014); delete that file to reset the limits.
-- **Sign-in:** passwordless (ADR 0012, `docs/specs/sign-in.md`). In Development the API seeds an Admin (`admin@example.test`, or `Bootstrap:AdminEmail`) and three Members (`ada@`, `ben@`, `cleo@example.test`, holding 10.0, 0.0 and 25.5 credits), and logs the Admin's sign-in link to the console at startup. By default nothing is sent: for any other seeded Member, request a link at `/sign-in` and read it from the console or `GET /api/dev/outbox?to=<email>`, then open it.
+- **Sign-in:** passwordless (ADR 0012, `docs/specs/sign-in.md`). In Development the API seeds an Admin (`admin@example.test`, or `Bootstrap:AdminEmail`) and three Members (`ryan@`, `sarah@`, `oscar@example.test`, holding 10.0, 0.0 and 25.5 credits), and logs the Admin's sign-in link to the console at startup. By default nothing is sent: for any other seeded Member, request a link at `/sign-in` and read it from the console or `GET /api/dev/outbox?to=<email>`, then open it.
 - **Real email in Development (optional):** set the SMTP secrets once and sign-in and invitation emails are delivered for real, on top of the console and outbox. Gmail needs an [app password](https://support.google.com/accounts/answer/185833) (2-Step Verification on), not the account password.
 
   ```sh
@@ -23,11 +23,22 @@ cd src/frontend && npm run dev                                               # S
   dotnet user-secrets set "Email:Smtp:Password" "<app password>"
   ```
 
-  The seed then uses plus-addresses of that base address, all landing in one inbox: `<local>+admin@<domain>` (Admin) and `+user1`, `+user2`, `+user3` (10.0, 0.0 and 25.5 credits). The startup Admin link is never emailed, so restarts send nothing; request one at `/sign-in`. Delete `babysitting.db` to reseed after switching. `Email:Smtp:Host` and `Email:Smtp:Port` override `smtp.gmail.com:587` (STARTTLS). E2E and backend tests ignore these secrets and always use the fake outbox; without them Development behaves as above.
+  The seed then uses plus-addresses of that base address, all landing in one inbox: `<local>+admin@<domain>` (Admin) and `+ryan`, `+sarah`, `+oscar` (10.0, 0.0 and 25.5 credits). The startup Admin link is never emailed, so restarts send nothing; request one at `/sign-in`. Delete `babysitting.db` to reseed after switching. `Email:Smtp:Host` and `Email:Smtp:Port` override `smtp.gmail.com:587` (STARTTLS). E2E and backend tests ignore these secrets and always use the fake outbox; without them Development behaves as above.
 - **Configuration:** `appsettings*.json`, then environment variables (`Section__Key`), then `dotnet user-secrets`; no `.env` files. Only deployment values go here (`Bootstrap:AdminEmail`, email provider, database path, `ForwardedHeaders:KnownProxies` set to the reverse proxy's address, otherwise every client is limited under the proxy's IP). Co-op rules such as Minimum Lead Time are defaults in the `CoopSettings` record, not configuration (ADR 0011).
 - **Feature flags:** declared in `FeatureFlagRegistry.Production` (ADR 0016). `Features__<Name>=true|false` sets a flag's first value and is ignored once the flag has a row; an undeclared name stops startup. After that an Admin changes it with `PUT /api/admin/feature-flags`, with no restart. Gate an endpoint with `.RequireFeature("name")`; in `E2E` each declared flag also gets `GET /api/test/gated/{name}`. The SPA reads `GET /api/feature-flags` (resolved for the caller, anonymous-safe, ETag/304 for clients that send `If-None-Match`; `/api` stays `no-store`, ADR 0014) with `useFeatureFlag("name")` from `features/flags`, which is off while loading or for an unknown name. Unit tests wrap components in `FeatureFlagsTestProvider flags={{ name: true }}`.
 - **API contract:** after changing an endpoint, run `UPDATE_OPENAPI=1 dotnet test --filter OpenApiDocumentTests`, then `npm run generate:api` and `npm run generate:postman` in `src/frontend` and commit the generated files (`schema.gen.ts`, `docs/api/postman_collection.json`).
 - **Migrations:** `dotnet dotnet-ef migrations add <Name> --project src/backend/BabysittingPool.Infrastructure --output-dir Persistence/Migrations`. For the rate-limit file add `--context RateLimitDbContext` and `--output-dir Persistence/RateLimitMigrations`.
+
+## Docker image
+
+One multi-stage image (ADR 0018) builds the SPA, publishes the API and copies the SPA into `wwwroot`; the API serves both on port 8080. Without an `index.html` in `wwwroot` (`dotnet run`, tests) the API serves no SPA.
+
+```sh
+docker build -t babysitting-pool .
+docker run --rm -p 8080:8080 -v babysitting-data:/data -e ASPNETCORE_ENVIRONMENT=Development babysitting-pool
+```
+
+The database and the rate-limit file live in `/data` (`ConnectionStrings__Default`). The image defaults to Production, which refuses to start without `App__BaseUrl`, `Bootstrap__AdminEmail` and working `Email__Smtp__Address` and `Email__Smtp__Password` (the first Admin is invited by email, ADR 0018). To try the image locally without email, run it as `Development` as above: it seeds the Members and logs the Admin's sign-in link.
 
 ## Checks
 
@@ -61,4 +72,28 @@ npm run test:e2e                  # or: npx playwright test
 
 ## Deployment
 
-Production is one always-on Fly.io Machine in `iad` (ADR 0018). Deploys are local: `scripts/deploy.sh` (#147) refuses to run unless the full-gate stamp matches the tree, then runs `fly deploy`. There is no GitHub workflow (ADR 0015). Backups, the restore drill and the production runbook are tracked in #148 and #149.
+Production is one always-on Fly.io Machine in `iad` (ADR 0018), configured in `fly.toml`: shared-cpu 256MB, `auto_stop_machines = false`, `min_machines_running = 1`, a 1GB `data` volume mounted at `/data`, and a `/health` check. Never scale past one Machine (SQLite is single-instance).
+
+Deploys are local and deliberate; there is no GitHub workflow (ADR 0015):
+
+```sh
+scripts/check.sh all --full   # writes .git/check-stamp-full for this exact tree
+scripts/deploy.sh             # extra arguments go to `fly deploy`
+```
+
+`scripts/deploy.sh` exits non-zero without deploying if the full-gate stamp is missing or does not match the current tree (any edit after the gate makes it stale), then runs `fly deploy`. First-time setup (`fly apps create`, `fly volumes create data`, secrets) is in the production runbook (#149).
+
+### Backups and the restore drill
+
+The container's entrypoint (`scripts/entrypoint.sh`) starts `scripts/backup-daily.sh` beside the API when `BACKUP_REMOTE` is set. Daily at 03:00 UTC (`BACKUP_HOUR_UTC`) it runs `scripts/backup.sh`: a consistent `sqlite3 .backup` of the main database only, an integrity check, gzip, upload with `rclone` as `babysitting-<UTC timestamp>.db.gz`, then pruning to the newest 30 (`BACKUP_KEEP`). A failed run is retried hourly and never stops the API.
+
+Configure a free-tier Cloudflare R2 (or Backblaze B2) bucket with Fly secrets; rclone reads a remote named `offhost` from the environment, so there is no config file:
+
+```sh
+fly secrets set BACKUP_REMOTE=offhost:<bucket> \
+  RCLONE_CONFIG_OFFHOST_TYPE=s3 RCLONE_CONFIG_OFFHOST_PROVIDER=Cloudflare \
+  RCLONE_CONFIG_OFFHOST_ENDPOINT=https://<account>.r2.cloudflarestorage.com \
+  RCLONE_CONFIG_OFFHOST_ACCESS_KEY_ID=... RCLONE_CONFIG_OFFHOST_SECRET_ACCESS_KEY=...
+```
+
+**Restore drill.** `fly ssh console -C /app/scripts/restore-drill.sh` restores the latest snapshot into a scratch database and checks that it opens, passes `integrity_check` and has the Ledger triggers (`LedgerEntries_no_update`, `LedgerEntries_no_delete`). It exits non-zero on any failure. Run it once before launch, then quarterly; keep a calendar reminder. To try the scripts locally, set `BACKUP_REMOTE` to a plain directory (rclone accepts local paths) inside the Docker image.

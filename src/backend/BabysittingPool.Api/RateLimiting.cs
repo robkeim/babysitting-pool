@@ -30,6 +30,8 @@ internal static class RateLimiting
 
     private const int MemberLimit = 120;
 
+    private const int StreamLimit = 30;
+
     /// <summary>Sign-in link request, per email, so a Member's inbox cannot be flooded. Checked by the endpoint.</summary>
     public static Task<RateLimitDecision> HitSignInLinkEmailAsync(
         this SqliteRateLimitStore store, string email, CancellationToken cancellationToken) =>
@@ -121,6 +123,13 @@ internal static class RateLimiting
             || !path.StartsWithSegments("/api", StringComparison.Ordinal))
         {
             return null;
+        }
+
+        // One long-lived request, counted once when it opens. Its own bucket, so reconnecting is not starved by other
+        // calls and a reconnect loop cannot eat the Member's budget for them.
+        if (path.StartsWithSegments(NotificationEndpoints.StreamPath, StringComparison.Ordinal))
+        {
+            return new Rule($"notification-stream:{member}", StreamLimit, MemberWindow);
         }
 
         // Client logs are batched by the SPA, so a Member sending them faster than this is a bug or abuse.

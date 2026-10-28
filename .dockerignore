@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+.git/
+.claude/
+.husky/
+.github/
+docs/research/
+*.db
+*.db-shm
+*.db-wal
+*.rate-limits*
+src/frontend/e2e/

@@ -12,7 +12,8 @@ test('the Admin offboards a Member, burning their balance, then erases their per
   await page.getByRole('button', { name: 'Create my account' }).click()
   await expect(page).toHaveURL(/\/credits$/)
 
-  await page.getByRole('link', { name: 'Members' }).first().click()
+  await page.getByRole('button', { name: 'Admin' }).click()
+  await page.getByRole('menuitem', { name: 'Members' }).click()
   const admin = page.getByRole('group', { name: 'Rosa Root' })
   await expect(admin).toContainText('Active')
   await expect(admin.getByRole('button')).toHaveCount(0)
