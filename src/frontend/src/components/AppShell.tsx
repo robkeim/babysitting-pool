@@ -9,15 +9,21 @@ export interface ShellTab {
   icon: LucideIcon
 }
 
+/** How one item in the navigation looks: a labelled icon in the bottom bar, an icon and label in the top bar. */
+export const shellTabClass =
+  'flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 text-center text-[0.6875rem] leading-tight font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-primary lg:flex-initial lg:flex-row lg:gap-2 lg:rounded-lg lg:px-3 lg:text-sm lg:data-[status=active]:bg-accent'
+
 interface AppShellProps {
   /** Rendered as the navigation when present: a bottom bar below `lg`, in the top bar from `lg` up. */
   tabs?: readonly ShellTab[]
+  /** Controls that are not links, such as the notification bell, shown after the tabs in the same navigation. */
+  navExtra?: ReactNode
   account?: ReactNode
   children: ReactNode
 }
 
 /** The frame every page sits in: a top bar with the wordmark and account, tab navigation, one content column. */
-export function AppShell({ tabs, account, children }: AppShellProps) {
+export function AppShell({ tabs, navExtra, account, children }: AppShellProps) {
   const intl = useIntl()
   const shell = useRef<HTMLDivElement>(null)
   const nav = useRef<HTMLElement>(null)
@@ -65,15 +71,12 @@ export function AppShell({ tabs, account, children }: AppShellProps) {
               className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card pb-[env(safe-area-inset-bottom)] lg:static lg:min-w-0 lg:flex-1 lg:border-t-0 lg:pb-0"
             >
               {tabs.map(({ to, label, icon: Icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 text-center text-[0.6875rem] leading-tight font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-primary lg:flex-initial lg:flex-row lg:gap-2 lg:rounded-lg lg:px-3 lg:text-sm lg:data-[status=active]:bg-accent"
-                >
+                <Link key={to} to={to} className={shellTabClass}>
                   <Icon className="size-5 shrink-0 lg:size-4" aria-hidden />
                   <span className="[overflow-wrap:anywhere]">{label}</span>
                 </Link>
               ))}
+              {navExtra}
             </nav>
           )}
           {account && <div className="ml-auto shrink-0">{account}</div>}

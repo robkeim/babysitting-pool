@@ -12,6 +12,7 @@ import {
 import { FormattedMessage } from 'react-intl'
 import { AppShell, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
+import { NotificationBell } from '@/features/notifications'
 import { I18nProvider } from '@/lib/i18n'
 
 const MEMBER_TABS: readonly ShellTab[] = [
@@ -46,6 +47,7 @@ export const Route = createRootRoute({
           tabs={
             me.data ? (me.data.isAdmin ? [...MEMBER_TABS, ...ADMIN_TABS] : MEMBER_TABS) : undefined
           }
+          navExtra={me.data ? <NotificationBell /> : undefined}
           account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
         >
           <Outlet />

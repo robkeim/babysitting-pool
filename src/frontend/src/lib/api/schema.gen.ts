@@ -898,6 +898,7 @@ export interface components {
             /** Format: date-time */
             postedAt: string;
             status: components["schemas"]["RequestStatus"];
+            sitterDisplayName?: null | string;
         };
         RoleRollout: {
             role: string;
