@@ -51,14 +51,9 @@ builder.Services.AddSingleton(new AppLinks(new Uri(baseUrl)));
 var smtp = builder.Configuration.SmtpSettings();
 if (builder.Environment.IsProduction())
 {
-    if (smtp is null)
-    {
-        builder.Services.AddUnconfiguredEmailSender();
-    }
-    else
-    {
-        builder.Services.AddSmtpEmailSender(smtp);
-    }
+    // Production cannot invite anyone without email (ADR 0018), so refuse to start rather than fail on first send.
+    builder.Services.AddSmtpEmailSender(smtp
+        ?? throw new InvalidOperationException("Email:Smtp:Address and Email:Smtp:Password must be set in Production."));
 }
 else if (builder.Environment.IsDevelopment() && smtp is not null)
 {

@@ -15,3 +15,5 @@ The co-op runs as a single Docker image on one always-on Fly.io Machine. Cost is
 **Continuous delivery.** None on GitHub (ADR 0015). `scripts/deploy.sh` refuses to run unless the full-gate stamp matches the current tree, then runs `fly deploy`. Deploys are deliberate and local; migrations apply at startup (ADR 0004).
 
 **Follow-up tickets.** #146 Dockerfile and SPA serving; #147 `fly.toml` and the deploy script; #148 backup job and restore drill; #149 production runbook and Gmail configuration.
+
+**Amendment (2026-10-27, #149).** Production now refuses to start without the SMTP secrets (the placeholder sender that failed on first send is removed). The runbook is in `docs/development.md`; the forwarded-header settings are in ADR 0014.

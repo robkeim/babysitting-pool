@@ -23,7 +23,8 @@ internal sealed class ApiFactory(
     FeatureFlag[]? flags = null,
     Dictionary<string, string>? features = null,
     string? e2eToken = null,
-    Dictionary<string, string>? settings = null) : WebApplicationFactory<Program>
+    Dictionary<string, string>? settings = null,
+    bool smtpConfigured = true) : WebApplicationFactory<Program>
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-api-{Guid.NewGuid():N}.db");
 
@@ -46,6 +47,13 @@ internal sealed class ApiFactory(
             builder.UseSetting("E2E:Token", e2eToken);
         }
 
+        if (environment == "Production" && smtpConfigured)
+        {
+            // Production refuses to start without SMTP; the outbox below stands in for the real sender.
+            builder.UseSetting("Email:Smtp:Address", "coop@example.com");
+            builder.UseSetting("Email:Smtp:Password", "app-password");
+        }
+
         foreach (var (name, value) in settings ?? [])
         {
             builder.UseSetting(name, value);
@@ -66,7 +74,7 @@ internal sealed class ApiFactory(
 
             if (environment == "Production")
             {
-                // Production has no email provider yet; tests stand in the outbox so the API can start.
+                // Tests stand in the outbox for the SMTP sender so no mail leaves the machine.
                 services.RemoveAll<IEmailSender>();
                 services.AddEmailOutbox();
             }

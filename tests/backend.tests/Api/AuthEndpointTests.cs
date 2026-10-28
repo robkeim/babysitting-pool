@@ -226,6 +226,16 @@ public class AuthEndpointTests : IDisposable
     }
 
     [Fact]
+    public void Production_refuses_to_start_without_SMTP_settings()
+    {
+        using var factory = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com", smtpConfigured: false);
+
+        var act = () => factory.CreateClient();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*Email:Smtp*");
+    }
+
+    [Fact]
     public async Task Production_invites_the_bootstrap_admin_at_startup()
     {
         using var factory = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com");

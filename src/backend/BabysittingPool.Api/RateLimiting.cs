@@ -9,11 +9,17 @@ namespace BabysittingPool.Api;
 /// <summary>
 /// Rate limits (ADR 0014): counters in a SQLite file next to the database, so they survive a restart.
 /// Over a limit is <c>429</c> ProblemDetails with <c>Retry-After</c>. The client IP comes from forwarded headers,
-/// trusted only from the proxies listed in <c>ForwardedHeaders:KnownProxies</c>.
+/// trusted only from the proxies listed in <c>ForwardedHeaders:KnownProxies</c> or the CIDR ranges in
+/// <c>ForwardedHeaders:KnownNetworks</c> (Fly's proxy network, ADR 0018); <c>ForwardedHeaders:ForwardedForHeaderName</c>
+/// names a header other than <c>X-Forwarded-For</c> (Fly sets <c>Fly-Client-IP</c>).
 /// </summary>
 internal static class RateLimiting
 {
     public const string KnownProxiesSetting = "ForwardedHeaders:KnownProxies";
+
+    public const string KnownNetworksSetting = "ForwardedHeaders:KnownNetworks";
+
+    public const string ForwardedForHeaderNameSetting = "ForwardedHeaders:ForwardedForHeaderName";
 
     private static readonly TimeSpan AuthWindow = TimeSpan.FromMinutes(15);
 
@@ -37,12 +43,24 @@ internal static class RateLimiting
     public static void AddApiRateLimiting(this IServiceCollection services, IConfiguration configuration)
     {
         var proxies = KnownProxies(configuration);
+        var networks = KnownNetworks(configuration);
+        var forwardedForHeader = configuration[ForwardedForHeaderNameSetting];
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            // Only the configured proxies: the defaults would trust any loopback caller.
+            // Only the configured proxies and networks: the defaults would trust any loopback caller.
             options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
+            foreach (var network in networks)
+            {
+                options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+            }
+
+            if (!string.IsNullOrWhiteSpace(forwardedForHeader))
+            {
+                options.ForwardedForHeaderName = forwardedForHeader;
+            }
+
             foreach (var proxy in proxies)
             {
                 options.KnownProxies.Add(IPAddress.Parse(proxy));
@@ -74,14 +92,19 @@ internal static class RateLimiting
         });
 
     /// <summary>
-    /// Forwarded headers are honoured only when a proxy is configured: with no known proxy the middleware
+    /// Forwarded headers are honoured only when a proxy or network is configured: with none the middleware
     /// would trust every caller, and anyone could pick the IP they are limited under.
     /// </summary>
     public static IApplicationBuilder UseConfiguredForwardedHeaders(this WebApplication app) =>
-        KnownProxies(app.Configuration).Length == 0 ? app : app.UseForwardedHeaders();
+        KnownProxies(app.Configuration).Length == 0 && KnownNetworks(app.Configuration).Length == 0
+            ? app
+            : app.UseForwardedHeaders();
 
     private static string[] KnownProxies(IConfiguration configuration) =>
         configuration.GetSection(KnownProxiesSetting).Get<string[]>() ?? [];
+
+    private static string[] KnownNetworks(IConfiguration configuration) =>
+        configuration.GetSection(KnownNetworksSetting).Get<string[]>() ?? [];
 
     /// <summary>A <c>429</c> for a limit the endpoint enforces itself.</summary>
     public static IResult Reject(HttpContext context, TimeSpan retryAfter)

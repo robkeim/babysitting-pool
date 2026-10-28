@@ -6,6 +6,12 @@ primary_region = "iad"
 [build]
   dockerfile = "Dockerfile"
 
+# Fly's proxy connects from its private network and sets Fly-Client-IP to the real client (ADR 0014, ADR 0018).
+[env]
+  ForwardedHeaders__KnownNetworks__0 = "172.16.0.0/16"
+  ForwardedHeaders__KnownNetworks__1 = "fdaa::/16"
+  ForwardedHeaders__ForwardedForHeaderName = "Fly-Client-IP"
+
 [mounts]
   source = "data"
   destination = "/data"
