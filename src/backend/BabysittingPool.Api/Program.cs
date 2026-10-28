@@ -118,6 +118,12 @@ if (app.Environment.IsProduction())
 
 app.UseHttpsRedirection();
 app.UseSecurityHeaders();
+var servesSpa = app.Environment.HasSpa();
+if (servesSpa)
+{
+    app.UseSpaStaticFiles();
+}
+
 app.UseCsrfHeaderCheck();
 app.UseAuthentication();
 app.UseApiRateLimiting();
@@ -127,6 +133,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapRequestEndpoints();
+app.MapNotificationEndpoints();
 app.MapAdminEndpoints();
 app.MapFeatureFlagEndpoints();
 
@@ -138,6 +145,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(TestEndpoin
 if (app.Environment.IsEnvironment(TestEndpoints.Environment))
 {
     app.MapTestEndpoints();
+}
+
+if (servesSpa)
+{
+    app.MapSpaFallback();
 }
 
 app.Run();

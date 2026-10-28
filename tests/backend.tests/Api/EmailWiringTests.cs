@@ -58,11 +58,11 @@ public sealed class EmailWiringTests
         // Startup would have thrown on the unreachable SMTP host had it tried to send the Admin's link.
         outbox.Messages.Should().ContainSingle().Which.To.Should().Be("co.op+admin@mail.example");
 
-        var response = await client.PostAsJsonAsync("/api/auth/sign-in-links", new { email = "co.op+user1@mail.example" });
+        var response = await client.PostAsJsonAsync("/api/auth/sign-in-links", new { email = "co.op+ryan@mail.example" });
 
         // The send was attempted (and failed on the unreachable host), and the link is in the outbox regardless.
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        outbox.Messages.Should().HaveCount(2).And.Contain(m => m.To == "co.op+user1@mail.example");
+        outbox.Messages.Should().HaveCount(2).And.Contain(m => m.To == "co.op+ryan@mail.example");
     }
 
     [Fact]

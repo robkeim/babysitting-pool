@@ -1,3 +1,4 @@
+using BabysittingPool.Application.Notifications;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Domain.Requests;
@@ -17,10 +18,11 @@ public interface IRequestStore
     Task<HomeLocation?> FindHomeLocationAsync(Guid memberId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Saves a newly posted Request, the Requester's updated account and the Escrow Ledger entry in one
-    /// transaction. Throws <see cref="ConcurrencyConflictException"/> if the account changed since it was read.
+    /// Saves a newly posted Request, the Requester's updated account, the Escrow Ledger entry and a Posted
+    /// Notification for every other open Member in one transaction, and returns those Notifications for the caller
+    /// to announce once it has committed. Throws <see cref="ConcurrencyConflictException"/> if the account changed since it was read.
     /// </summary>
-    Task AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
+    Task<IReadOnlyList<NotificationDelivery>> AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
 
     /// <summary>The Request, or null. The store remembers the version it read (ADR 0004).</summary>
     Task<Request?> FindRequestAsync(Guid requestId, CancellationToken cancellationToken);
@@ -36,10 +38,10 @@ public interface IRequestStore
     Task<IReadOnlyList<Request>> FindClaimedBySitterAsync(Guid sitterId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Saves a Request's Claim. Throws <see cref="ConcurrencyConflictException"/> if the Request changed since it
+    /// Saves a Request's Claim and the Claimed Notification for its Requester in one transaction, and returns it for the caller to announce. Throws <see cref="ConcurrencyConflictException"/> if the Request changed since it
     /// was read, which is how the loser of a claim race finds out (ADR 0004).
     /// </summary>
-    Task SaveClaimedAsync(Request request, CancellationToken cancellationToken);
+    Task<IReadOnlyList<NotificationDelivery>> SaveClaimedAsync(Request request, DateTime now, CancellationToken cancellationToken);
 
     /// <summary>
     /// Saves a Request a Requester cancelled or a Sitter withdrew from. When the Request ended Cancelled or Expired

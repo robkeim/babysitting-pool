@@ -2,6 +2,7 @@ using BabysittingPool.Application.Admin;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
+using BabysittingPool.Application.Notifications;
 using BabysittingPool.Application.Offboarding;
 using BabysittingPool.Application.Requests;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,10 @@ public static class DependencyInjection
         services.AddScoped<ListMemberRequestsHandler>();
         services.AddScoped<GetPoolOverviewHandler>();
         services.AddScoped<ListDormantMembersHandler>();
+        services.AddScoped<NotificationAnnouncer>();
+        services.AddScoped<ListNotificationsHandler>();
+        services.AddScoped<DismissNotificationHandler>();
+        services.AddScoped<DismissAllNotificationsHandler>();
         services.AddSingleton(FeatureFlagRegistry.Production);
         services.AddScoped<ListFeatureFlagsHandler>();
         services.AddScoped<UpdateFeatureFlagHandler>();
