@@ -13,10 +13,13 @@ public sealed class Request
     /// <summary>Start times fall on a boundary of this many minutes, with no seconds (spec §4.1).</summary>
     public const int StartIncrementMinutes = 5;
 
+    /// <summary>The longest notes a Request holds (spec §4.6).</summary>
+    public const int MaxNotesLength = 500;
+
     private Request(
         Guid id, Guid requesterId, Guid? sitterId, CreditRequestDetails details, DateTime startsAt,
-        string? area, string? address, string? instructions, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt,
-        RequestStatus status)
+        string? area, string? address, string? instructions, string? notes, Credits.Credits cost, DateTime claimCutoffAt,
+        DateTime postedAt, RequestStatus status)
     {
         Id = id;
         RequesterId = requesterId;
@@ -26,6 +29,7 @@ public sealed class Request
         Area = area;
         Address = address;
         Instructions = instructions;
+        Notes = notes;
         Cost = cost;
         ClaimCutoffAt = claimCutoffAt;
         PostedAt = postedAt;
@@ -56,6 +60,12 @@ public sealed class Request
     /// <summary>The Requester's address instructions, copied with the address and shown on the same terms (ADR 0020).</summary>
     public string? Instructions { get; }
 
+    /// <summary>
+    /// The Requester's free-text notes for the Sitter, shown on the same terms as the address (spec §4.6). Unlike the
+    /// address they can change while Claimed without dropping the claim, until the start time.
+    /// </summary>
+    public string? Notes { get; private set; }
+
     /// <summary>The cost taken into Escrow when the Request was posted.</summary>
     public Credits.Credits Cost { get; }
 
@@ -79,7 +89,8 @@ public sealed class Request
         HomeLocation? requesterHome,
         DateTime now,
         TimeSpan minimumLeadTime,
-        TimeSpan claimCutoff)
+        TimeSpan claimCutoff,
+        string? notes = null)
     {
         ArgumentNullException.ThrowIfNull(requester);
         ArgumentNullException.ThrowIfNull(details);
@@ -110,22 +121,23 @@ public sealed class Request
                 "A member with no available credits cannot post a request.", "no_available_credits");
         }
 
+        var cleanNotes = CleanNotes(notes);
         var cost = Credits.Credits.FromDecimal(CreditCostCalculator.Calculate(details).Total);
         requester.Escrow(cost.Value);
 
         return new Request(
             Guid.NewGuid(), requesterId, null, details, startsAt,
             atFamilyHouse ? requesterHome!.Area : null, atFamilyHouse ? requesterHome!.Address : null,
-            atFamilyHouse ? requesterHome!.Instructions : null, cost,
+            atFamilyHouse ? requesterHome!.Instructions : null, cleanNotes, cost,
             startsAt - claimCutoff, now, RequestStatus.Posted);
     }
 
     /// <summary>Rehydrates a Request from persisted state.</summary>
     public static Request Restore(
         Guid id, Guid requesterId, Guid? sitterId, CreditRequestDetails details, DateTime startsAt,
-        string? area, string? address, string? instructions, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt,
-        RequestStatus status) =>
-        new(id, requesterId, sitterId, details, startsAt, area, address, instructions, cost, claimCutoffAt, postedAt, status);
+        string? area, string? address, string? instructions, string? notes, Credits.Credits cost, DateTime claimCutoffAt,
+        DateTime postedAt, RequestStatus status) =>
+        new(id, requesterId, sitterId, details, startsAt, area, address, instructions, notes, cost, claimCutoffAt, postedAt, status);
 
     /// <summary>
     /// The status a reader should show at <paramref name="now"/>: an overdue Posted Request already reads as
@@ -208,6 +220,38 @@ public sealed class Request
 
         RequireBeforeStart(now);
         Refund(requester, RequestStatus.Cancelled);
+    }
+
+    /// <summary>
+    /// The Requester sets or clears the notes of a Posted or Claimed Request until its start time (spec §4.6). Only the
+    /// notes change, so a claim stands. Blank notes mean none; over <see cref="MaxNotesLength"/> characters is
+    /// <c>invalid_notes</c>.
+    /// </summary>
+    public void EditNotes(Guid requesterId, string? notes, DateTime now)
+    {
+        if (requesterId != RequesterId)
+        {
+            throw new DomainException("Only the Requester can edit the notes.", "not_the_requester");
+        }
+
+        RequireBeforeStart(now);
+        if (StatusNow(now) is not (RequestStatus.Posted or RequestStatus.Claimed))
+        {
+            throw new DomainException($"The notes of a {StatusNow(now)} request cannot be edited.", "invalid_state");
+        }
+
+        Notes = CleanNotes(notes);
+    }
+
+    private static string? CleanNotes(string? notes)
+    {
+        var trimmed = notes?.Trim();
+        if (trimmed?.Length > MaxNotesLength)
+        {
+            throw new DomainException($"The notes are at most {MaxNotesLength} characters.", "invalid_notes");
+        }
+
+        return string.IsNullOrEmpty(trimmed) ? null : trimmed;
     }
 
     /// <summary>An unclaimed Request expires at its Claim Cutoff and the Requester is refunded (spec §4.2).</summary>

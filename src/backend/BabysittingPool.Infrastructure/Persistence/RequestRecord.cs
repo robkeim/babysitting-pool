@@ -30,6 +30,8 @@ public sealed class RequestRecord
 
     public string? Instructions { get; set; }
 
+    public string? Notes { get; set; }
+
     public Credits Cost { get; set; }
 
     public DateTime ClaimCutoffAt { get; set; }

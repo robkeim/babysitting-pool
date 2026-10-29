@@ -954,6 +954,87 @@
         }
       }
     },
+    "/api/requests/{id}/notes": {
+      "put": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "EditRequestNotes",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditNotesBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/requests/quote": {
       "get": {
         "tags": [
@@ -2341,6 +2422,20 @@
           }
         }
       },
+      "EditNotesBody": {
+        "required": [
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "FeatureFlagView": {
         "required": [
           "name",
@@ -3092,6 +3187,12 @@
           },
           "dinner": {
             "type": "boolean"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -3311,6 +3412,7 @@
           "area",
           "address",
           "instructions",
+          "notes",
           "costQuarterCredits",
           "claimCutoffAt",
           "postedAt",
@@ -3362,6 +3464,12 @@
             ]
           },
           "instructions": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "notes": {
             "type": [
               "null",
               "string"
