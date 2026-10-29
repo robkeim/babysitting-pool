@@ -285,6 +285,7 @@
   "notifications.badge.more": "{count}+",
   "notifications.panel.title": "Notifications",
   "notifications.panel.empty": "You're all caught up.",
+  "notifications.panel.loading": "Loading your notifications…",
   "notifications.panel.loadFailed": "We couldn't load your notifications.",
   "notifications.panel.loadMore": "Load more",
   "notifications.panel.dismissAll": "Dismiss all",

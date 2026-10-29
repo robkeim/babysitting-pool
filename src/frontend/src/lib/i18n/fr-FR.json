@@ -285,6 +285,7 @@
   "notifications.badge.more": "{count}+",
   "notifications.panel.title": "Notifications",
   "notifications.panel.empty": "Vous êtes à jour.",
+  "notifications.panel.loading": "Chargement de vos notifications…",
   "notifications.panel.loadFailed": "Nous n’avons pas pu charger vos notifications.",
   "notifications.panel.loadMore": "Voir plus",
   "notifications.panel.dismissAll": "Tout ignorer",

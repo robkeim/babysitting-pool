@@ -1,4 +1,4 @@
-import { Bell, X } from 'lucide-react'
+import { Bell, Loader2, X } from 'lucide-react'
 import { useIntl } from 'react-intl'
 import { Button } from '@/components/ui/button'
 import { formatInstant } from '@/features/credits'
@@ -28,7 +28,14 @@ export function NotificationList() {
       </p>
     )
   }
-  if (!notifications.data) return null
+  if (!notifications.data) {
+    return (
+      <p role="status" className="flex items-center justify-center gap-2 p-8 text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" aria-hidden />
+        {intl.formatMessage({ id: 'notifications.panel.loading' })}
+      </p>
+    )
+  }
 
   const items = notifications.data.pages.flatMap((page) => page.items)
   if (items.length === 0) {
