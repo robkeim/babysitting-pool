@@ -48,7 +48,7 @@ async function renderShell(path: string) {
       </IntlProvider>
     ),
   })
-  const routes = ['/credits', '/admin/members', '/admin/feature-flags'].map((to) =>
+  const routes = ['/', '/credits', '/admin/members', '/admin/feature-flags'].map((to) =>
     createRoute({ getParentRoute: () => root, path: to }),
   )
   const router = createRouter({
@@ -82,5 +82,14 @@ describe('AppShell More tab', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Admin' }))
 
     expect(await screen.findByRole('menuitem', { name: 'Feature flags' })).toBeInTheDocument()
+  })
+})
+
+describe('AppShell brand', () => {
+  it('links the logo and name to the home route', async () => {
+    stubViewport(true)
+    await renderShell('/credits')
+
+    expect(screen.getByRole('link', { name: enUS['common.appName'] })).toHaveAttribute('href', '/')
   })
 })
