@@ -21,6 +21,11 @@ internal sealed class NotificationStore(BabysittingPoolDbContext db) : INotifica
     public async Task<int> DeleteOlderThanAsync(DateTime cutoff, CancellationToken cancellationToken) =>
         await db.Notifications.Where(n => n.CreatedAt < cutoff).ExecuteDeleteAsync(cancellationToken);
 
+    public async Task<int> DeleteForStartedRequestsAsync(DateTime now, CancellationToken cancellationToken) =>
+        await db.Notifications
+            .Where(n => db.Requests.Any(r => r.Id == n.RequestId && r.StartsAt <= now))
+            .ExecuteDeleteAsync(cancellationToken);
+
     public async Task<Page<NotificationView>> ListAsync(Guid memberId, PageRequest page, CancellationToken cancellationToken)
     {
         var rows = await db.Notifications.AsNoTracking().Where(n => n.MemberId == memberId)

@@ -74,7 +74,8 @@ public sealed partial class SettleHandler(
     }
 
     /// <summary>
-    /// Deletes Notifications past their retention, a safety net for ones nobody dismissed (ADR 0019). Settle itself
+    /// Deletes Notifications whose Request has started, and any past their retention as a safety net for ones nobody
+    /// dismissed (ADR 0019). Settle itself
     /// writes none (ADR 0007). A failure is logged and retried next run; it never blocks the rest.
     /// </summary>
     private async Task SweepNotificationsAsync(DateTime now, CancellationToken cancellationToken)
@@ -83,7 +84,8 @@ public sealed partial class SettleHandler(
         try
         {
             var store = scope.ServiceProvider.GetRequiredService<INotificationStore>();
-            var deleted = await store.DeleteOlderThanAsync(now - settings.NotificationRetention, cancellationToken);
+            var deleted = await store.DeleteForStartedRequestsAsync(now, cancellationToken)
+                + await store.DeleteOlderThanAsync(now - settings.NotificationRetention, cancellationToken);
             LogSwept(deleted);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

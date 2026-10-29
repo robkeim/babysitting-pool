@@ -14,6 +14,9 @@ public interface INotificationStore
 
     /// <summary>Deletes every Notification created before <paramref name="cutoff"/>, whoever it is for. Returns how many.</summary>
     Task<int> DeleteOlderThanAsync(DateTime cutoff, CancellationToken cancellationToken);
+
+    /// <summary>Deletes every Notification whose Request has started by <paramref name="now"/>, whoever it is for. Returns how many.</summary>
+    Task<int> DeleteForStartedRequestsAsync(DateTime now, CancellationToken cancellationToken);
 }
 
 /// <summary>Read port (ADR 0002).</summary>

@@ -29,11 +29,11 @@ public class NotificationTests : IAsyncLifetime
 
     private DateTime Now => _database.Clock.GetUtcNow().UtcDateTime;
 
-    private async Task<RequestView> PostAsync(Guid requester, bool atHome = false)
+    private async Task<RequestView> PostAsync(Guid requester, bool atHome = false, TimeSpan? startsIn = null)
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            requester, Now.AddHours(10), new CreditRequestDetails(
+            requester, Now.Add(startsIn ?? TimeSpan.FromHours(10)), new CreditRequestDetails(
                 120, 1, atHome ? BabysittingLocation.RequestingFamilysHouse : BabysittingLocation.SittersHouse));
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!;
     }
@@ -335,10 +335,11 @@ public class NotificationTests : IAsyncLifetime
     [Fact]
     public async Task Settle_deletes_notifications_older_than_ninety_days_and_keeps_newer_ones()
     {
-        await PostAsync(_requester);
+        var far = TimeSpan.FromDays(200);
+        await PostAsync(_requester, startsIn: far);
         var old = (await AllAsync()).Single(n => n.MemberId == _sitter);
         _database.Clock.Advance(TimeSpan.FromDays(89));
-        await PostAsync(_bystander);
+        await PostAsync(_bystander, startsIn: far);
 
         _database.Clock.Advance(TimeSpan.FromDays(2));
         await using (var scope = _database.CreateScope())
@@ -349,5 +350,23 @@ public class NotificationTests : IAsyncLifetime
         var rows = await AllAsync();
         rows.Should().NotContain(n => n.CreatedAt == old.CreatedAt);
         rows.Should().NotBeEmpty().And.OnlyContain(n => n.CreatedAt > old.CreatedAt);
+    }
+
+    [Fact]
+    public async Task Settle_deletes_notifications_once_their_request_has_started_and_keeps_the_rest()
+    {
+        var soon = await PostAsync(_requester);
+        var later = await PostAsync(_bystander, startsIn: TimeSpan.FromDays(3));
+        await ClaimAsync(soon.Id, _sitter);
+
+        _database.Clock.Advance(TimeSpan.FromHours(11));
+        await using (var scope = _database.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<SettleHandler>().HandleAsync(default);
+        }
+
+        var rows = await AllAsync();
+        rows.Should().NotContain(n => n.RequestId == soon.Id);
+        rows.Should().NotBeEmpty().And.OnlyContain(n => n.RequestId == later.Id);
     }
 }
