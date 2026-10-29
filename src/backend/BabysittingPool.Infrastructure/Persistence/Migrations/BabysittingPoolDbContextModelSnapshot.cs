@@ -74,6 +74,9 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("AcceptedByMemberId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("ConsumedAt")
                         .HasColumnType("TEXT");
 

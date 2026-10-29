@@ -4,6 +4,7 @@ using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using backend.tests.Support;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.tests.Application;
@@ -70,6 +71,21 @@ public class IdentityHandlerTests : IAsyncLifetime
             .HandleAsync(new GetMyAccountQuery(me.MemberId), CancellationToken.None));
         account!.AvailableQuarterCredits.Should().Be(40);
         account.Ledger.Items.Should().ContainSingle().Which.Kind.Should().Be(LedgerEntryKind.Grant);
+    }
+
+    [Fact]
+    public async Task Accepting_an_invitation_records_the_new_member_on_it()
+    {
+        var token = await InviteAndGetTokenAsync("ada@example.com");
+        await InviteAndGetTokenAsync("grace@example.com");
+
+        var signedIn = await AcceptAsync(token);
+
+        var me = await ResolveAsync(signedIn!.SessionSecret);
+        await using var scope = _database.CreateScope();
+        var invitations = await _database.NewContext(scope).Invitations.AsNoTracking().ToListAsync();
+        invitations.Single(i => i.Email == "ada@example.com").AcceptedByMemberId.Should().Be(me!.MemberId);
+        invitations.Single(i => i.Email == "grace@example.com").AcceptedByMemberId.Should().BeNull();
     }
 
     [Fact]

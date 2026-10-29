@@ -57,6 +57,9 @@ public sealed class InvitationRecord
 
     public DateTime? ConsumedAt { get; set; }
 
+    /// <summary>The Member created by accepting this Invitation; set together with <see cref="ConsumedAt"/>. Erasure uses it, not the email, to find the Invitation (spec §2A).</summary>
+    public Guid? AcceptedByMemberId { get; set; }
+
     /// <summary>Optimistic concurrency token: two people submitting one Invitation cannot both win (ADR 0004).</summary>
     public int Version { get; set; }
 }
