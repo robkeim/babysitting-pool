@@ -62,6 +62,20 @@ public class AuthEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task A_member_changes_their_colour_scheme_and_it_is_stored_on_the_member()
+    {
+        using var client = await JoinAsync("ada@example.com");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("colorScheme").GetString().Should().Be("system");
+
+        var changed = await client.PutAsJsonAsync("/api/me/color-scheme", new { colorScheme = "dark" });
+        var rejected = await client.PutAsJsonAsync("/api/me/color-scheme", new { colorScheme = "sepia" });
+
+        changed.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await AssertProblemAsync(rejected, HttpStatusCode.BadRequest, "invalid_request");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("colorScheme").GetString().Should().Be("dark");
+    }
+
+    [Fact]
     public async Task Unicode_test_is_not_a_choosable_language_in_production()
     {
         using var production = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com");
@@ -160,6 +174,7 @@ public class AuthEndpointTests : IDisposable
     [InlineData("POST", "/api/invitations/accept")]
     [InlineData("DELETE", "/api/auth/sessions/current")]
     [InlineData("PUT", "/api/me/language")]
+    [InlineData("PUT", "/api/me/color-scheme")]
     public async Task State_changing_calls_without_the_csrf_header_are_403(string method, string path)
     {
         using var client = _factory.CreateClient();

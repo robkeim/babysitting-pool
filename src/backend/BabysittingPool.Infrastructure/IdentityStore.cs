@@ -79,6 +79,10 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         await db.Members.Where(m => m.Id == memberId)
             .ExecuteUpdateAsync(m => m.SetProperty(x => x.Language, language.Tag), cancellationToken);
 
+    public async Task SetColorSchemeAsync(Guid memberId, ColorScheme colorScheme, CancellationToken cancellationToken) =>
+        await db.Members.Where(m => m.Id == memberId)
+            .ExecuteUpdateAsync(m => m.SetProperty(x => x.ColorScheme, colorScheme.Tag), cancellationToken);
+
     public async Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken)
     {
         db.Invitations.Add(new InvitationRecord
@@ -142,6 +146,7 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
             Email = member.Email.Value,
             DisplayName = member.DisplayName.Value,
             Language = member.Language.Tag,
+            ColorScheme = member.ColorScheme.Tag,
             IsAdmin = member.IsAdmin,
             CreatedAt = member.CreatedAt,
         });
@@ -245,6 +250,6 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         : Invitation.Restore(r.Id, EmailAddress.Restore(r.Email), r.IsAdmin, r.SecretHash, r.IssuedAt, r.ExpiresAt, r.ConsumedAt);
 
     private static Member ToDomain(MemberRecord r) => Member.Restore(
-        r.Id, EmailAddress.Restore(r.Email), DisplayName.Restore(r.DisplayName), Language.Restore(r.Language), r.IsAdmin, r.CreatedAt, r.ClosedAt,
+        r.Id, EmailAddress.Restore(r.Email), DisplayName.Restore(r.DisplayName), Language.Restore(r.Language), ColorScheme.Restore(r.ColorScheme), r.IsAdmin, r.CreatedAt, r.ClosedAt,
         r.Area is { } area && r.Address is { } address ? HomeLocation.Restore(area, address) : null);
 }

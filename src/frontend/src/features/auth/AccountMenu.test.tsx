@@ -14,6 +14,7 @@ const ada = {
   email: 'ada@example.com',
   displayName: 'Ada',
   language: 'en-US',
+  colorScheme: 'system',
   isAdmin: false,
 }
 

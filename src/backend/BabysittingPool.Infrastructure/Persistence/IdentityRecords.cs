@@ -10,6 +10,8 @@ public sealed class MemberRecord
 
     public string Language { get; set; } = "en-US";
 
+    public string ColorScheme { get; set; } = "system";
+
     public bool IsAdmin { get; set; }
 
     public DateTime CreatedAt { get; set; }

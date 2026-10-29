@@ -32,6 +32,8 @@ public interface IIdentityStore
 
     Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken);
 
+    Task SetColorSchemeAsync(Guid memberId, ColorScheme colorScheme, CancellationToken cancellationToken);
+
     Task AddInvitationAsync(Invitation invitation, CancellationToken cancellationToken);
 
     Task<Invitation?> FindInvitationAsync(string secretHash, CancellationToken cancellationToken);

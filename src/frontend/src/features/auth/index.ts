@@ -1,6 +1,7 @@
 export { useMe } from './api'
 export { AccountMenu } from './AccountMenu'
 export { InvitationPage } from './InvitationPage'
+export { ColorSchemeCard } from './ColorSchemeCard'
 export { LanguageCard } from './LanguageCard'
 export { RequireMember } from './RequireMember'
 export { SignInPage } from './SignInPage'

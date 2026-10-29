@@ -252,6 +252,49 @@
         }
       }
     },
+    "/api/me/color-scheme": {
+      "put": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "ChangeMyColorScheme",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ColorSchemeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/me/account": {
       "get": {
         "tags": [
@@ -2109,6 +2152,20 @@
           "RequestingFamilysHouse"
         ]
       },
+      "ColorSchemeRequest": {
+        "required": [
+          "colorScheme"
+        ],
+        "type": "object",
+        "properties": {
+          "colorScheme": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "CostLines": {
         "required": [
           "hourlyRateQuarterCredits",
@@ -2574,6 +2631,7 @@
           "email",
           "displayName",
           "language",
+          "colorScheme",
           "isAdmin"
         ],
         "type": "object",
@@ -2589,6 +2647,9 @@
             "type": "string"
           },
           "language": {
+            "type": "string"
+          },
+          "colorScheme": {
             "type": "string"
           },
           "isAdmin": {

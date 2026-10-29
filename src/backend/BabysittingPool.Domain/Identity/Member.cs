@@ -5,12 +5,13 @@ namespace BabysittingPool.Domain.Identity;
 /// <summary>A person in the co-op (credit-engine.md §2A). A closed Member keeps their history but cannot sign in.</summary>
 public sealed class Member
 {
-    private Member(Guid id, EmailAddress email, DisplayName displayName, Language language, bool isAdmin, DateTime createdAt, DateTime? closedAt, HomeLocation? home)
+    private Member(Guid id, EmailAddress email, DisplayName displayName, Language language, ColorScheme colorScheme, bool isAdmin, DateTime createdAt, DateTime? closedAt, HomeLocation? home)
     {
         Id = id;
         Email = email;
         DisplayName = displayName;
         Language = language;
+        ColorScheme = colorScheme;
         IsAdmin = isAdmin;
         CreatedAt = createdAt;
         ClosedAt = closedAt;
@@ -24,6 +25,8 @@ public sealed class Member
     public DisplayName DisplayName { get; private set; }
 
     public Language Language { get; }
+
+    public ColorScheme ColorScheme { get; }
 
     public bool IsAdmin { get; }
 
@@ -84,10 +87,10 @@ public sealed class Member
     }
 
     public static Member Join(EmailAddress email, DisplayName displayName, bool isAdmin, DateTime now) =>
-        new(Guid.NewGuid(), email, displayName, Language.EnglishUs, isAdmin, now, null, null);
+        new(Guid.NewGuid(), email, displayName, Language.EnglishUs, ColorScheme.System, isAdmin, now, null, null);
 
     public static Member Restore(
-        Guid id, EmailAddress email, DisplayName displayName, Language language, bool isAdmin, DateTime createdAt, DateTime? closedAt,
-        HomeLocation? home = null) =>
-        new(id, email, displayName, language, isAdmin, createdAt, closedAt, home);
+        Guid id, EmailAddress email, DisplayName displayName, Language language, ColorScheme colorScheme, bool isAdmin, DateTime createdAt,
+        DateTime? closedAt, HomeLocation? home = null) =>
+        new(id, email, displayName, language, colorScheme, isAdmin, createdAt, closedAt, home);
 }
