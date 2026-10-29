@@ -124,6 +124,12 @@ _Avoid_: Inactivity fee, decay
 The recurring run that applies every time-driven change that has become due: Expiry, Payout and Demurrage. It is not the same as a Payout.
 _Avoid_: Cron job, batch, sweep
 
+### Colour Scheme
+
+**Colour Scheme**:
+Whether a Member sees the co-op light, dark, or as their device is set, chosen by the Member and kept on their profile. System (follow the browser or operating system) is the default. It is separate from vacation mode, which changes the palette for everyone; the two combine.
+_Avoid_: Theme, dark mode setting
+
 ### Language
 
 **Language**:

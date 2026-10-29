@@ -3,7 +3,7 @@ using BabysittingPool.Domain.Identity;
 
 namespace BabysittingPool.Application.Identity;
 
-public sealed record MemberView(Guid MemberId, string Email, string DisplayName, string Language, bool IsAdmin);
+public sealed record MemberView(Guid MemberId, string Email, string DisplayName, string Language, string ColorScheme, bool IsAdmin);
 
 /// <summary>Who is behind a session cookie, keeping the session alive as it is used.</summary>
 public sealed class ResolveSessionHandler(IIdentityStore store, CoopSettings settings, TimeProvider clock)
@@ -29,7 +29,7 @@ public sealed class ResolveSessionHandler(IIdentityStore store, CoopSettings set
             await store.TouchSessionAsync(session.Id, now, cancellationToken);
         }
 
-        return new MemberView(member.Id, member.Email.Value, member.DisplayName.Value, member.Language.Tag, member.IsAdmin);
+        return new MemberView(member.Id, member.Email.Value, member.DisplayName.Value, member.Language.Tag, member.ColorScheme.Tag, member.IsAdmin);
     }
 }
 
@@ -37,6 +37,12 @@ public sealed class ChangeLanguageHandler(IIdentityStore store)
 {
     public Task HandleAsync(Guid memberId, Language language, CancellationToken cancellationToken) =>
         store.SetLanguageAsync(memberId, language, cancellationToken);
+}
+
+public sealed class ChangeColorSchemeHandler(IIdentityStore store)
+{
+    public Task HandleAsync(Guid memberId, ColorScheme colorScheme, CancellationToken cancellationToken) =>
+        store.SetColorSchemeAsync(memberId, colorScheme, cancellationToken);
 }
 
 public sealed class EndSessionHandler(IIdentityStore store)

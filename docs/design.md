@@ -10,8 +10,8 @@ Calm and friendly, in the manner of LinkedIn/Facebook structure with Nextdoor/Ai
 - Never use palette classes (`bg-blue-500`), `white`/`black`, arbitrary colours or hex. ESLint fails the build.
 - A new colour need is a new token with a light and a dark value in `index.css`, not a one-off.
 - Brand colour: change `--brand-hue` (192 teal; 30 coral).
-- Vacation mode is the one alternative theme: the `vacationMode` flag sets `data-theme="vacation"` and `index.css` overrides the same tokens (light and dark). A new token needs a value in those blocks too. Never branch on the theme in a component.
-- Dark mode is automatic from the system setting. Do not add `.dark` classes or a toggle. Use `dark:` variants only when a token cannot express it.
+- Vacation mode is the one alternative theme: the `vacationMode` flag sets `data-theme="vacation"` and `index.css` overrides the same tokens (light and dark). A new token needs a value in all four sets: light, dark, vacation light and vacation dark. Never branch on the theme in a component.
+- Dark mode is the `dark` class on `<html>`, set from the Member's Colour Scheme (light, dark or system, chosen on the profile) by `lib/theme`. It is independent of the vacation theme: each dark token set is written once, under `:root.dark` and `:root[data-theme='vacation'].dark`. Never add or remove the class in a component. Use `dark:` variants only when a token cannot express it.
 
 ## Layout
 - Mobile-first: write the small-screen classes unprefixed, then add `lg:` overrides. Shell, nav and column come from `AppShell` (`components/`); do not build a second one.
@@ -31,5 +31,5 @@ Every string must survive the padded `en-XA` Language (about +100% on short labe
 
 ## Checking your work
 1. `npm run design:screenshots` (in `src/frontend`; `DESIGN_THEME=vacation npm run design:screenshots` shows vacation mode). It writes `design-screenshots/<screen>/<language>-<scheme>-<width>.png` (gitignored) and fails on sideways scroll or content spilling out of its box. Add a screen by adding it to `SCREENS` in `e2e/design/screenshots.spec.ts`.
-2. Open the images for the screens you touched: `en-US` and `en-XA`, light and dark, mobile and desktop. Look for clipped or overlapping text, low contrast, tabs or buttons that wrap badly, and anything that differs from its neighbours.
+2. The script runs as a Member on the System Colour Scheme and emulates the browser setting for light and dark. Open the images for the screens you touched: `en-US` and `en-XA`, light and dark, mobile and desktop. Look for clipped or overlapping text, low contrast, tabs or buttons that wrap badly, and anything that differs from its neighbours.
 3. `scripts/check.sh all --fast` stays green.

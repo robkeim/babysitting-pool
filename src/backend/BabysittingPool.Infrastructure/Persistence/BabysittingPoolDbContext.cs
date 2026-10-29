@@ -52,6 +52,7 @@ public sealed class BabysittingPoolDbContext(DbContextOptions<BabysittingPoolDbC
             member.ToTable("Members");
             member.HasKey(m => m.Id);
             member.Property(m => m.Language).HasDefaultValue("en-US");
+            member.Property(m => m.ColorScheme).HasDefaultValue("system");
             // A closed Member's address may be invited again as a new Member (spec §2A).
             member.HasIndex(m => m.Email).IsUnique().HasFilter("ClosedAt IS NULL");
         });

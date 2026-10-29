@@ -159,6 +159,12 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ColorScheme")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("system");
+
                     b.Property<string>("Commune")
                         .HasColumnType("TEXT");
 

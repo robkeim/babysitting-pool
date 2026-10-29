@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BabysittingPool.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(BabysittingPoolDbContext))]
-    [Migration("20261029141512_VerifiedMemberAddress")]
-    partial class VerifiedMemberAddress
+    [Migration("20261029140032_AddMemberColorScheme")]
+    partial class AddMemberColorScheme
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -159,16 +159,19 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Area")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Commune")
-                        .HasColumnType("TEXT");
+                    b.Property<string>("ColorScheme")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("system");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DepartmentNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DisplayName")
@@ -179,12 +182,6 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("InseeCode")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Instructions")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
 
@@ -193,9 +190,6 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("en-US");
-
-                    b.Property<string>("Postcode")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

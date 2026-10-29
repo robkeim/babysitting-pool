@@ -815,7 +815,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"memberId\": \"<uuid>\",\n  \"email\": \"<string>\",\n  \"displayName\": \"<string>\",\n  \"language\": \"<string>\",\n  \"isAdmin\": \"<boolean>\"\n}",
+                  "body": "{\n  \"memberId\": \"<uuid>\",\n  \"email\": \"<string>\",\n  \"displayName\": \"<string>\",\n  \"language\": \"<string>\",\n  \"colorScheme\": \"<string>\",\n  \"isAdmin\": \"<boolean>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
                 },
@@ -1022,6 +1022,196 @@
                         "body": {
                           "mode": "raw",
                           "raw": "{\n  \"language\": \"<null,string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    }
+                  ],
+                  "event": [],
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  }
+                }
+              ]
+            },
+            {
+              "name": "color-scheme",
+              "description": "",
+              "item": [
+                {
+                  "name": "Change My Color Scheme",
+                  "request": {
+                    "name": "Change My Color Scheme",
+                    "description": {},
+                    "url": {
+                      "path": [
+                        "api",
+                        "me",
+                        "color-scheme"
+                      ],
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "query": [],
+                      "variable": []
+                    },
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/problem+json"
+                      }
+                    ],
+                    "method": "PUT",
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"colorScheme\": \"<null,string>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "auth": null
+                  },
+                  "response": [
+                    {
+                      "name": "No Content",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "me",
+                            "color-scheme"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"colorScheme\": \"<null,string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "No Content",
+                      "code": 204,
+                      "header": [],
+                      "cookie": [],
+                      "_postman_previewlanguage": "text"
+                    },
+                    {
+                      "name": "Bad Request",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "me",
+                            "color-scheme"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"colorScheme\": \"<null,string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Unauthorized",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "me",
+                            "color-scheme"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"colorScheme\": \"<null,string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",

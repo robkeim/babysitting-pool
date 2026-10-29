@@ -123,9 +123,31 @@ internal static class AuthEndpoints
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        app.MapPut("/api/me/color-scheme", async (
+            HttpContext context, ColorSchemeRequest request, ChangeColorSchemeHandler handler,
+            CancellationToken cancellationToken) =>
+        {
+            var member = context.CurrentMember();
+
+            if (!ColorScheme.TryParse(request.ColorScheme, out var colorScheme))
+            {
+                return Problems.InvalidRequest("colorScheme", "unsupported");
+            }
+
+            await handler.HandleAsync(member.MemberId, colorScheme, cancellationToken);
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .WithName("ChangeMyColorScheme")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 
     private sealed record LanguageRequest(string? Language);
+
+    private sealed record ColorSchemeRequest(string? ColorScheme);
 
     private sealed record SignInLinkRequest(string? Email);
 

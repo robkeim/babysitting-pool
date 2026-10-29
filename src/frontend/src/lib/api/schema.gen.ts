@@ -149,6 +149,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/color-scheme": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ChangeMyColorScheme"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/account": {
         parameters: {
             query?: never;
@@ -603,6 +619,9 @@ export interface components {
         };
         /** @enum {unknown} */
         BabysittingLocation: "SittersHouse" | "RequestingFamilysHouse";
+        ColorSchemeRequest: {
+            colorScheme: null | string;
+        };
         CostLines: {
             /** Format: int64 */
             hourlyRateQuarterCredits: number;
@@ -750,6 +769,7 @@ export interface components {
             email: string;
             displayName: string;
             language: string;
+            colorScheme: string;
             isAdmin: boolean;
         };
         NotificationView: {
@@ -1189,6 +1209,46 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["LanguageRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ChangeMyColorScheme: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ColorSchemeRequest"];
             };
         };
         responses: {

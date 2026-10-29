@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { FormattedMessage } from 'react-intl'
 import { PageHeader } from '@/components/PageHeader'
-import { LanguageCard } from '@/features/auth'
+import { ColorSchemeCard, LanguageCard } from '@/features/auth'
 import { ProfilePage } from '@/features/profile'
 
 export const Route = createFileRoute('/_authed/profile')({
@@ -13,6 +13,7 @@ export const Route = createFileRoute('/_authed/profile')({
         </PageHeader>
         <ProfilePage />
         <LanguageCard />
+        <ColorSchemeCard />
       </div>
     )
   },
