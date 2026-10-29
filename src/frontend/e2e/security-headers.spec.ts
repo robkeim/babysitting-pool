@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { createServer, type Server } from 'node:http'
+import { Readable } from 'node:stream'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { FRONTEND_ROOT } from './paths.ts'
@@ -38,7 +39,13 @@ async function serveBuild(apiUrl: string, csp: string): Promise<{ url: string; s
       if (url.pathname.startsWith('/api')) {
         const chunks: Buffer[] = []
         for await (const chunk of request) chunks.push(chunk as Buffer)
+        // The Notification stream never ends, so the body is piped through and dropped when the browser leaves.
+        const aborted = new AbortController()
+        response.on('close', () => {
+          if (!response.writableFinished) aborted.abort()
+        })
         const upstream = await fetch(apiUrl + url.pathname + url.search, {
+          signal: aborted.signal,
           method: request.method,
           headers: request.headers as Record<string, string>,
           body: chunks.length > 0 ? Buffer.concat(chunks) : undefined,
@@ -48,7 +55,15 @@ async function serveBuild(apiUrl: string, csp: string): Promise<{ url: string; s
         delete headers['content-length']
         delete headers['transfer-encoding']
         response.writeHead(upstream.status, headers)
-        response.end(Buffer.from(await upstream.arrayBuffer()))
+        if (upstream.body) {
+          Readable.fromWeb(upstream.body)
+            .on('error', () => {
+              response.destroy()
+            })
+            .pipe(response)
+        } else {
+          response.end()
+        }
         return
       }
 
@@ -99,6 +114,7 @@ test('the SPA loads and works under the API CSP without violations', async ({ pa
     await expect(page.getByRole('group', { name: 'Available' })).toContainText('10.00')
     expect(violations).toEqual([])
   } finally {
+    server.closeAllConnections()
     await new Promise((resolve) => server.close(resolve))
   }
 })
