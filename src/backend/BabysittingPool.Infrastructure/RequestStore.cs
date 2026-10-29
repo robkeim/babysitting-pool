@@ -23,9 +23,8 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
     {
         var member = await db.Members.AsNoTracking()
             .Where(m => m.Id == memberId)
-            .Select(m => new { m.Area, m.Address })
             .SingleOrDefaultAsync(cancellationToken);
-        return member is { Area: { } area, Address: { } address } ? HomeLocation.Restore(area, address) : null;
+        return member?.ToHome();
     }
 
     public async Task<Request?> FindRequestAsync(Guid requestId, CancellationToken cancellationToken)

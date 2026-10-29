@@ -93,7 +93,11 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         var requests = _database.NewContext(scope).Requests.AsNoTracking();
         (await requests.SingleAsync(r => r.Id == theirs)).Address.Should().BeNull();
         var erased = await _database.NewContext(scope).Members.AsNoTracking().SingleAsync(m => m.Id == _leaver);
-        erased.Area.Should().BeNull();
+        erased.Commune.Should().BeNull();
+        erased.InseeCode.Should().BeNull();
+        erased.DepartmentNumber.Should().BeNull();
+        erased.Postcode.Should().BeNull();
+        erased.Instructions.Should().BeNull();
         erased.Address.Should().BeNull();
         (await requests.SingleAsync(r => r.Id == others)).Address.Should().Be("12 River Rd");
     }

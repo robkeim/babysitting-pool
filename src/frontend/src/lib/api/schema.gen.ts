@@ -883,12 +883,18 @@ export interface components {
             instance?: null | string;
         };
         ProfileBody: {
-            area: null | string;
-            address: null | string;
+            banId: null | string;
+            label: null | string;
+            instructions: null | string;
         };
         ProfileView: {
             area: null | string;
             address: null | string;
+            commune: null | string;
+            inseeCode: null | string;
+            departmentNumber: null | string;
+            postcode: null | string;
+            instructions: null | string;
         };
         RequestCounts: {
             /** Format: int32 */
@@ -1343,6 +1349,15 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

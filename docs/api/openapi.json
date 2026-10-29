@@ -413,6 +413,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -3103,18 +3113,25 @@
       },
       "ProfileBody": {
         "required": [
-          "area",
-          "address"
+          "banId",
+          "label",
+          "instructions"
         ],
         "type": "object",
         "properties": {
-          "area": {
+          "banId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "address": {
+          "label": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instructions": {
             "type": [
               "null",
               "string"
@@ -3125,7 +3142,12 @@
       "ProfileView": {
         "required": [
           "area",
-          "address"
+          "address",
+          "commune",
+          "inseeCode",
+          "departmentNumber",
+          "postcode",
+          "instructions"
         ],
         "type": "object",
         "properties": {
@@ -3136,6 +3158,36 @@
             ]
           },
           "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "commune": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "inseeCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "departmentNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "postcode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instructions": {
             "type": [
               "null",
               "string"

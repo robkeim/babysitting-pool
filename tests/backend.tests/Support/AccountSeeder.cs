@@ -78,7 +78,11 @@ internal static class AccountSeeder
         Email = $"{id:N}@example.test",
         DisplayName = "Test Member",
         CreatedAt = clock.GetUtcNow().UtcDateTime,
-        Area = "Riverside",
         Address = "12 River Rd",
+        Commune = "Riverside",
+        InseeCode = "80021",
+        DepartmentNumber = "80",
+        Postcode = "80000",
+        Instructions = "ring twice",
     };
 }

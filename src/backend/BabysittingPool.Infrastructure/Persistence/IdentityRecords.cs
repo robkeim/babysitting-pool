@@ -1,3 +1,5 @@
+using BabysittingPool.Domain.Identity;
+
 namespace BabysittingPool.Infrastructure.Persistence;
 
 public sealed class MemberRecord
@@ -16,9 +18,25 @@ public sealed class MemberRecord
 
     public DateTime? ClosedAt { get; set; }
 
-    public string? Area { get; set; }
-
+    /// <summary>The BAN label.</summary>
     public string? Address { get; set; }
+
+    public string? Commune { get; set; }
+
+    public string? InseeCode { get; set; }
+
+    public string? DepartmentNumber { get; set; }
+
+    public string? Postcode { get; set; }
+
+    public string? Instructions { get; set; }
+
+    /// <summary>Null until the Member has picked an address.</summary>
+    public HomeLocation? ToHome() =>
+        Address is { } address && Commune is { } commune && InseeCode is { } inseeCode
+            && DepartmentNumber is { } departmentNumber && Postcode is { } postcode
+            ? HomeLocation.Restore(address, commune, inseeCode, departmentNumber, postcode, Instructions)
+            : null;
 }
 
 public sealed class InvitationRecord

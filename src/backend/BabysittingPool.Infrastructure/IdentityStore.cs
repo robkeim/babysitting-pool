@@ -53,8 +53,12 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
             .ExecuteUpdateAsync(
                 m => m.SetProperty(x => x.Email, member.Email.Value)
                     .SetProperty(x => x.DisplayName, member.DisplayName.Value)
-                    .SetProperty(x => x.Area, (string?)null)
-                    .SetProperty(x => x.Address, (string?)null),
+                    .SetProperty(x => x.Address, (string?)null)
+                    .SetProperty(x => x.Commune, (string?)null)
+                    .SetProperty(x => x.InseeCode, (string?)null)
+                    .SetProperty(x => x.DepartmentNumber, (string?)null)
+                    .SetProperty(x => x.Postcode, (string?)null)
+                    .SetProperty(x => x.Instructions, (string?)null),
                 cancellationToken);
         await db.Requests.Where(r => r.RequesterId == member.Id)
             .ExecuteUpdateAsync(r => r.SetProperty(x => x.Address, (string?)null), cancellationToken);
@@ -72,7 +76,13 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
         ArgumentNullException.ThrowIfNull(home);
         await db.Members.Where(m => m.Id == memberId && m.ClosedAt == null)
             .ExecuteUpdateAsync(
-                m => m.SetProperty(x => x.Area, home.Area).SetProperty(x => x.Address, home.Address), cancellationToken);
+                m => m.SetProperty(x => x.Address, home.Address)
+                    .SetProperty(x => x.Commune, home.Commune)
+                    .SetProperty(x => x.InseeCode, home.InseeCode)
+                    .SetProperty(x => x.DepartmentNumber, home.DepartmentNumber)
+                    .SetProperty(x => x.Postcode, home.Postcode)
+                    .SetProperty(x => x.Instructions, home.Instructions),
+                cancellationToken);
     }
 
     public async Task SetLanguageAsync(Guid memberId, Language language, CancellationToken cancellationToken) =>
@@ -246,5 +256,5 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
 
     private static Member ToDomain(MemberRecord r) => Member.Restore(
         r.Id, EmailAddress.Restore(r.Email), DisplayName.Restore(r.DisplayName), Language.Restore(r.Language), r.IsAdmin, r.CreatedAt, r.ClosedAt,
-        r.Area is { } area && r.Address is { } address ? HomeLocation.Restore(area, address) : null);
+        r.ToHome());
 }

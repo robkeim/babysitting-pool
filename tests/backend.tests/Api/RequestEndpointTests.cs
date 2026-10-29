@@ -73,7 +73,7 @@ public class RequestEndpointTests : IDisposable
         await using (var scope = _factory.Services.CreateAsyncScope())
         {
             await scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>().Members.Where(m => m.Id == memberId)
-                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Area, (string?)null).SetProperty(x => x.Address, (string?)null));
+                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Commune, (string?)null));
         }
 
         using var client = _factory.CreateMemberClient(memberId);
@@ -180,7 +180,7 @@ public class RequestEndpointTests : IDisposable
         var own = await ownerClient.GetFromJsonAsync<JsonElement>("/api/requests/open");
 
         var item = seen.GetProperty("items").EnumerateArray().Single();
-        item.GetProperty("area").GetString().Should().Be("Riverside");
+        item.GetProperty("area").GetString().Should().Be("Riverside (80)");
         item.GetProperty("costQuarterCredits").GetInt64().Should().Be(10);
         item.TryGetProperty("address", out _).Should().BeFalse();
         item.TryGetProperty("requesterId", out _).Should().BeFalse();
@@ -333,7 +333,7 @@ public class RequestEndpointTests : IDisposable
         var withdrawn = await response.Content.ReadFromJsonAsync<JsonElement>();
         withdrawn.GetProperty("status").GetString().Should().Be("Posted");
         withdrawn.GetProperty("address").ValueKind.Should().Be(JsonValueKind.Null);
-        withdrawn.GetProperty("area").GetString().Should().Be("Riverside");
+        withdrawn.GetProperty("area").GetString().Should().Be("Riverside (80)");
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").GetArrayLength().Should().Be(1);
     }

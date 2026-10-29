@@ -3,38 +3,74 @@ using BabysittingPool.Domain.Credits;
 namespace BabysittingPool.Domain.Identity;
 
 /// <summary>
-/// Where a Member lives (spec §2A): a rough <see cref="Area"/> other Members may see and the exact
-/// <see cref="Address"/> only a counterparty may see (spec §4.6). Both are required and trimmed.
+/// Where a Member lives (spec §2A, ADR 0020): a verified BAN <see cref="Address"/> label only a counterparty may see
+/// (spec §4.6), the commune it is in, and optional <see cref="Instructions"/> for what a geocoder cannot say. The
+/// <see cref="Area"/> other Members may see is derived from the commune, never typed.
 /// </summary>
 public sealed record HomeLocation
 {
-    public const int MaxAreaLength = 100;
-    public const int MaxAddressLength = 200;
+    public const int MaxInstructionsLength = 300;
 
-    private HomeLocation(string area, string address)
+    private HomeLocation(
+        string address, string commune, string inseeCode, string departmentNumber, string postcode, string? instructions)
     {
-        Area = area;
         Address = address;
+        Commune = commune;
+        InseeCode = inseeCode;
+        DepartmentNumber = departmentNumber;
+        Postcode = postcode;
+        Instructions = instructions;
     }
 
-    public string Area { get; }
-
+    /// <summary>The BAN label ("12 Rue de la Paix 80000 Amiens").</summary>
     public string Address { get; }
 
-    /// <summary>Throws <see cref="DomainException"/> (<c>invalid_area</c>, <c>invalid_address</c>) if either part is blank or too long.</summary>
-    public static HomeLocation Create(string? area, string? address) =>
-        new(RequireText(area, MaxAreaLength, "area"), RequireText(address, MaxAddressLength, "address"));
+    public string Commune { get; }
 
-    public static HomeLocation Restore(string area, string address) => new(area, address);
+    /// <summary>Grouping and equality of Areas use this, the text is only a label (ADR 0020).</summary>
+    public string InseeCode { get; }
 
-    private static string RequireText(string? value, int maxLength, string field)
+    public string DepartmentNumber { get; }
+
+    public string Postcode { get; }
+
+    public string? Instructions { get; }
+
+    /// <summary>The commune and its département number, for example "Amiens (80)".</summary>
+    public string Area => $"{Commune} ({DepartmentNumber})";
+
+    /// <summary>
+    /// Throws <see cref="DomainException"/> (<c>invalid_address</c>) if a part of the address is blank, or
+    /// <c>invalid_instructions</c> if the instructions are over <see cref="MaxInstructionsLength"/> characters. Blank instructions mean none.
+    /// </summary>
+    public static HomeLocation Create(
+        string? address, string? commune, string? inseeCode, string? departmentNumber, string? postcode, string? instructions)
     {
-        var trimmed = value?.Trim();
-        if (string.IsNullOrEmpty(trimmed) || trimmed.Length > maxLength)
+        var trimmedInstructions = instructions?.Trim();
+        if (trimmedInstructions?.Length > MaxInstructionsLength)
         {
-            throw new DomainException($"The {field} is required and at most {maxLength} characters.", $"invalid_{field}");
+            throw new DomainException(
+                $"The instructions are at most {MaxInstructionsLength} characters.", "invalid_instructions");
         }
 
-        return trimmed;
+        return new HomeLocation(
+            RequireText(address), RequireText(commune), RequireText(inseeCode), RequireText(departmentNumber), RequireText(postcode),
+            string.IsNullOrEmpty(trimmedInstructions) ? null : trimmedInstructions);
+    }
+
+    /// <summary>The same address with other instructions (a Member edits them without picking again). Throws as <see cref="Create"/> does.</summary>
+    public HomeLocation WithInstructions(string? instructions) =>
+        Create(Address, Commune, InseeCode, DepartmentNumber, Postcode, instructions);
+
+    public static HomeLocation Restore(
+        string address, string commune, string inseeCode, string departmentNumber, string postcode, string? instructions) =>
+        new(address, commune, inseeCode, departmentNumber, postcode, instructions);
+
+    private static string RequireText(string? value)
+    {
+        var trimmed = value?.Trim();
+        return string.IsNullOrEmpty(trimmed)
+            ? throw new DomainException("The address is required.", "invalid_address")
+            : trimmed;
     }
 }

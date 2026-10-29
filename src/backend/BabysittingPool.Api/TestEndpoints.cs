@@ -95,7 +95,7 @@ internal static class TestEndpoints
 
             var grants = request.GrantsQuarterCredits.Select(Credits.FromQuarterCredits).ToList();
             var email = request.Email ?? $"member-{Guid.NewGuid():N}@example.test";
-            var home = request.Area is null || request.Address is null ? null : HomeLocation.Create(request.Area, request.Address);
+            var home = request.Area is null || request.Address is null ? null : HomeLocation.Create(request.Address, request.Area, "80021", "80", "80000", null);
             var memberId = await services.SeedMemberAsync(
                 email, request.DisplayName ?? "Test Member", false, grants, home, cancellationToken);
             return Results.Created($"/api/test/members/{memberId}", new SeedMemberResponse(memberId, email));

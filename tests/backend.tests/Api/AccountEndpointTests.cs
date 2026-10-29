@@ -2,14 +2,26 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using AwesomeAssertions;
+using BabysittingPool.Application.Addresses;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Infrastructure.Persistence;
 using backend.tests.Support;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace backend.tests.Api;
 
 public class AccountEndpointTests : IDisposable
 {
-    private readonly ApiFactory _factory = new();
+    private static readonly AddressSuggestion Amiens = new(
+        "80021_6115_12", "12 Rue de la Paix 80000 Amiens", "Amiens", "80021", "80", "80000", "housenumber");
+
+    private readonly FakeSuggester _suggester = new([Amiens]);
+    private readonly ApiFactory _factory;
+
+    public AccountEndpointTests() =>
+        _factory = new ApiFactory(configureServices: services => services.Replace(ServiceDescriptor.Singleton<IAddressSuggester>(_suggester)));
 
     public void Dispose() => _factory.Dispose();
 
@@ -102,34 +114,115 @@ public class AccountEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task The_profile_holds_the_members_area_and_address_and_can_be_changed()
+    public async Task The_profile_is_set_from_a_BAN_pick_and_the_area_is_derived()
     {
         var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var client = _factory.CreateMemberClient(memberId);
 
         var before = await client.GetFromJsonAsync<JsonElement>("/api/me/profile");
-        var response = await client.PutAsJsonAsync("/api/me/profile", new { area = " Hilltop ", address = "1 Hill St" });
+        var response = await client.PutAsJsonAsync(
+            "/api/me/profile", new { banId = Amiens.BanId, label = Amiens.Label, instructions = " apt 3, ring twice " });
         var after = await client.GetFromJsonAsync<JsonElement>("/api/me/profile");
 
-        before.GetProperty("area").GetString().Should().Be("Riverside");
+        before.GetProperty("area").GetString().Should().Be("Riverside (80)");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        after.GetProperty("area").GetString().Should().Be("Hilltop");
-        after.GetProperty("address").GetString().Should().Be("1 Hill St");
+        after.GetProperty("area").GetString().Should().Be("Amiens (80)");
+        after.GetProperty("address").GetString().Should().Be(Amiens.Label);
+        after.GetProperty("commune").GetString().Should().Be("Amiens");
+        after.GetProperty("inseeCode").GetString().Should().Be("80021");
+        after.GetProperty("departmentNumber").GetString().Should().Be("80");
+        after.GetProperty("postcode").GetString().Should().Be("80000");
+        after.GetProperty("instructions").GetString().Should().Be("apt 3, ring twice");
+        _suggester.Queries.Should().Equal(Amiens.Label);
     }
 
-    [Theory]
-    [InlineData("", "1 Hill St", "invalid_area")]
-    [InlineData("Hilltop", "  ", "invalid_address")]
-    public async Task A_blank_area_or_address_is_refused_with_422_and_leaves_the_profile_alone(string area, string address, string code)
+    [Fact]
+    public async Task Instructions_can_change_without_picking_again_and_leave_the_address_alone()
     {
         var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var client = _factory.CreateMemberClient(memberId);
 
-        var response = await client.PutAsJsonAsync("/api/me/profile", new { area, address });
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { instructions = "back door" });
+        var after = await client.GetFromJsonAsync<JsonElement>("/api/me/profile");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        after.GetProperty("area").GetString().Should().Be("Riverside (80)");
+        after.GetProperty("address").GetString().Should().Be("12 River Rd");
+        after.GetProperty("instructions").GetString().Should().Be("back door");
+        _suggester.Queries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task A_Member_with_no_address_cannot_save_without_a_pick()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+        await client.PutAsJsonAsync("/api/me/profile", new { banId = Amiens.BanId, label = Amiens.Label });
+        await EraseHomeAsync(memberId);
+
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { instructions = "back door" });
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-        (await response.Content.ReadAsStringAsync()).Should().Contain(code);
-        (await client.GetFromJsonAsync<JsonElement>("/api/me/profile")).GetProperty("area").GetString().Should().Be("Riverside");
+        (await response.Content.ReadAsStringAsync()).Should().Contain("invalid_address");
+    }
+
+    [Fact]
+    public async Task A_forged_label_for_a_real_id_cannot_change_what_is_stored()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        // The client names Amiens' id but a label whose BAN results hold a different id.
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { banId = Amiens.BanId, label = "1 Rue Inconnue 75001 Paris" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadAsStringAsync()).Should().Contain("invalid_address");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me/profile")).GetProperty("area").GetString().Should().Be("Riverside (80)");
+    }
+
+    [Theory]
+    [InlineData("nope", "12 Rue de la Paix 80000 Amiens")]
+    [InlineData("", "12 Rue de la Paix 80000 Amiens")]
+    [InlineData("80021_6115_12", "")]
+    [InlineData("80021_6115_12", "ab")]
+    public async Task An_unknown_id_or_a_missing_pick_is_refused_with_422_and_leaves_the_profile_alone(string banId, string label)
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { banId, label });
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadAsStringAsync()).Should().Contain("invalid_address");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me/profile")).GetProperty("area").GetString().Should().Be("Riverside (80)");
+    }
+
+    [Fact]
+    public async Task Instructions_over_300_characters_are_refused_with_422()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+
+        var response = await client.PutAsJsonAsync(
+            "/api/me/profile", new { banId = Amiens.BanId, label = Amiens.Label, instructions = new string('x', 301) });
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadAsStringAsync()).Should().Contain("invalid_instructions");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me/profile")).GetProperty("area").GetString().Should().Be("Riverside (80)");
+    }
+
+    [Fact]
+    public async Task When_BAN_is_down_the_save_is_503_and_nothing_changes()
+    {
+        var memberId = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(memberId);
+        _suggester.Fail = true;
+
+        var response = await client.PutAsJsonAsync("/api/me/profile", new { banId = Amiens.BanId, label = Amiens.Label });
+
+        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+        (await response.Content.ReadAsStringAsync()).Should().Contain("address_service_unavailable");
+        (await client.GetFromJsonAsync<JsonElement>("/api/me/profile")).GetProperty("area").GetString().Should().Be("Riverside (80)");
     }
 
     [Fact]
@@ -138,5 +231,28 @@ public class AccountEndpointTests : IDisposable
         using var client = _factory.CreateClient();
 
         (await client.GetAsync("/api/me/profile")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    private async Task EraseHomeAsync(Guid memberId)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
+        await db.Members.Where(m => m.Id == memberId).ExecuteUpdateAsync(m => m.SetProperty(x => x.Commune, (string?)null));
+    }
+
+    private sealed class FakeSuggester(params AddressSuggestion[] known) : IAddressSuggester
+    {
+        public List<string> Queries { get; } = [];
+
+        public bool Fail { get; set; }
+
+        /// <summary>Like BAN: finds a suggestion only when the query is its label.</summary>
+        public Task<IReadOnlyList<AddressSuggestion>> SuggestAsync(string query, CancellationToken cancellationToken)
+        {
+            Queries.Add(query);
+            return Fail
+                ? throw new AddressServiceUnavailableException()
+                : Task.FromResult<IReadOnlyList<AddressSuggestion>>(known.Where(k => k.Label == query).ToList());
+        }
     }
 }

@@ -129,10 +129,10 @@ public class RequestTests
         var account = CreditAccount.Open();
 
         var request = Request.Post(
-            _requesterId, account, AtFamilyHouse, Start, HomeLocation.Create(" Riverside ", "12 River Rd"), Now, LeadTime, Cutoff);
+            _requesterId, account, AtFamilyHouse, Start, HomeLocation.Create("12 River Rd 80000 Amiens", " Amiens ", "80021", "80", "80000", null), Now, LeadTime, Cutoff);
 
-        request.Area.Should().Be("Riverside");
-        request.Address.Should().Be("12 River Rd");
+        request.Area.Should().Be("Amiens (80)");
+        request.Address.Should().Be("12 River Rd 80000 Amiens");
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class RequestTests
         var account = CreditAccount.Open();
 
         var request = Request.Post(
-            _requesterId, account, TwoHours, Start, HomeLocation.Create("Riverside", "12 River Rd"), Now, LeadTime, Cutoff);
+            _requesterId, account, TwoHours, Start, HomeLocation.Create("12 River Rd 80000 Amiens", "Amiens", "80021", "80", "80000", null), Now, LeadTime, Cutoff);
 
         request.Area.Should().BeNull();
         request.Address.Should().BeNull();
