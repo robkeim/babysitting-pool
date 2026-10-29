@@ -89,7 +89,11 @@ function FlagCard({ flag }: { flag: FeatureFlagView }) {
           <h3 id={nameId}>{flag.name}</h3>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          <FormattedMessage id="flags.admin.removal" values={{ issue: flag.removalIssue }} />
+          {flag.removalIssue == null ? (
+            <FormattedMessage id="flags.admin.operatorToggle" />
+          ) : (
+            <FormattedMessage id="flags.admin.removal" values={{ issue: flag.removalIssue }} />
+          )}
         </p>
       </CardHeader>
       <CardContent>

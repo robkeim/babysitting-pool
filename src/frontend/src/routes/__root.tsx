@@ -13,6 +13,7 @@ import {
 import { FormattedMessage } from 'react-intl'
 import { AppShell, type ShellMore, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
+import { useFlagTheme } from '@/features/flags'
 import { NotificationBell } from '@/features/notifications'
 import { I18nProvider } from '@/lib/i18n'
 
@@ -48,6 +49,7 @@ export const Route = createRootRoute({
   component: function Root() {
     const navigate = useNavigate()
     const me = useMe()
+    useFlagTheme()
     return (
       <I18nProvider language={me.data?.language}>
         <AppShell

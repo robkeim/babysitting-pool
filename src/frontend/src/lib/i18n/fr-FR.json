@@ -148,6 +148,7 @@
   "flags.admin.loadFailed.body": "Veuillez réessayer dans un instant.",
   "flags.admin.empty": "Aucun indicateur de fonctionnalité n’est déclaré.",
   "flags.admin.removal": "Retiré par le ticket n° {issue}",
+  "flags.admin.operatorToggle": "Interrupteur d'exploitation : reste en place",
   "flags.admin.enabled": "Activé",
   "flags.admin.enabled.hint": "L’interrupteur général : désactivé signifie désactivé pour tout le monde.",
   "flags.admin.rollout": "Pourcentage de déploiement",

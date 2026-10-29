@@ -10,6 +10,7 @@ Calm and friendly, in the manner of LinkedIn/Facebook structure with Nextdoor/Ai
 - Never use palette classes (`bg-blue-500`), `white`/`black`, arbitrary colours or hex. ESLint fails the build.
 - A new colour need is a new token with a light and a dark value in `index.css`, not a one-off.
 - Brand colour: change `--brand-hue` (192 teal; 30 coral).
+- Vacation mode is the one alternative theme: the `vacationMode` flag sets `data-theme="vacation"` and `index.css` overrides the same tokens (light and dark). A new token needs a value in those blocks too. Never branch on the theme in a component.
 - Dark mode is automatic from the system setting. Do not add `.dark` classes or a toggle. Use `dark:` variants only when a token cannot express it.
 
 ## Layout
@@ -29,6 +30,6 @@ Inputs, selects, checkbox rows and the submit button are `h-11` on mobile; the s
 Every string must survive the padded `en-XA` Language (about +100% on short labels). Give text containers `min-w-0`, let labels wrap between words rather than truncate, and never fix a width or a padding to the English text (the shell measures its fixed bottom bar for that reason). Never break inside a word: no `[overflow-wrap:anywhere]` on navigation labels, which clip (`line-clamp-2`) instead of splitting. A header that runs out of room gets fewer items, not narrower ones.
 
 ## Checking your work
-1. `npm run design:screenshots` (in `src/frontend`). It writes `design-screenshots/<screen>/<language>-<scheme>-<width>.png` (gitignored) and fails on sideways scroll or content spilling out of its box. Add a screen by adding it to `SCREENS` in `e2e/design/screenshots.spec.ts`.
+1. `npm run design:screenshots` (in `src/frontend`; `DESIGN_THEME=vacation npm run design:screenshots` shows vacation mode). It writes `design-screenshots/<screen>/<language>-<scheme>-<width>.png` (gitignored) and fails on sideways scroll or content spilling out of its box. Add a screen by adding it to `SCREENS` in `e2e/design/screenshots.spec.ts`.
 2. Open the images for the screens you touched: `en-US` and `en-XA`, light and dark, mobile and desktop. Look for clipped or overlapping text, low contrast, tabs or buttons that wrap badly, and anything that differs from its neighbours.
 3. `scripts/check.sh all --fast` stays green.

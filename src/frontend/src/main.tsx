@@ -3,7 +3,10 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import { restoreTheme } from '@/features/flags'
 import { routeTree } from './routeTree.gen'
+
+restoreTheme()
 
 const queryClient = new QueryClient()
 const router = createRouter({ routeTree })

@@ -132,6 +132,29 @@ public class FeatureFlagTests : IDisposable
     }
 
     [Fact]
+    public void The_production_registry_declares_vacationMode_as_an_operator_toggle_that_starts_off()
+    {
+        var flag = FeatureFlagRegistry.Production.Find("vacationMode");
+
+        flag.Should().NotBeNull();
+        flag!.Default.Should().BeFalse();
+        flag.RemovalIssue.Should().BeNull("an operator toggle has no removal issue (ADR 0016)");
+    }
+
+    [Fact]
+    public async Task An_operator_toggle_lists_a_null_removal_issue()
+    {
+        using var factory = new ApiFactory(flags: [new FeatureFlag("toggle", false, null)]);
+        var admin = await factory.SeedMemberAsync();
+        await factory.MakeAdminAsync(admin);
+        using var client = factory.CreateMemberClient(admin);
+
+        var page = await client.GetFromJsonAsync<JsonElement>("/api/admin/feature-flags");
+
+        page.GetProperty("items")[0].GetProperty("removalIssue").ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
     public async Task The_admin_api_is_for_the_Admin_only_and_rejects_bad_input()
     {
         var member = await _factory.SeedMemberAsync();

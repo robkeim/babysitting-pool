@@ -148,6 +148,7 @@
   "flags.admin.loadFailed.body": "Please try again in a moment.",
   "flags.admin.empty": "No feature flags are declared.",
   "flags.admin.removal": "Removed by issue #{issue}",
+  "flags.admin.operatorToggle": "Operator toggle: stays for good",
   "flags.admin.enabled": "Enabled",
   "flags.admin.enabled.hint": "The master switch: off means off for everyone.",
   "flags.admin.rollout": "Rollout percent",
