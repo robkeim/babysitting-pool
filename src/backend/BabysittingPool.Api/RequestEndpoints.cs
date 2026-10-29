@@ -15,22 +15,11 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                var command = new PostRequestCommand(
-                    member.MemberId, body.StartsAt.UtcDateTime, body.ToDetails());
-                return await handler.HandleAsync(command, cancellationToken) is { } view
-                    ? Results.Created($"/api/me/requests#{view.Id}", view)
-                    : Problems.AccountNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
-            catch (ConcurrencyConflictException)
-            {
-                return Problems.Conflict();
-            }
+            var command = new PostRequestCommand(
+                member.MemberId, body.StartsAt.UtcDateTime, body.ToDetails());
+            return await handler.HandleAsync(command, cancellationToken) is { } view
+                ? Results.Created($"/api/me/requests#{view.Id}", view)
+                : Problems.AccountNotFound();
         })
         .RequireAuthorization()
         .WithName("PostRequest")
@@ -50,14 +39,7 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                return Results.Ok(await reader.ListByRequesterAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            return Results.Ok(await reader.ListByRequesterAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
         })
         .RequireAuthorization()
         .WithName("ListMyRequests")
@@ -75,14 +57,7 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                return Results.Ok(await reader.ListOpenAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            return Results.Ok(await reader.ListOpenAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
         })
         .RequireAuthorization()
         .WithName("ListOpenRequests")
@@ -100,14 +75,7 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                return Results.Ok(await reader.ListClaimedByAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            return Results.Ok(await reader.ListClaimedByAsync(member.MemberId, clock.GetUtcNow().UtcDateTime, PageRequest.From(cursor, limit), cancellationToken));
         })
         .RequireAuthorization()
         .WithName("ListMyClaims")
@@ -120,20 +88,9 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                return await handler.HandleAsync(new ClaimRequestCommand(id, member.MemberId), cancellationToken) is { } view
-                    ? Results.Ok(view)
-                    : Problems.RequestNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
-            catch (ConcurrencyConflictException)
-            {
-                return Problems.Conflict();
-            }
+            return await handler.HandleAsync(new ClaimRequestCommand(id, member.MemberId), cancellationToken) is { } view
+                ? Results.Ok(view)
+                : Problems.RequestNotFound();
         })
         .RequireAuthorization()
         .WithName("ClaimRequest")
@@ -148,20 +105,9 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                return await handler.HandleAsync(new CancelRequestCommand(id, member.MemberId), cancellationToken) is { } view
-                    ? Results.Ok(view)
-                    : Problems.RequestNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
-            catch (ConcurrencyConflictException)
-            {
-                return Problems.Conflict();
-            }
+            return await handler.HandleAsync(new CancelRequestCommand(id, member.MemberId), cancellationToken) is { } view
+                ? Results.Ok(view)
+                : Problems.RequestNotFound();
         })
         .RequireAuthorization()
         .WithName("CancelRequest")
@@ -176,20 +122,9 @@ internal static class RequestEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                return await handler.HandleAsync(new WithdrawClaimCommand(id, member.MemberId), cancellationToken) is { } view
-                    ? Results.Ok(view)
-                    : Problems.RequestNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
-            catch (ConcurrencyConflictException)
-            {
-                return Problems.Conflict();
-            }
+            return await handler.HandleAsync(new WithdrawClaimCommand(id, member.MemberId), cancellationToken) is { } view
+                ? Results.Ok(view)
+                : Problems.RequestNotFound();
         })
         .RequireAuthorization()
         .WithName("WithdrawClaim")
@@ -201,14 +136,7 @@ internal static class RequestEndpoints
 
         app.MapGet("/api/requests/quote", ([AsParameters] QuoteQuery query) =>
         {
-            try
-            {
-                return Results.Ok(QuoteRequest.Handle(query.ToDetails()));
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
+            return Results.Ok(QuoteRequest.Handle(query.ToDetails()));
         })
         .RequireAuthorization()
         .WithName("QuoteRequest")

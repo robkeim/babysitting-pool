@@ -54,7 +54,7 @@ internal static class Problems
     /// </summary>
     public static IResult DomainRule(DomainException exception) =>
         Problem(
-            exception.Code == "invalid_state" ? StatusCodes.Status409Conflict : StatusCodes.Status422UnprocessableEntity,
+            exception.Code == DomainException.InvalidStateCode ? StatusCodes.Status409Conflict : StatusCodes.Status422UnprocessableEntity,
             exception.Code,
             exception.Message);
 
