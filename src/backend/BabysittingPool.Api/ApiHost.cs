@@ -109,6 +109,8 @@ public static class ApiHost
         })
         // The default handlers log the full request URL, which holds the query: a partial home address (ADR 0010).
         .RemoveAllLoggers();
+        builder.Services.AddExceptionHandler<DomainFailureHandler>();
+        builder.Services.AddProblemDetails();
         builder.Services.AddSessionAuthentication();
         builder.Services.AddFeatureFlags();
         builder.Services.AddApiRateLimiting(builder.Configuration);
@@ -152,6 +154,7 @@ public static class ApiHost
             app.MapOpenApi();
         }
 
+        app.UseExceptionHandler();
         app.UseConfiguredForwardedHeaders();
         if (app.Environment.IsProduction())
         {

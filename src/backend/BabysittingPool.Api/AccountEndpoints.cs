@@ -19,15 +19,8 @@ internal static class AccountEndpoints
         {
             var member = context.CurrentMember();
 
-            try
-            {
-                var account = await handler.HandleAsync(new GetMyAccountQuery(member.MemberId, cursor, limit), cancellationToken);
-                return account is null ? Problems.AccountNotFound() : Results.Ok(account);
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            var account = await handler.HandleAsync(new GetMyAccountQuery(member.MemberId, cursor, limit), cancellationToken);
+            return account is null ? Problems.AccountNotFound() : Results.Ok(account);
         })
         .RequireAuthorization()
         .WithName("GetMyAccount")
@@ -50,21 +43,10 @@ internal static class AccountEndpoints
         app.MapPut("/api/me/profile", async (
             HttpContext context, ProfileBody body, UpdateMyProfileHandler handler, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                var command = new UpdateMyProfileCommand(context.CurrentMember().MemberId, body.BanId, body.Label, body.Instructions);
-                return await handler.HandleAsync(command, cancellationToken) is { } profile
-                    ? Results.Ok(profile)
-                    : Problems.MemberNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
-            catch (AddressServiceUnavailableException)
-            {
-                return Problems.AddressServiceUnavailable();
-            }
+            var command = new UpdateMyProfileCommand(context.CurrentMember().MemberId, body.BanId, body.Label, body.Instructions);
+            return await handler.HandleAsync(command, cancellationToken) is { } profile
+                ? Results.Ok(profile)
+                : Problems.MemberNotFound();
         })
         .RequireAuthorization()
         .WithName("UpdateMyProfile")
