@@ -1,9 +1,11 @@
 import { useState, type SyntheticEvent } from 'react'
+import { Info } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { formatCredits, useMyAccount } from '@/features/credits'
 import { useMyProfile } from '@/features/profile'
 import { formatDuration, useRules } from '@/features/rules'
@@ -163,7 +165,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   <FormattedMessage id="requests.post.duration.invalid" />
                 </p>
               )}
-              {durationValid && lines && (
+              {durationValid && lines && childCount > 1 && (
                 <p className="text-sm text-muted-foreground">
                   <FormattedMessage
                     id="requests.post.duration.hint"
@@ -176,9 +178,30 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="children" className="text-sm font-medium">
-                <FormattedMessage id="requests.post.children" />
-              </label>
+              <div className="mb-0 flex items-center gap-1">
+                <label htmlFor="children" className="text-sm font-medium">
+                  <FormattedMessage id="requests.post.children" />
+                </label>
+                {options && (
+                  <Popover>
+                    <PopoverTrigger
+                      aria-label={intl.formatMessage({ id: 'requests.post.children.info' })}
+                      className="inline-flex size-5 items-center justify-center rounded-full text-muted-foreground"
+                    >
+                      <Info aria-hidden className="size-4" />
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="p-3">
+                      <FormattedMessage
+                        id="requests.post.children.hint"
+                        values={{
+                          second: formatCredits(options.secondChildHourlyQuarterCredits),
+                          additional: formatCredits(options.additionalChildHourlyQuarterCredits),
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
               <Input
                 id="children"
                 className="h-11 lg:h-8"
@@ -191,17 +214,6 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   setChildCount(event.target.valueAsNumber)
                 }}
               />
-              {options && (
-                <p className="text-sm text-muted-foreground">
-                  <FormattedMessage
-                    id="requests.post.children.hint"
-                    values={{
-                      second: formatCredits(options.secondChildHourlyQuarterCredits),
-                      additional: formatCredits(options.additionalChildHourlyQuarterCredits),
-                    }}
-                  />
-                </p>
-              )}
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -283,7 +295,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   intl.formatMessage({ id: 'requests.post.meals.lunch' }),
                   options?.lunchQuarterCredits,
                 )}
-                {options && (
+                {options && childCount > 1 && (
                   <span className="block text-xs text-muted-foreground">
                     {perChild(options.lunchPerChildQuarterCredits)}
                   </span>
@@ -304,7 +316,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   intl.formatMessage({ id: 'requests.post.meals.snack' }),
                   options?.snackQuarterCredits,
                 )}
-                {options && (
+                {options && childCount > 1 && (
                   <span className="block text-xs text-muted-foreground">
                     {perChild(options.snackPerChildQuarterCredits)}
                   </span>
@@ -325,7 +337,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   intl.formatMessage({ id: 'requests.post.meals.dinner' }),
                   options?.dinnerQuarterCredits,
                 )}
-                {options && (
+                {options && childCount > 1 && (
                   <span className="block text-xs text-muted-foreground">
                     {perChild(options.dinnerPerChildQuarterCredits)}
                   </span>
