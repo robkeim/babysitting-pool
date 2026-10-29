@@ -143,6 +143,20 @@ describe('MembersAdminPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('That member no longer exists.')
   })
 
+  it('explains that the Admin cannot be offboarded', async () => {
+    const user = userEvent.setup()
+    server.use(
+      membersHandler([sampleMember]),
+      offboardRejectedHandler(422, 'cannot_offboard_admin'),
+    )
+
+    renderWithProviders(<MembersAdminPage />)
+    await user.click(await screen.findByRole('button', { name: 'Offboard Ada Lovelace' }))
+    await user.click(screen.getByRole('button', { name: 'Offboard member' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("The Admin can't be offboarded.")
+  })
+
   it('erases a closed member only after an irreversible-action confirmation', async () => {
     const user = userEvent.setup()
     const wiped: string[] = []
