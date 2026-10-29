@@ -7,7 +7,7 @@ Decisions and rationale: [ADR 0004](adr/0004-sqlite-persistence-and-test-strateg
 From many tests to few:
 
 1. **Domain unit tests**: pure C#, no I/O, no clock (pass `now` in). The bulk of the tests.
-2. **Application handler tests**: real handlers on real SQLite (fresh in-memory database per test, built from the real migrations). Fake only the email and clock ports. Per feature: the happy path and the main failure.
+2. **Application handler tests**: real handlers on real SQLite (fresh in-memory database per test, built from the real migrations). Fake only the email and clock ports. The fixture builds its container with `AddCoopCore`, the same entry point `ApiHost` uses, varying only the database path, email sender and clock. Per feature: the happy path and the main failure.
 3. **API tests**: `WebApplicationFactory` over HTTP, for the contract surface only (status codes, ProblemDetails, auth).
 4. **Architecture tests**: layer boundaries.
 
