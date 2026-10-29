@@ -16,6 +16,7 @@ import { AccountMenu, useMe } from '@/features/auth'
 import { useFlagTheme } from '@/features/flags'
 import { NotificationBell } from '@/features/notifications'
 import { I18nProvider } from '@/lib/i18n'
+import { useColorScheme } from '@/lib/theme'
 
 const MEMBER_TABS: readonly ShellTab[] = [
   { to: '/credits', label: <FormattedMessage id="common.nav.credits" />, icon: Wallet },
@@ -50,6 +51,7 @@ export const Route = createRootRoute({
     const navigate = useNavigate()
     const me = useMe()
     useFlagTheme()
+    useColorScheme(me.data?.colorScheme)
     return (
       <I18nProvider language={me.data?.language}>
         <AppShell

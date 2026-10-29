@@ -71,6 +71,18 @@ export function useChangeLanguage() {
   })
 }
 
+/** Saves the Member's Colour Scheme and applies it at once; the server confirms on the next `me` fetch. */
+export function useChangeColorScheme() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (colorScheme: string) =>
+      apiFetch<undefined>('/api/me/color-scheme', { method: 'PUT', body: { colorScheme } }),
+    onSuccess: (_data, colorScheme) => {
+      client.setQueryData<MemberView>(authKeys.me(), (me) => (me ? { ...me, colorScheme } : me))
+    },
+  })
+}
+
 export function useSignOut() {
   const client = useQueryClient()
   return useMutation({

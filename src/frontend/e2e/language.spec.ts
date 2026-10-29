@@ -12,13 +12,13 @@ test('a Member switches Language, the visible text changes and the choice outliv
 
   await page.getByLabel('Language').selectOption({ label: '🏴‍☠️ Ünïcödé Tëst' })
   await expect(page.getByRole('heading', { level: 1, name: /^⏩/u })).toBeVisible()
-  await expect(page.getByRole('combobox')).toHaveValue('en-XA')
+  await expect(page.locator('#language')).toHaveValue('en-XA')
 
   // The Language is kept on the Member, not in the browser tab.
   await page.reload()
   await expect(page.getByRole('heading', { level: 1, name: /^⏩/u })).toBeVisible()
 
-  await page.getByRole('combobox').selectOption({ label: '🇺🇸 English' })
+  await page.locator('#language').selectOption({ label: '🇺🇸 English' })
   await expect(page.getByRole('heading', { level: 1, name: 'Babysitting Pool' })).toBeVisible()
-  await expect(page.getByRole('combobox')).toHaveValue('en-US')
+  await expect(page.locator('#language')).toHaveValue('en-US')
 })

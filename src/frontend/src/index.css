@@ -3,7 +3,7 @@
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -90,42 +90,40 @@
   --sidebar-ring: oklch(0.6 0.1 var(--brand-hue));
 }
 
-/* Dark mode follows the browser or OS setting; there is no toggle (docs/design.md). */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.18 0.012 215);
-    --foreground: oklch(0.96 0.005 190);
-    --card: oklch(0.23 0.014 215);
-    --card-foreground: oklch(0.96 0.005 190);
-    --popover: oklch(0.25 0.014 215);
-    --popover-foreground: oklch(0.96 0.005 190);
-    --primary: oklch(0.76 0.1 var(--brand-hue));
-    --primary-foreground: oklch(0.2 0.04 var(--brand-hue));
-    --secondary: oklch(0.3 0.03 var(--brand-hue));
-    --secondary-foreground: oklch(0.95 0.01 var(--brand-hue));
-    --muted: oklch(0.27 0.012 215);
-    --muted-foreground: oklch(0.72 0.02 210);
-    --accent: oklch(0.32 0.06 var(--brand-hue));
-    --accent-foreground: oklch(0.93 0.04 var(--brand-hue));
-    --destructive: oklch(0.704 0.191 22.216);
-    --success: oklch(0.78 0.14 155);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 16%);
-    --ring: oklch(0.65 0.09 var(--brand-hue));
-    --chart-1: oklch(0.8 0.08 var(--brand-hue));
-    --chart-2: oklch(0.65 0.1 var(--brand-hue));
-    --chart-3: oklch(0.5 0.1 var(--brand-hue));
-    --chart-4: oklch(0.4 0.08 var(--brand-hue));
-    --chart-5: oklch(0.3 0.06 var(--brand-hue));
-    --sidebar: oklch(0.23 0.014 215);
-    --sidebar-foreground: oklch(0.96 0.005 190);
-    --sidebar-primary: oklch(0.76 0.1 var(--brand-hue));
-    --sidebar-primary-foreground: oklch(0.2 0.04 var(--brand-hue));
-    --sidebar-accent: oklch(0.32 0.06 var(--brand-hue));
-    --sidebar-accent-foreground: oklch(0.93 0.04 var(--brand-hue));
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.65 0.09 var(--brand-hue));
-  }
+/* Dark mode is the `dark` class on <html>, set from the Member's Colour Scheme: light, dark, or the system setting (docs/design.md). */
+:root.dark {
+  --background: oklch(0.18 0.012 215);
+  --foreground: oklch(0.96 0.005 190);
+  --card: oklch(0.23 0.014 215);
+  --card-foreground: oklch(0.96 0.005 190);
+  --popover: oklch(0.25 0.014 215);
+  --popover-foreground: oklch(0.96 0.005 190);
+  --primary: oklch(0.76 0.1 var(--brand-hue));
+  --primary-foreground: oklch(0.2 0.04 var(--brand-hue));
+  --secondary: oklch(0.3 0.03 var(--brand-hue));
+  --secondary-foreground: oklch(0.95 0.01 var(--brand-hue));
+  --muted: oklch(0.27 0.012 215);
+  --muted-foreground: oklch(0.72 0.02 210);
+  --accent: oklch(0.32 0.06 var(--brand-hue));
+  --accent-foreground: oklch(0.93 0.04 var(--brand-hue));
+  --destructive: oklch(0.704 0.191 22.216);
+  --success: oklch(0.78 0.14 155);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.65 0.09 var(--brand-hue));
+  --chart-1: oklch(0.8 0.08 var(--brand-hue));
+  --chart-2: oklch(0.65 0.1 var(--brand-hue));
+  --chart-3: oklch(0.5 0.1 var(--brand-hue));
+  --chart-4: oklch(0.4 0.08 var(--brand-hue));
+  --chart-5: oklch(0.3 0.06 var(--brand-hue));
+  --sidebar: oklch(0.23 0.014 215);
+  --sidebar-foreground: oklch(0.96 0.005 190);
+  --sidebar-primary: oklch(0.76 0.1 var(--brand-hue));
+  --sidebar-primary-foreground: oklch(0.2 0.04 var(--brand-hue));
+  --sidebar-accent: oklch(0.32 0.06 var(--brand-hue));
+  --sidebar-accent-foreground: oklch(0.93 0.04 var(--brand-hue));
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.65 0.09 var(--brand-hue));
 }
 
 /*
@@ -162,34 +160,32 @@
   --sidebar-ring: oklch(0.65 0.14 var(--brand-hue));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root[data-theme='vacation'] {
-    --background: oklch(0.2 0.045 300);
-    --foreground: oklch(0.96 0.015 80);
-    --card: oklch(0.26 0.05 300);
-    --card-foreground: oklch(0.96 0.015 80);
-    --popover: oklch(0.28 0.05 300);
-    --popover-foreground: oklch(0.96 0.015 80);
-    --primary: oklch(0.76 0.13 var(--brand-hue));
-    --primary-foreground: oklch(0.22 0.05 var(--brand-hue));
-    --secondary: oklch(0.32 0.05 300);
-    --secondary-foreground: oklch(0.95 0.02 80);
-    --muted: oklch(0.3 0.045 300);
-    --muted-foreground: oklch(0.75 0.04 70);
-    --accent: oklch(0.36 0.08 340);
-    --accent-foreground: oklch(0.94 0.05 60);
-    --border: oklch(1 0.02 60 / 12%);
-    --input: oklch(1 0.02 60 / 18%);
-    --ring: oklch(0.7 0.12 var(--brand-hue));
-    --sidebar: oklch(0.26 0.05 300);
-    --sidebar-foreground: oklch(0.96 0.015 80);
-    --sidebar-primary: oklch(0.76 0.13 var(--brand-hue));
-    --sidebar-primary-foreground: oklch(0.22 0.05 var(--brand-hue));
-    --sidebar-accent: oklch(0.36 0.08 340);
-    --sidebar-accent-foreground: oklch(0.94 0.05 60);
-    --sidebar-border: oklch(1 0.02 60 / 12%);
-    --sidebar-ring: oklch(0.7 0.12 var(--brand-hue));
-  }
+:root[data-theme='vacation'].dark {
+  --background: oklch(0.2 0.045 300);
+  --foreground: oklch(0.96 0.015 80);
+  --card: oklch(0.26 0.05 300);
+  --card-foreground: oklch(0.96 0.015 80);
+  --popover: oklch(0.28 0.05 300);
+  --popover-foreground: oklch(0.96 0.015 80);
+  --primary: oklch(0.76 0.13 var(--brand-hue));
+  --primary-foreground: oklch(0.22 0.05 var(--brand-hue));
+  --secondary: oklch(0.32 0.05 300);
+  --secondary-foreground: oklch(0.95 0.02 80);
+  --muted: oklch(0.3 0.045 300);
+  --muted-foreground: oklch(0.75 0.04 70);
+  --accent: oklch(0.36 0.08 340);
+  --accent-foreground: oklch(0.94 0.05 60);
+  --border: oklch(1 0.02 60 / 12%);
+  --input: oklch(1 0.02 60 / 18%);
+  --ring: oklch(0.7 0.12 var(--brand-hue));
+  --sidebar: oklch(0.26 0.05 300);
+  --sidebar-foreground: oklch(0.96 0.015 80);
+  --sidebar-primary: oklch(0.76 0.13 var(--brand-hue));
+  --sidebar-primary-foreground: oklch(0.22 0.05 var(--brand-hue));
+  --sidebar-accent: oklch(0.36 0.08 340);
+  --sidebar-accent-foreground: oklch(0.94 0.05 60);
+  --sidebar-border: oklch(1 0.02 60 / 12%);
+  --sidebar-ring: oklch(0.7 0.12 var(--brand-hue));
 }
 
 @layer base {
