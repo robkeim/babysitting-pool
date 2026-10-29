@@ -21,7 +21,7 @@ async function postRequest(page: Page, appUrl: string) {
 
 test('a Member sees a posted Request arrive live, and the Requester sees it claimed', async ({
   browser,
-  backend,
+  ownBackend: backend,
 }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
   const requesterId = await backend.seedMember([40], { area: 'Riverside', address: '12 River Rd' })
@@ -51,7 +51,7 @@ test('a Member sees a posted Request arrive live, and the Requester sees it clai
 
 test('dismissing a Notification in one tab clears it in the other', async ({
   browser,
-  backend,
+  ownBackend: backend,
 }) => {
   await backend.setClock('2026-03-01T09:00:00Z')
   const requesterId = await backend.seedMember([40], { area: 'Riverside', address: '12 River Rd' })
