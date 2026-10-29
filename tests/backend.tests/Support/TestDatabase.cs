@@ -1,4 +1,4 @@
-using BabysittingPool.Application;
+using BabysittingPool.Api;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Infrastructure;
@@ -21,12 +21,9 @@ internal sealed class TestDatabase : IAsyncDisposable
     {
         Clock = new FakeTimeProvider(new DateTimeOffset(2026, 3, 1, 9, 0, 0, TimeSpan.Zero));
         var services = new ServiceCollection();
-        services.AddSingleton<TimeProvider>(Clock);
-        services.AddApplication();
-        services.AddInfrastructure($"Data Source={_path}");
         services.AddLogging();
-        services.AddEmailOutbox();
-        services.AddSingleton(new AppLinks(new Uri("https://coop.example/")));
+        services.AddCoopCore(new CoopCoreOptions(
+            $"Data Source={_path}", new Uri("https://coop.example/"), s => s.AddEmailOutbox(), Clock));
         _services = services.BuildServiceProvider();
     }
 

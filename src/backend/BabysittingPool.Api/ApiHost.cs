@@ -66,12 +66,7 @@ public static class ApiHost
             // Enums travel as their names, so the contract says "Posted" rather than 0.
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
-        builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddSingleton(new SessionCookieSettings(PlainHttp: host.PlainHttpCookies));
-
-        builder.Services.AddApplication();
-        builder.Services.AddInfrastructure(
-            builder.Configuration.GetConnectionString("Default") ?? "Data Source=babysitting.db");
 
         // Where links in emails point (the SPA's origin). Required in Production; elsewhere the Vite dev server.
         var baseUrl = builder.Configuration["App:BaseUrl"];
@@ -82,24 +77,30 @@ public static class ApiHost
                 : "http://localhost:5173";
         }
 
-        builder.Services.AddSingleton(new AppLinks(new Uri(baseUrl)));
         // SMTP secrets (dotnet user-secrets, ADR 0011) are only ever honoured in Development and Production; E2E and
         // tests always use the fake outbox, even on a machine that has them.
         var smtp = builder.Configuration.SmtpSettings();
+        Action<IServiceCollection> addEmailSender;
         if (builder.Environment.IsProduction())
         {
             // Production cannot invite anyone without email (ADR 0018), so refuse to start rather than fail on first send.
-            builder.Services.AddSmtpEmailSender(smtp
-                ?? throw new InvalidOperationException("Email:Smtp:Address and Email:Smtp:Password must be set in Production."));
+            var productionSmtp = smtp
+                ?? throw new InvalidOperationException("Email:Smtp:Address and Email:Smtp:Password must be set in Production.");
+            addEmailSender = services => services.AddSmtpEmailSender(productionSmtp);
         }
         else if (builder.Environment.IsDevelopment() && smtp is not null)
         {
-            builder.Services.AddEmailOutboxOverSmtp(smtp);
+            addEmailSender = services => services.AddEmailOutboxOverSmtp(smtp);
         }
         else
         {
-            builder.Services.AddEmailOutbox();
+            addEmailSender = services => services.AddEmailOutbox();
         }
+
+        builder.Services.AddCoopCore(new CoopCoreOptions(
+            builder.Configuration.GetConnectionString("Default") ?? "Data Source=babysitting.db",
+            new Uri(baseUrl),
+            addEmailSender));
 
         builder.Services.AddHttpClient<IAddressSuggester, BanAddressSuggester>(client =>
         {
