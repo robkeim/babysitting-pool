@@ -95,8 +95,6 @@ async function launchBackend(): Promise<{ backend: Backend; dispose: () => Promi
       ASPNETCORE_URLS: apiUrl,
       App__BaseUrl: appUrl,
       Bootstrap__AdminEmail: BOOTSTRAP_ADMIN_EMAIL,
-      // The bell and its live stream are behind this flag until #160 removes it (ADR 0019).
-      Features__notifications: 'true',
       // Browser runs click faster than any Member; the limit itself is covered by backend tests.
       RateLimits__MemberPerMinute: '100000',
       ConnectionStrings__Default: `Data Source=${path.join(dataDirectory, 'babysitting.db')}`,

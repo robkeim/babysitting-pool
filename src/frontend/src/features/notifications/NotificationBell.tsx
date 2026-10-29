@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { shellTabClass } from '@/components/AppShell'
 import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
-import { useFeatureFlag } from '@/features/flags'
 import { cn } from '@/lib/utils'
 import { useNotifications } from './api'
 import { NotificationList } from './NotificationList'
@@ -11,13 +10,8 @@ import { useNotificationStream } from './stream'
 import { NotificationToast } from './NotificationToast'
 import type { NotificationView } from './types'
 
-/** The bell in the navigation and the panel it opens; renders nothing while the `notifications` flag is off (ADR 0019). */
+/** The bell in the navigation and the panel it opens, kept live by the Notification stream (ADR 0019). */
 export function NotificationBell() {
-  const enabled = useFeatureFlag('notifications')
-  return enabled ? <BellWithPanel /> : null
-}
-
-function BellWithPanel() {
   const intl = useIntl()
   const notifications = useNotifications()
   const [toast, setToast] = useState<NotificationView>()

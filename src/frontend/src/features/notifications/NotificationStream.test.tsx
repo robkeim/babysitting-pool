@@ -1,7 +1,6 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, vi } from 'vitest'
-import { FeatureFlagsTestProvider } from '@/features/flags'
 import { FakeEventSource } from '@/test/eventSource'
 import { renderWithProviders } from '@/test/render'
 import { server } from '@/test/server'
@@ -20,12 +19,8 @@ function stream() {
   return source
 }
 
-function renderBell(enabled = true) {
-  return renderWithProviders(
-    <FeatureFlagsTestProvider flags={{ notifications: enabled }}>
-      <NotificationBell />
-    </FeatureFlagsTestProvider>,
-  )
+function renderBell() {
+  return renderWithProviders(<NotificationBell />)
 }
 
 beforeEach(() => {
@@ -36,7 +31,7 @@ afterEach(() => {
 })
 
 describe('the live Notification stream', () => {
-  it('opens on the stream path while the flag is on, and closes when the bell goes', async () => {
+  it('opens on the stream path and closes when the bell goes', async () => {
     server.use(notificationsHandler([]))
     const { unmount } = renderBell()
 
@@ -46,12 +41,6 @@ describe('the live Notification stream', () => {
     const source = stream()
     unmount()
     expect(source.closed).toBe(true)
-  })
-
-  it('stays closed while the flag is off', () => {
-    renderBell(false)
-
-    expect(FakeEventSource.instances).toHaveLength(0)
   })
 
   it('adds a created Notification to the badge and list and announces it in a toast', async () => {

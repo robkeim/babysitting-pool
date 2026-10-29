@@ -14,13 +14,11 @@ public class NotificationStreamTests : IDisposable
 {
     private static readonly TimeSpan Patience = TimeSpan.FromSeconds(10);
 
-    private readonly ApiFactory _on = new(features: new Dictionary<string, string> { ["notifications"] = "true" });
-    private readonly ApiFactory _off = new();
+    private readonly ApiFactory _on = new();
 
     public void Dispose()
     {
         _on.Dispose();
-        _off.Dispose();
     }
 
     private static async Task<Guid> SeedAsync(ApiFactory factory) =>
@@ -97,17 +95,6 @@ public class NotificationStreamTests : IDisposable
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType!.MediaType.Should().Be("text/event-stream");
         return new EventStream(response, await response.Content.ReadAsStreamAsync());
-    }
-
-    [Fact]
-    public async Task While_the_flag_is_off_the_stream_answers_404_feature_off()
-    {
-        using var client = _off.CreateMemberClient(await SeedAsync(_off));
-
-        var response = await client.GetAsync("/api/notifications/stream");
-
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be("feature_off");
     }
 
     [Fact]
