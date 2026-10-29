@@ -144,16 +144,21 @@ export function AppShell({ tabs, more, navExtra, account, children }: AppShellPr
     <div ref={shell} className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 border-b bg-card">
         <div className="mx-auto flex min-h-14 max-w-6xl items-center gap-3 px-4 lg:gap-6">
-          <h1 className="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight">
-            <span
-              aria-hidden
-              className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground"
+          <h1 className="min-w-0 text-base font-semibold tracking-tight">
+            <Link
+              to="/"
+              className="flex items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <HeartHandshake className="size-5" />
-            </span>
-            <span className="min-w-0 [overflow-wrap:anywhere]">
-              <FormattedMessage id="common.appName" />
-            </span>
+              <span
+                aria-hidden
+                className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground"
+              >
+                <HeartHandshake className="size-5" />
+              </span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">
+                <FormattedMessage id="common.appName" />
+              </span>
+            </Link>
           </h1>
           {tabs && (
             <nav
