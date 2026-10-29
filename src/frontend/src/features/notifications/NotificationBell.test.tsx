@@ -1,6 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { FeatureFlagsTestProvider } from '@/features/flags'
 import { renderWithProviders } from '@/test/render'
 import { server } from '@/test/server'
 import { NotificationBell } from './NotificationBell'
@@ -16,12 +15,8 @@ import {
   postedNotification,
 } from './mocks'
 
-function renderBell(enabled = true) {
-  return renderWithProviders(
-    <FeatureFlagsTestProvider flags={{ notifications: enabled }}>
-      <NotificationBell />
-    </FeatureFlagsTestProvider>,
-  )
+function renderBell() {
+  return renderWithProviders(<NotificationBell />)
 }
 
 const claimedRequest = {
@@ -205,11 +200,5 @@ describe('NotificationBell', () => {
     expect(await within(panel).findByRole('alert')).toHaveTextContent(
       "We couldn't load your notifications.",
     )
-  })
-
-  it('renders nothing while the flag is off', () => {
-    const { container } = renderBell(false)
-
-    expect(container).toBeEmptyDOMElement()
   })
 })
