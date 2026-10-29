@@ -19,7 +19,7 @@ public class AuthEndpointTests : IDisposable
     private async Task<string> LatestLinkAsync(string to)
     {
         using var client = _factory.CreateClient();
-        var outbox = await client.GetFromJsonAsync<JsonElement>($"/api/dev/outbox?to={Uri.EscapeDataString(to)}");
+        var outbox = await client.GetFromJsonAsync<JsonElement>($"/api/test/outbox?to={Uri.EscapeDataString(to)}");
         return outbox.EnumerateArray().Last().GetProperty("link").GetString()!;
     }
 
@@ -78,7 +78,7 @@ public class AuthEndpointTests : IDisposable
     [Fact]
     public async Task Unicode_test_is_not_a_choosable_language_in_production()
     {
-        using var production = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com");
+        using var production = new PlainApiFactory("Production", bootstrapAdminEmail: "root@example.com");
         var memberId = await production.SeedMemberAsync();
         using var client = production.CreateMemberClient(memberId);
 
@@ -191,7 +191,7 @@ public class AuthEndpointTests : IDisposable
     [Fact]
     public async Task Development_seeds_an_admin_and_three_members_and_logs_the_admin_link()
     {
-        using var development = new ApiFactory("Development");
+        using var development = new PlainApiFactory("Development");
         using var client = development.CreateClient();
 
         var outbox = await client.GetFromJsonAsync<JsonElement>("/api/dev/outbox?to=admin@example.test");
@@ -224,7 +224,7 @@ public class AuthEndpointTests : IDisposable
     [Fact]
     public async Task The_outbox_does_not_exist_outside_development_and_e2e()
     {
-        using var factory = new ApiFactory("Staging");
+        using var factory = new PlainApiFactory("Staging");
         using var client = factory.CreateClient();
 
         (await client.GetAsync("/api/dev/outbox")).StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -233,7 +233,7 @@ public class AuthEndpointTests : IDisposable
     [Fact]
     public void Production_refuses_to_start_with_no_admin_and_no_bootstrap_address()
     {
-        using var factory = new ApiFactory("Production");
+        using var factory = new PlainApiFactory("Production");
 
         var act = () => factory.CreateClient();
 
@@ -243,7 +243,7 @@ public class AuthEndpointTests : IDisposable
     [Fact]
     public void Production_refuses_to_start_without_SMTP_settings()
     {
-        using var factory = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com", smtpConfigured: false);
+        using var factory = new PlainApiFactory("Production", bootstrapAdminEmail: "root@example.com", smtpConfigured: false);
 
         var act = () => factory.CreateClient();
 
@@ -253,7 +253,7 @@ public class AuthEndpointTests : IDisposable
     [Fact]
     public async Task Production_invites_the_bootstrap_admin_at_startup()
     {
-        using var factory = new ApiFactory("Production", bootstrapAdminEmail: "root@example.com");
+        using var factory = new PlainApiFactory("Production", bootstrapAdminEmail: "root@example.com");
         using var client = factory.CreateClient();
 
         var outbox = factory.Services.GetRequiredService<EmailOutbox>();

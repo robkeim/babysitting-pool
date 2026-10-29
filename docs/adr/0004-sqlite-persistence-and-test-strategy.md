@@ -11,3 +11,5 @@ Playwright E2E runs the real API and SPA with no API mocks. Each Playwright work
 **Amendment (2026-10-27).** Persistence queries go through EF Core (LINQ, `ExecuteUpdate`, `ExecuteDelete`), never hand-written SQL. Raw SQL is for schema and connection setup only (migrations, triggers, PRAGMAs). The full gate enforces it with the Semgrep rule `project.csharp.raw-sql-outside-migrations` in `.semgrep/project.yml`; suppress with `nosemgrep` and a reason. The rate-limit counters (ADR 0014) first used one raw upsert and were moved to LINQ, accepting a non-atomic read-back that can only over-count; revisit if that proves a problem.
 
 **Amendment (2026-10-27, #23).** Deployment settled the backup destination: a daily snapshot of the main database to a free-tier object store, 30 kept, with a restore drill before launch and quarterly (ADR 0018).
+
+**Amendment (2026-10-29, #101).** The E2E host is its own project, `BabysittingPool.E2E`, which adds `BabysittingPool.TestSupport` (the test-only endpoints, the settable fake clock and the stand-in address suggester) to the API. Production publishes only `BabysittingPool.Api` (ADR 0016).

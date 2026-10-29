@@ -20,7 +20,7 @@ public class RateLimitTests : IDisposable
     public void Dispose() => _factory.Dispose();
 
     /// <summary>The same host, but the TCP peer is <see cref="ProxyIp"/> (TestServer has none) and optionally a trusted proxy.</summary>
-    private WebApplicationFactory<Program> Behind(bool trustProxy) =>
+    private WebApplicationFactory<BabysittingPool.E2E.E2EHost> Behind(bool trustProxy) =>
         _factory.WithWebHostBuilder(builder =>
         {
             if (trustProxy)
@@ -31,7 +31,7 @@ public class RateLimitTests : IDisposable
             builder.ConfigureServices(services => services.AddSingleton<IStartupFilter, PeerAddressFilter>());
         });
 
-    private static HttpClient SpaClient(WebApplicationFactory<Program> factory, string? forwardedFor = null)
+    private static HttpClient SpaClient(WebApplicationFactory<BabysittingPool.E2E.E2EHost> factory, string? forwardedFor = null)
     {
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Requested-With", "fetch");
