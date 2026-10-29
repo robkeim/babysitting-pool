@@ -23,3 +23,4 @@ One line per ADR so you can pick what to open (ADR 0013). Read an ADR only if it
 | [0017](0017-design-tokens-and-visual-check-loop.md) | UI themed by semantic tokens, dark mode from the system setting, checked by screenshots | frontend |
 | [0018](0018-deployment-on-fly-io.md) | One always-on Fly.io container in iad, daily off-host backups, local deploy script, Gmail SMTP | ops |
 | [0019](0019-in-app-notifications.md) | In-app Notifications: SSE transport, persisted until dismissed, hard delete, 90-day backstop, fixed audience | backend, frontend, api |
+| [0020](0020-address-verification-with-ban-and-derived-area.md) | Address picked from the French national address base (BAN) through a backend proxy; Area derived as commune plus département; France only | backend, frontend, api |

@@ -85,8 +85,8 @@ Where a Session takes place: *Sitter's House* or *Requesting Family's House*. On
 _Avoid_: Venue, host's house
 
 **Area**:
-The rough neighbourhood a Member lives in, kept with their exact address on their profile. Other Members see the Area of a Posted Request at the Requesting Family's House; the exact address goes only to the Requester and the Sitter who claimed it.
-_Avoid_: Neighbourhood, region, zone
+The commune a Member lives in, with its département number ("Amiens (80)"), worked out from their verified address and never typed. It sits on their profile with the address. Other Members see the Area of a Posted Request at the Requesting Family's House; the exact address goes only to the Requester and the Sitter who claimed it.
+_Avoid_: Neighbourhood, region, zone, city
 
 ### Credits
 
