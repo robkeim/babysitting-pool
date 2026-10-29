@@ -1,4 +1,5 @@
-import { type ReactNode, useId } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { type ReactNode, useId, useState } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { formatCredits } from '@/features/credits'
 import type { CostQuote, QuoteDetails } from './types'
@@ -40,6 +41,8 @@ export function CostReceipt({
 }: CostReceiptProps) {
   const intl = useIntl()
   const titleId = useId()
+  const detailsId = useId()
+  const [expanded, setExpanded] = useState(false)
   const lines = quote?.lines
   const options = quote?.options
   const meal = (id: 'lunch' | 'snack' | 'dinner', amount: number, perChild: number) => (
@@ -65,51 +68,12 @@ export function CostReceipt({
       aria-labelledby={titleId}
       className="rounded-lg bg-accent px-3 py-3 text-sm text-accent-foreground"
     >
-      <h3 id={titleId} className="mb-2 font-medium">
+      <h3 id={titleId} className="sr-only">
         <FormattedMessage id="requests.post.receipt.title" />
       </h3>
-      <dl className="space-y-1">
-        {lines && options && (
-          <>
-            <Row
-              label={intl.formatMessage(
-                { id: 'requests.post.receipt.time' },
-                {
-                  minutes: details.durationMinutes,
-                  rate: formatCredits(lines.hourlyRateQuarterCredits),
-                },
-              )}
-              amount={formatCredits(lines.timeQuarterCredits)}
-            />
-            {lines.locationQuarterCredits > 0 && (
-              <Row
-                label={intl.formatMessage({ id: 'requests.post.location.RequestingFamilysHouse' })}
-                amount={formatCredits(lines.locationQuarterCredits)}
-              />
-            )}
-            {lines.transportQuarterCredits > 0 && (
-              <Row
-                label={intl.formatMessage(
-                  { id: 'requests.post.receipt.transport' },
-                  {
-                    option: intl.formatMessage({
-                      id: `requests.post.transport.${details.transport}`,
-                    }),
-                  },
-                )}
-                amount={formatCredits(lines.transportQuarterCredits)}
-              />
-            )}
-            {lines.lunchQuarterCredits > 0 &&
-              meal('lunch', lines.lunchQuarterCredits, options.lunchPerChildQuarterCredits)}
-            {lines.snackQuarterCredits > 0 &&
-              meal('snack', lines.snackQuarterCredits, options.snackPerChildQuarterCredits)}
-            {lines.dinnerQuarterCredits > 0 &&
-              meal('dinner', lines.dinnerQuarterCredits, options.dinnerPerChildQuarterCredits)}
-          </>
-        )}
+      <dl>
         <Row
-          className="mt-2 border-t border-current/30 pt-2 font-semibold"
+          className="font-semibold"
           label={<FormattedMessage id="requests.post.receipt.total" />}
           amount={
             quote ? (
@@ -124,7 +88,7 @@ export function CostReceipt({
         />
       </dl>
       {available !== undefined && (
-        <p className="mt-2">
+        <p className="mt-1">
           <FormattedMessage
             id="requests.post.available"
             values={{ available: formatCredits(available) }}
@@ -140,18 +104,80 @@ export function CostReceipt({
           )}
         </p>
       )}
-      {showRulesLink && (
-        <p className="mt-2">
-          <a
-            href="/how-it-works#pricing"
-            target="_blank"
-            rel="noopener"
-            className="underline underline-offset-2"
-          >
-            <FormattedMessage id="requests.post.receipt.rules" />
-          </a>
-        </p>
-      )}
+      <button
+        type="button"
+        className="mt-2 flex items-center gap-1 underline underline-offset-2"
+        aria-expanded={expanded}
+        aria-controls={detailsId}
+        onClick={() => {
+          setExpanded((open) => !open)
+        }}
+      >
+        <FormattedMessage
+          id={expanded ? 'requests.post.receipt.hide' : 'requests.post.receipt.show'}
+        />
+        <ChevronDown
+          aria-hidden
+          className={`size-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+        />
+      </button>
+      <div id={detailsId} hidden={!expanded} className="mt-2">
+        <dl className="space-y-1 border-t border-current/30 pt-2">
+          {lines && options && (
+            <>
+              <Row
+                label={intl.formatMessage(
+                  { id: 'requests.post.receipt.time' },
+                  {
+                    minutes: details.durationMinutes,
+                    rate: formatCredits(lines.hourlyRateQuarterCredits),
+                  },
+                )}
+                amount={formatCredits(lines.timeQuarterCredits)}
+              />
+              {lines.locationQuarterCredits > 0 && (
+                <Row
+                  label={intl.formatMessage({
+                    id: 'requests.post.location.RequestingFamilysHouse',
+                  })}
+                  amount={formatCredits(lines.locationQuarterCredits)}
+                />
+              )}
+              {lines.transportQuarterCredits > 0 && (
+                <Row
+                  label={intl.formatMessage(
+                    { id: 'requests.post.receipt.transport' },
+                    {
+                      option: intl.formatMessage({
+                        id: `requests.post.transport.${details.transport}`,
+                      }),
+                    },
+                  )}
+                  amount={formatCredits(lines.transportQuarterCredits)}
+                />
+              )}
+              {lines.lunchQuarterCredits > 0 &&
+                meal('lunch', lines.lunchQuarterCredits, options.lunchPerChildQuarterCredits)}
+              {lines.snackQuarterCredits > 0 &&
+                meal('snack', lines.snackQuarterCredits, options.snackPerChildQuarterCredits)}
+              {lines.dinnerQuarterCredits > 0 &&
+                meal('dinner', lines.dinnerQuarterCredits, options.dinnerPerChildQuarterCredits)}
+            </>
+          )}
+        </dl>
+        {showRulesLink && (
+          <p className="mt-2">
+            <a
+              href="/how-it-works#pricing"
+              target="_blank"
+              rel="noopener"
+              className="underline underline-offset-2"
+            >
+              <FormattedMessage id="requests.post.receipt.rules" />
+            </a>
+          </p>
+        )}
+      </div>
     </section>
   )
 }

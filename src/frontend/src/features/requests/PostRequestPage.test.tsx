@@ -239,6 +239,7 @@ describe('PostRequestPage', () => {
     expect(screen.getByText(/1\.75 credits per hour for 3 children/i)).toBeInTheDocument()
 
     const receipt = screen.getByRole('region', { name: /cost breakdown/i })
+    await user.click(within(receipt).getByRole('button', { name: /show breakdown/i }))
     expect(within(receipt).getByText(/time \(60 min at 1\.75\/hr\)/i)).toBeInTheDocument()
     expect(within(receipt).getByText('1.75')).toBeInTheDocument()
     expect(within(receipt).getByText('1.50')).toBeInTheDocument()
@@ -251,5 +252,25 @@ describe('PostRequestPage', () => {
       'href',
       '/how-it-works#pricing',
     )
+  })
+
+  it('keeps the form compact: breakdown collapsed, per-child detail only for several children', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+
+    const receipt = await screen.findByRole('region', { name: /cost breakdown/i })
+    const toggle = within(receipt).getByRole('button', { name: /show breakdown/i })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    const details = document.getElementById(toggle.getAttribute('aria-controls') ?? '')
+    expect(details).not.toBeVisible()
+    expect(screen.queryByText(/credits per hour for/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/× 1 child/)).not.toBeInTheDocument()
+
+    await user.click(toggle)
+    expect(within(receipt).getByRole('button', { name: /hide breakdown/i })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+    expect(details).toBeVisible()
   })
 })
