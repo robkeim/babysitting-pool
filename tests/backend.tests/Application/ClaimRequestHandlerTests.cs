@@ -218,7 +218,7 @@ public class ClaimRequestHandlerTests : IAsyncLifetime
 
         page.Items.Select(r => r.Id).Should().Equal(sooner.Id, later.Id);
         page.Items.Select(r => r.Id).Should().NotContain(mine.Id);
-        page.Items[0].Area.Should().Be("Riverside");
+        page.Items[0].Area.Should().Be("Riverside (80)");
         page.Items[0].CostQuarterCredits.Should().Be(10);
         page.Items[1].Area.Should().BeNull();
     }

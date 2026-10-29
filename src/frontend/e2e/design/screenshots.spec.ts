@@ -27,6 +27,7 @@ const SCREENS = [
   { name: 'my-requests', path: '/requests' },
   { name: 'my-claims', path: '/claims' },
   { name: 'post-request', path: '/requests/new' },
+  { name: 'profile', path: '/profile' },
 ]
 
 const CLOCK = '2026-03-01T09:00:00Z'
@@ -141,7 +142,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
       else await backend.signIn(setup, who === 'reader' ? readerId : viewerId)
       const setupPage = await setup.newPage()
       await setupPage.goto(`${backend.appUrl}/profile`)
-      await setupPage.getByRole('combobox').selectOption({ label: language.label })
+      await setupPage.locator('#language').selectOption({ label: language.label })
       await expect(setupPage.getByRole('heading', { level: 1 })).toHaveText(language.heading)
       await setup.close()
     }
@@ -256,8 +257,8 @@ async function postRequest(
 ) {
   // The area and address come from the profile, so set the profile before each Request.
   await page.goto(`${appUrl}/profile`)
-  await page.getByLabel(/^area/i).fill(request.area)
-  await page.getByLabel(/exact address/i).fill('12 River Rd')
+  await page.getByRole('combobox', { name: /search for your address/i }).fill(request.area)
+  await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /save/i }).click()
   await expect(page.getByRole('status')).toContainText(/saved/i)
 

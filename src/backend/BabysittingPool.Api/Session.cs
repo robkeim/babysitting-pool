@@ -25,14 +25,18 @@ internal static class SessionCookie
     private static CookieOptions Options(HttpContext context)
     {
         var environment = context.RequestServices.GetRequiredService<IHostEnvironment>();
+        var settings = context.RequestServices.GetRequiredService<SessionCookieSettings>();
         return new CookieOptions
         {
             HttpOnly = true,
             SameSite = SameSiteMode.Lax,
             Path = "/",
             MaxAge = CookieLifetime,
-            // Safari drops Secure cookies on http://localhost, which is how Development and E2E are served.
-            Secure = !environment.IsDevelopment() && !environment.IsEnvironment(TestEndpoints.Environment),
+            // Safari drops Secure cookies on http://localhost, which is how Development and E2E are served (<see cref="SessionCookieSettings"/>).
+            Secure = !environment.IsDevelopment() && !settings.PlainHttp,
         };
     }
 }
+
+/// <summary>Whether the session cookie is served over plain HTTP, as the E2E host does.</summary>
+internal sealed record SessionCookieSettings(bool PlainHttp);

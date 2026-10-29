@@ -1,62 +1,45 @@
 using System.Security.Cryptography;
 using System.Text;
+using BabysittingPool.Api;
 using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 
-namespace BabysittingPool.Api;
+namespace BabysittingPool.TestSupport;
 
 /// <summary>
-/// Test-only endpoints for Playwright (ADR 0004). Mapped only in the <c>E2E</c> environment, so they do not
-/// exist in Production, and kept out of the OpenAPI document because they are not part of the contract.
+/// <summary>
+/// Test-only endpoints for Playwright (ADR 0004). They live in this project, which only the E2E host references, so
+/// Production does not contain them. Every one needs the <c>E2E:Token</c> (ADR 0016), and they are kept out of the
+/// OpenAPI document because they are not part of the contract.
 /// </summary>
 internal static class TestEndpoints
 {
-    public const string Environment = "E2E";
     public const string TokenSetting = "E2E:Token";
     public const string TokenHeader = "X-E2E-Token";
 
     private static readonly DateTimeOffset InitialClock = new(2026, 3, 1, 9, 0, 0, TimeSpan.Zero);
 
     /// <summary>E2E runs on a clock the tests control.</summary>
-    public static void AddTestClock(this IServiceCollection services)
+    public static void ReplaceClock(this IServiceCollection services)
     {
+        services.RemoveAll<FakeTimeProvider>();
+        services.RemoveAll<TimeProvider>();
         services.AddSingleton<FakeTimeProvider>(new SettableClock(InitialClock));
         services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<FakeTimeProvider>());
     }
 
-    /// <summary>
-    /// Production must not carry anything that can change who sees what: it stops if the E2E token is configured or
-    /// the host was pointed at the E2E environment through the other environment variable (ADR 0016).
-    /// </summary>
-    public static void RefuseE2EInProduction(this WebApplicationBuilder builder)
-    {
-        if (!builder.Environment.IsProduction())
-        {
-            return;
-        }
-
-        if (!string.IsNullOrEmpty(builder.Configuration[TokenSetting]))
-        {
-            throw new InvalidOperationException($"{TokenSetting} must not be set in Production.");
-        }
-
-        foreach (var variable in new[] { "ASPNETCORE_ENVIRONMENT", "DOTNET_ENVIRONMENT" })
-        {
-            if (string.Equals(System.Environment.GetEnvironmentVariable(variable), Environment, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException($"{variable}={Environment} must not be present in Production.");
-            }
-        }
-    }
-
     public static void MapTestEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/test").AllowAnonymous().ExcludeFromDescription();
+        // Anything that changes or reveals state needs the token; without it the answer is 404.
+        var group = app.MapGroup("/api/test").AllowAnonymous().ExcludeFromDescription()
+            .AddEndpointFilter(async (context, next) =>
+                HasToken(context.HttpContext) ? await next(context) : Results.NotFound());
 
         // An endpoint gated on each declared flag, so tests can see a flag take effect (ADR 0016).
         foreach (var flag in app.ServiceProvider.GetRequiredService<FeatureFlagRegistry>().All)
@@ -64,7 +47,6 @@ internal static class TestEndpoints
             group.MapGet($"/gated/{flag.Name}", () => Results.Ok()).RequireFeature(flag.Name);
         }
 
-        // Changes who sees what, so unlike the endpoints below it needs the token; without it the answer is 404.
         group.MapPost("/feature-flags", async (
             SetFeatureFlagRequest request, UpdateFeatureFlagHandler handler, CancellationToken cancellationToken) =>
         {
@@ -82,9 +64,13 @@ internal static class TestEndpoints
             return await handler.HandleAsync(new UpdateFeatureFlagCommand(request.Name, settings), cancellationToken) is { } view
                 ? Results.Ok(view)
                 : Problems.FeatureFlagNotFound();
-        })
-        .AddEndpointFilter(async (context, next) =>
-            HasToken(context.HttpContext) ? await next(context) : Results.NotFound());
+        });
+
+        // Where sign-in and Invitation links land (ADR 0011).
+        group.MapGet("/outbox", (EmailOutbox outbox, string? to) =>
+            outbox.Messages
+                .Where(m => to is null || string.Equals(m.To, to, StringComparison.OrdinalIgnoreCase))
+                .Select(m => new OutboxMessage(m.To, m.Subject, m.Link.ToString())));
 
         group.MapPost("/members", async (SeedMemberRequest request, IServiceProvider services, CancellationToken cancellationToken) =>
         {
@@ -95,7 +81,7 @@ internal static class TestEndpoints
 
             var grants = request.GrantsQuarterCredits.Select(Credits.FromQuarterCredits).ToList();
             var email = request.Email ?? $"member-{Guid.NewGuid():N}@example.test";
-            var home = request.Area is null || request.Address is null ? null : HomeLocation.Create(request.Area, request.Address);
+            var home = request.Area is null || request.Address is null ? null : HomeLocation.Create(request.Address, request.Area, "80021", "80", "80000", null);
             var memberId = await services.SeedMemberAsync(
                 email, request.DisplayName ?? "Test Member", false, grants, home, cancellationToken);
             return Results.Created($"/api/test/members/{memberId}", new SeedMemberResponse(memberId, email));
@@ -173,6 +159,8 @@ internal static class TestEndpoints
     private sealed record CreateSessionRequest(Guid MemberId);
 
     private sealed record CreateSessionResponse(string Token);
+
+    private sealed record OutboxMessage(string To, string Subject, string Link);
 
     private sealed record SetClockRequest(DateTimeOffset Now);
 }

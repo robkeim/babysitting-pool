@@ -46,6 +46,7 @@ public class RequestEndpointTests : IDisposable
         var item = list.GetProperty("items").EnumerateArray().Single();
         item.GetProperty("id").GetString().Should().Be(posted.GetProperty("id").GetString());
         item.GetProperty("address").GetString().Should().Be("12 River Rd");
+        item.GetProperty("instructions").GetString().Should().Be("ring twice");
         var account = await client.GetFromJsonAsync<JsonElement>("/api/me/account");
         account.GetProperty("availableQuarterCredits").GetInt64().Should().Be(30);
         account.GetProperty("escrowedQuarterCredits").GetInt64().Should().Be(10);
@@ -64,6 +65,7 @@ public class RequestEndpointTests : IDisposable
         item.TryGetProperty("area", out var area).Should().BeTrue();
         area.ValueKind.Should().Be(JsonValueKind.Null);
         item.GetProperty("address").ValueKind.Should().Be(JsonValueKind.Null);
+        item.GetProperty("instructions").ValueKind.Should().Be(JsonValueKind.Null);
     }
 
     [Fact]
@@ -73,7 +75,7 @@ public class RequestEndpointTests : IDisposable
         await using (var scope = _factory.Services.CreateAsyncScope())
         {
             await scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>().Members.Where(m => m.Id == memberId)
-                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Area, (string?)null).SetProperty(x => x.Address, (string?)null));
+                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Commune, (string?)null));
         }
 
         using var client = _factory.CreateMemberClient(memberId);
@@ -180,9 +182,10 @@ public class RequestEndpointTests : IDisposable
         var own = await ownerClient.GetFromJsonAsync<JsonElement>("/api/requests/open");
 
         var item = seen.GetProperty("items").EnumerateArray().Single();
-        item.GetProperty("area").GetString().Should().Be("Riverside");
+        item.GetProperty("area").GetString().Should().Be("Riverside (80)");
         item.GetProperty("costQuarterCredits").GetInt64().Should().Be(10);
         item.TryGetProperty("address", out _).Should().BeFalse();
+        item.TryGetProperty("instructions", out _).Should().BeFalse();
         item.TryGetProperty("requesterId", out _).Should().BeFalse();
         own.GetProperty("items").GetArrayLength().Should().Be(0);
     }
@@ -203,11 +206,54 @@ public class RequestEndpointTests : IDisposable
         var claimed = await response.Content.ReadFromJsonAsync<JsonElement>();
         claimed.GetProperty("status").GetString().Should().Be("Claimed");
         claimed.GetProperty("address").GetString().Should().Be("12 River Rd");
+        claimed.GetProperty("instructions").GetString().Should().Be("ring twice");
         var claims = await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims");
         claims.GetProperty("items").EnumerateArray().Single().GetProperty("id").GetString().Should().Be(id);
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").GetArrayLength().Should().Be(0);
         var mine = await ownerClient.GetFromJsonAsync<JsonElement>("/api/me/requests");
         mine.GetProperty("items").EnumerateArray().Single().GetProperty("status").GetString().Should().Be("Claimed");
+    }
+
+    [Fact]
+    public async Task The_sitter_sees_the_instructions_in_my_claims_only_while_holding_the_claim()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"))).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").EnumerateArray().Single()
+            .TryGetProperty("instructions", out _).Should().BeFalse();
+
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+        var claim = (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").EnumerateArray().Single();
+        claim.GetProperty("instructions").GetString().Should().Be("ring twice");
+
+        (await sitterClient.PostAsync($"/api/requests/{id}/withdraw", null)).EnsureSuccessStatusCode();
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").EnumerateArray().Single()
+            .TryGetProperty("instructions", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Editing_the_profile_instructions_neither_drops_a_claim_nor_changes_the_copy_on_the_request()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(location: "RequestingFamilysHouse"))).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>().Members.Where(m => m.Id == owner)
+                .ExecuteUpdateAsync(m => m.SetProperty(x => x.Instructions, "new instructions"));
+        }
+
+        var claim = (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").EnumerateArray().Single();
+        claim.GetProperty("status").GetString().Should().Be("Claimed");
+        claim.GetProperty("instructions").GetString().Should().Be("ring twice");
     }
 
     [Fact]
@@ -333,7 +379,8 @@ public class RequestEndpointTests : IDisposable
         var withdrawn = await response.Content.ReadFromJsonAsync<JsonElement>();
         withdrawn.GetProperty("status").GetString().Should().Be("Posted");
         withdrawn.GetProperty("address").ValueKind.Should().Be(JsonValueKind.Null);
-        withdrawn.GetProperty("area").GetString().Should().Be("Riverside");
+        withdrawn.GetProperty("instructions").ValueKind.Should().Be(JsonValueKind.Null);
+        withdrawn.GetProperty("area").GetString().Should().Be("Riverside (80)");
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").GetArrayLength().Should().Be(1);
     }

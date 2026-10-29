@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\src\backend\BabysittingPool.Application\BabysittingPool.Application.csproj" />
     <ProjectReference Include="..\..\src\backend\BabysittingPool.Infrastructure\BabysittingPool.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\backend\BabysittingPool.Api\BabysittingPool.Api.csproj" />
+    <ProjectReference Include="..\..\src\backend\BabysittingPool.E2E\BabysittingPool.E2E.csproj" />
   </ItemGroup>
 
 </Project>

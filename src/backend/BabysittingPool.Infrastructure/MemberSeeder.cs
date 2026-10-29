@@ -40,8 +40,12 @@ public static class MemberSeeder
             DisplayName = displayName,
             IsAdmin = isAdmin,
             CreatedAt = now,
-            Area = home?.Area,
             Address = home?.Address,
+            Commune = home?.Commune,
+            InseeCode = home?.InseeCode,
+            DepartmentNumber = home?.DepartmentNumber,
+            Postcode = home?.Postcode,
+            Instructions = home?.Instructions,
         });
         db.CreditAccounts.Add(new CreditAccountRecord
         {

@@ -12,7 +12,7 @@ import {
 } from './mocks'
 
 describe('OpenRequestsPage', () => {
-  it('lists open Requests with the rough area, details and credits, and no address', async () => {
+  it('lists open Requests with the rough area, details and credits, and no address or instructions', async () => {
     server.use(
       openRequestsHandler({
         items: [sampleOpenRequest, { ...sampleOpenRequest, id: 'b', area: 'Hilltop' }],
@@ -29,6 +29,7 @@ describe('OpenRequestsPage', () => {
     expect(within(row).getByText('120 minutes, 2 children')).toBeInTheDocument()
     expect(within(row).getByText('3.00')).toBeInTheDocument()
     expect(other).toHaveTextContent(/hilltop/i)
+    expect(row).not.toHaveTextContent(/ring twice/i)
   })
 
   it('says so when nothing is open', async () => {

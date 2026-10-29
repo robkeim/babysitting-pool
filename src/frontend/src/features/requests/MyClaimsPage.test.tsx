@@ -12,7 +12,7 @@ import {
 } from './mocks'
 
 describe('MyClaimsPage', () => {
-  it('lists the Member’s claims with state, credits, area and the exact address', async () => {
+  it('lists the Member’s claims with state, credits, area, the exact address and its instructions', async () => {
     server.use(
       myClaimsHandler({
         items: [
@@ -31,6 +31,7 @@ describe('MyClaimsPage', () => {
     expect(within(claimed).getByText('Claimed')).toBeInTheDocument()
     expect(within(claimed).getByText('2.00')).toBeInTheDocument()
     expect(within(claimed).getByText('12 River Rd')).toBeInTheDocument()
+    expect(within(claimed).getByText('ring twice')).toBeInTheDocument()
     expect(within(other).getByText('Completed')).toBeInTheDocument()
   })
 

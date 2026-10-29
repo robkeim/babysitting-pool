@@ -76,7 +76,7 @@ public class NotificationTests : IAsyncLifetime
         rows.Select(n => n.MemberId).Should().BeEquivalentTo([_sitter, _bystander]);
         rows.Should().OnlyContain(n =>
             n.Kind == "request_posted" && n.RequestId == posted.Id && n.CreatedAt == Now
-            && n.StartsAt == Now.AddHours(10) && n.SitterId == null && n.Area == "Riverside");
+            && n.StartsAt == Now.AddHours(10) && n.SitterId == null && n.Area == "Riverside (80)");
         rows.Select(n => n.Id).Distinct().Should().HaveCount(2);
     }
 

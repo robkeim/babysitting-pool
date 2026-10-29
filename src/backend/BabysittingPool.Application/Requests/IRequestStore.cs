@@ -89,7 +89,7 @@ public interface IRequestReader
         Guid excludeRequesterId, DateTime now, PageRequest page, CancellationToken cancellationToken);
 
     /// <summary>
-    /// The Requests the Member claimed as Sitter, latest start first, exact address included: the Sitter holds the
+    /// The Requests the Member claimed as Sitter, latest start first, exact address and instructions included: the Sitter holds the
     /// claim (spec §4.6). A Request the Sitter withdrew from has no Sitter any more, so it drops off the list.
     /// </summary>
     Task<Page<RequestView>> ListClaimedByAsync(
