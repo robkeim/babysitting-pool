@@ -75,7 +75,7 @@ test('a Member cannot post inside the Minimum Lead Time', async ({ page, backend
   await page.getByLabel(/start time/i).fill('2026-03-01T12:00')
   await page.getByRole('button', { name: /post request/i }).click()
 
-  await expect(page.getByRole('alert')).toContainText(/too soon/i)
+  await expect(page.getByRole('alert')).toContainText(/at least 6 hours/i)
 })
 
 test('a Member with no available credits cannot post', async ({ page, backend }) => {

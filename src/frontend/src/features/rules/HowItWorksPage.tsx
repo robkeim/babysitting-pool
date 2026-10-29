@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CostReceipt } from '@/features/requests'
 import { formatCredits } from '@/features/credits'
 import { useRules } from './api'
+import { formatDuration } from './formatDuration'
 import type { PricingExample, RulesView } from './types'
 
 /** Anchors a link can point at, e.g. `/how-it-works#pricing` from the post form. */
@@ -16,13 +17,6 @@ const SECTION_IDS = {
 } as const
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
-/** "6 hours" when the minutes are whole hours, else "90 minutes". */
-function duration(intl: IntlShape, minutes: number) {
-  return minutes % 60 === 0
-    ? intl.formatMessage({ id: 'rules.hours' }, { count: minutes / 60 })
-    : intl.formatMessage({ id: 'rules.minutes' }, { count: minutes })
-}
 
 /** The weekday in the Member's Language; 2024-01-07 was a Sunday. */
 function weekday(intl: IntlShape, day: string) {
@@ -168,13 +162,13 @@ function Rules({ rules }: { rules: RulesView }) {
           <li>
             <FormattedMessage
               id="rules.requests.lead"
-              values={{ lead: duration(intl, rules.minimumLeadTimeMinutes) }}
+              values={{ lead: formatDuration(intl, rules.minimumLeadTimeMinutes) }}
             />
           </li>
           <li>
             <FormattedMessage
               id="rules.requests.claim"
-              values={{ cutoff: duration(intl, rules.claimCutoffMinutes) }}
+              values={{ cutoff: formatDuration(intl, rules.claimCutoffMinutes) }}
             />
           </li>
           <li>

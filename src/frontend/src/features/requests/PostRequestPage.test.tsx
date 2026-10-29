@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
+import { http, HttpResponse } from 'msw'
 import { PostRequestPage } from './PostRequestPage'
 import {
   availableBalanceHandler,
@@ -179,13 +180,14 @@ describe('PostRequestPage', () => {
       availableBalanceHandler(40),
       quoteHandler({ costQuarterCredits: 8 }),
       postRequestRejectedHandler('below_minimum_lead_time'),
+      http.get('*/api/rules', () => HttpResponse.json({ minimumLeadTimeMinutes: 360 })),
     )
 
     renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
     await fillRequiredFields(user)
     await user.click(screen.getByRole('button', { name: /post request/i }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/too soon/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/at least 6 hours/i)
   })
 
   it('prices each option inline and itemises the backend quote as a receipt', async () => {
