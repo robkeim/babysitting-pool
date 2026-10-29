@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { formatCredits, useMyAccount } from '@/features/credits'
 import { useMyProfile } from '@/features/profile'
+import { formatDuration, useRules } from '@/features/rules'
 import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useQuote, usePostRequest } from './api'
@@ -38,8 +39,10 @@ const POST_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   home_location_required: 'error.home_location_required',
 }
 
-function postFailure(error: unknown): MessageId {
+function postFailure(error: unknown, leadKnown: boolean): MessageId {
   const code = error instanceof ApiError ? error.code : ''
+  if (code === 'below_minimum_lead_time' && !leadKnown)
+    return 'error.below_minimum_lead_time.unknown'
   return POST_FAILURE_CODES[code] ?? 'requests.post.failed.generic'
 }
 
@@ -49,6 +52,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const account = useMyAccount()
   const post = usePostRequest()
   const profile = useMyProfile()
+  const rules = useRules()
   const [startsAt, setStartsAt] = useState(defaultStartsAt)
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [childCount, setChildCount] = useState(1)
@@ -386,7 +390,12 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                 <FormattedMessage id="requests.post.failed.title" />
               </AlertTitle>
               <AlertDescription>
-                <FormattedMessage id={postFailure(post.error)} />
+                <FormattedMessage
+                  id={postFailure(post.error, rules.data !== undefined)}
+                  values={{
+                    lead: rules.data ? formatDuration(intl, rules.data.minimumLeadTimeMinutes) : '',
+                  }}
+                />
               </AlertDescription>
             </Alert>
           )}
