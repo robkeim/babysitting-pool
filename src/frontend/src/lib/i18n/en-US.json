@@ -130,6 +130,7 @@
   "requests.open.starts": "Starts",
   "requests.open.area": "Area",
   "requests.open.details": "Details",
+  "requests.instructions": "Instructions for the address",
   "requests.open.credits": "Credits",
   "requests.open.claim": "Claim",
   "requests.open.claimFailed.title": "We couldn't claim that request",

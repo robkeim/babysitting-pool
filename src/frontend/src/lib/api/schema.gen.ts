@@ -946,6 +946,7 @@ export interface components {
             dinner: boolean;
             area: null | string;
             address: null | string;
+            instructions: null | string;
             /** Format: int64 */
             costQuarterCredits: number;
             /** Format: date-time */

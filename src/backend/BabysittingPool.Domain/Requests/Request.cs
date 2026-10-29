@@ -15,7 +15,8 @@ public sealed class Request
 
     private Request(
         Guid id, Guid requesterId, Guid? sitterId, CreditRequestDetails details, DateTime startsAt,
-        string? area, string? address, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt, RequestStatus status)
+        string? area, string? address, string? instructions, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt,
+        RequestStatus status)
     {
         Id = id;
         RequesterId = requesterId;
@@ -24,6 +25,7 @@ public sealed class Request
         StartsAt = startsAt;
         Area = area;
         Address = address;
+        Instructions = instructions;
         Cost = cost;
         ClaimCutoffAt = claimCutoffAt;
         PostedAt = postedAt;
@@ -50,6 +52,9 @@ public sealed class Request
 
     /// <summary>The exact address; only the Requester, and the Sitter once Claimed, may see it (spec §4.6).</summary>
     public string? Address { get; }
+
+    /// <summary>The Requester's address instructions, copied with the address and shown on the same terms (ADR 0020).</summary>
+    public string? Instructions { get; }
 
     /// <summary>The cost taken into Escrow when the Request was posted.</summary>
     public Credits.Credits Cost { get; }
@@ -110,15 +115,17 @@ public sealed class Request
 
         return new Request(
             Guid.NewGuid(), requesterId, null, details, startsAt,
-            atFamilyHouse ? requesterHome!.Area : null, atFamilyHouse ? requesterHome!.Address : null, cost,
+            atFamilyHouse ? requesterHome!.Area : null, atFamilyHouse ? requesterHome!.Address : null,
+            atFamilyHouse ? requesterHome!.Instructions : null, cost,
             startsAt - claimCutoff, now, RequestStatus.Posted);
     }
 
     /// <summary>Rehydrates a Request from persisted state.</summary>
     public static Request Restore(
         Guid id, Guid requesterId, Guid? sitterId, CreditRequestDetails details, DateTime startsAt,
-        string? area, string? address, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt, RequestStatus status) =>
-        new(id, requesterId, sitterId, details, startsAt, area, address, cost, claimCutoffAt, postedAt, status);
+        string? area, string? address, string? instructions, Credits.Credits cost, DateTime claimCutoffAt, DateTime postedAt,
+        RequestStatus status) =>
+        new(id, requesterId, sitterId, details, startsAt, area, address, instructions, cost, claimCutoffAt, postedAt, status);
 
     /// <summary>
     /// The status a reader should show at <paramref name="now"/>: an overdue Posted Request already reads as

@@ -34,7 +34,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         return record is null ? null : Request.Restore(
             record.Id, record.RequesterId, record.SitterId,
             new CreditRequestDetails(record.DurationMinutes, record.ChildCount, record.Location, record.Transport, record.Meals),
-            record.StartsAt, record.Area, record.Address, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status);
+            record.StartsAt, record.Area, record.Address, record.Instructions, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status);
     }
 
     private IDbContextTransaction? _claimTransaction;
@@ -56,7 +56,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         return records.Select(record => Request.Restore(
             record.Id, record.RequesterId, record.SitterId,
             new CreditRequestDetails(record.DurationMinutes, record.ChildCount, record.Location, record.Transport, record.Meals),
-            record.StartsAt, record.Area, record.Address, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status)).ToList();
+            record.StartsAt, record.Area, record.Address, record.Instructions, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status)).ToList();
     }
 
     public async Task<IReadOnlyList<NotificationDelivery>> SaveClaimedAsync(Request request, DateTime now, CancellationToken cancellationToken)
@@ -221,6 +221,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             Meals = request.Details.Meals,
             Area = request.Area,
             Address = request.Address,
+            Instructions = request.Instructions,
             Cost = request.Cost,
             ClaimCutoffAt = request.ClaimCutoffAt,
             PostedAt = request.PostedAt,
