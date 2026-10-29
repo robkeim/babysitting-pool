@@ -31,6 +31,16 @@ export const cancelledNotification: NotificationView = {
   sitterId: null,
 }
 
+export const withdrawnNotification: NotificationView = {
+  id: '5b0c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e04',
+  kind: 'request_withdrawn',
+  createdAt: '2026-03-01T11:30:00Z',
+  requestId: '2f6c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e55',
+  area: null,
+  startsAt: '2026-03-02T10:00:00Z',
+  sitterId: null,
+}
+
 export function notificationsHandler(items: NotificationView[], nextCursor: string | null = null) {
   return http.get('*/api/notifications', () =>
     HttpResponse.json({ items, nextCursor } satisfies NotificationPage),

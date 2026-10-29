@@ -13,6 +13,7 @@ import {
   notificationsHandler,
   openRequestIdsHandler,
   postedNotification,
+  withdrawnNotification,
 } from './mocks'
 
 function renderBell() {
@@ -189,6 +190,22 @@ describe('NotificationBell', () => {
       name: 'A request you claimed for Mar 2, 2026, 10:00 AM UTC was cancelled',
     })
     expect(link).toHaveAttribute('href', '/claims')
+  })
+
+  it('tells the Requester the Sitter withdrew and links to their requests', async () => {
+    server.use(
+      notificationsHandler([withdrawnNotification]),
+      openRequestIdsHandler([]),
+      claimedRequestsHandler([]),
+    )
+    renderBell()
+
+    const panel = await openPanel()
+
+    const link = await within(panel).findByRole('link', {
+      name: 'The sitter withdrew from your request for Mar 2, 2026, 10:00 AM UTC',
+    })
+    expect(link).toHaveAttribute('href', '/requests')
   })
 
   it('says it could not load the Notifications', async () => {

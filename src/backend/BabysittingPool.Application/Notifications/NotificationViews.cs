@@ -1,6 +1,6 @@
 namespace BabysittingPool.Application.Notifications;
 
-/// <summary>The three kinds of in-app Notification (spec §2A, ADR 0019). The value is what the API and the table carry.</summary>
+/// <summary>The four kinds of in-app Notification (spec §2A, ADR 0019). The value is what the API and the table carry.</summary>
 public static class NotificationKinds
 {
     /// <summary>A Request was Posted; goes to every open Member but the Requester.</summary>
@@ -11,12 +11,15 @@ public static class NotificationKinds
 
     /// <summary>A Claimed Request was cancelled by its Requester; goes to its Sitter.</summary>
     public const string RequestCancelled = "request_cancelled";
+
+    /// <summary>A Sitter withdrew their claim; goes to the Requester. The Request may be back to Posted or Expired.</summary>
+    public const string RequestWithdrawn = "request_withdrawn";
 }
 
 /// <summary>
 /// One Notification as its Member sees it: ids, kind, time and a small payload, never an address, a name or free
 /// text. <see cref="Area"/> and <see cref="StartsAt"/> are set for a Posted Request (Area only if it has one),
-/// and <see cref="StartsAt"/> for a Cancelled one;
+/// and <see cref="StartsAt"/> for a Cancelled or Withdrawn one;
 /// <see cref="SitterId"/> for a Claimed one.
 /// </summary>
 public sealed record NotificationView(

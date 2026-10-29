@@ -296,6 +296,8 @@
   "notifications.claimed.generic": "A sitter claimed your request.",
   "notifications.cancelled.dated": "A request you claimed for {date} was cancelled",
   "notifications.cancelled.generic": "A request you claimed was cancelled.",
+  "notifications.withdrawn.dated": "The sitter withdrew from your request for {date}",
+  "notifications.withdrawn.generic": "The sitter withdrew from your request.",
   "notifications.row.unavailable": "No longer available",
   "notifications.row.dismiss": "Dismiss: {summary}"
 }

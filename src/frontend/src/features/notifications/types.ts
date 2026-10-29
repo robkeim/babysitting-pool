@@ -8,4 +8,5 @@ export const NOTIFICATION_KINDS = {
   requestPosted: 'request_posted',
   requestClaimed: 'request_claimed',
   requestCancelled: 'request_cancelled',
+  requestWithdrawn: 'request_withdrawn',
 } as const

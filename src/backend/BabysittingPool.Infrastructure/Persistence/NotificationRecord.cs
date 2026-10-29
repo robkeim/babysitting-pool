@@ -22,7 +22,7 @@ public sealed class NotificationRecord
     /// <summary>Posted only: the Request's Area, if it has one.</summary>
     public string? Area { get; set; }
 
-    /// <summary>Posted and Cancelled only.</summary>
+    /// <summary>Posted, Cancelled and Withdrawn only.</summary>
     public DateTime? StartsAt { get; set; }
 
     /// <summary>Claimed only.</summary>
