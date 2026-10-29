@@ -3,15 +3,19 @@ import { FormattedMessage } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
+import { AddressSearch } from './AddressSearch'
 import { useMyProfile, useUpdateProfile } from './api'
-import type { ProfileView } from './types'
+import type { AddressSuggestion, ProfileView } from './types'
+
+const INSTRUCTIONS_MAX_LENGTH = 300
 
 const KNOWN_FAILURES: Record<string, MessageId> = {
-  invalid_area: 'profile.failed.area',
   invalid_address: 'profile.failed.address',
+  invalid_instructions: 'profile.failed.instructions',
+  address_service_unavailable: 'profile.failed.unavailable',
 }
 
 function failure(error: unknown): MessageId {
@@ -23,12 +27,20 @@ function failure(error: unknown): MessageId {
 
 function ProfileForm({ profile }: { profile: ProfileView }) {
   const update = useUpdateProfile()
-  const [area, setArea] = useState(profile.area ?? '')
-  const [address, setAddress] = useState(profile.address ?? '')
+  const [text, setText] = useState(profile.address ?? '')
+  const [picked, setPicked] = useState<AddressSuggestion | null>(null)
+  const [instructions, setInstructions] = useState(profile.instructions ?? '')
+
+  // Typed text that is not a pick is not an address; the saved one stays valid while it is untouched.
+  const editedWithoutPick = picked === null && text.trim() !== (profile.address ?? '')
+  const hasAddress = picked !== null || profile.address !== null
+  const area = picked ? `${picked.commune} (${picked.departmentNumber})` : profile.area
 
   function submit(event: SyntheticEvent) {
     event.preventDefault()
-    update.mutate({ area, address })
+    update.mutate(
+      picked ? { banId: picked.banId, label: picked.label, instructions } : { instructions },
+    )
   }
 
   return (
@@ -44,32 +56,47 @@ function ProfileForm({ profile }: { profile: ProfileView }) {
             <FormattedMessage id="profile.home.intro" />
           </p>
           <div className="space-y-2">
-            <label htmlFor="area" className="text-sm font-medium">
-              <FormattedMessage id="profile.area" />
-            </label>
-            <Input
-              id="area"
-              className="h-11 lg:h-8"
-              required
-              maxLength={100}
-              value={area}
-              onChange={(event) => {
-                setArea(event.target.value)
-              }}
-            />
-          </div>
-          <div className="space-y-2">
             <label htmlFor="address" className="text-sm font-medium">
               <FormattedMessage id="profile.address" />
             </label>
-            <Input
+            <AddressSearch
               id="address"
-              className="h-11 lg:h-8"
-              required
-              maxLength={200}
-              value={address}
+              value={text}
+              searching={editedWithoutPick}
+              describedBy="address-hint"
+              onChange={(value) => {
+                setText(value)
+                setPicked(null)
+              }}
+              onPick={(suggestion) => {
+                setText(suggestion.label)
+                setPicked(suggestion)
+              }}
+            />
+            <p id="address-hint" className="text-sm text-muted-foreground">
+              <FormattedMessage id="profile.address.hint" />
+            </p>
+            {editedWithoutPick && (
+              <p className="text-sm text-destructive">
+                <FormattedMessage id="profile.address.choose" />
+              </p>
+            )}
+          </div>
+          {area && (
+            <p className="text-sm">
+              <FormattedMessage id="profile.area.preview" values={{ area }} />
+            </p>
+          )}
+          <div className="space-y-2">
+            <label htmlFor="instructions" className="text-sm font-medium">
+              <FormattedMessage id="profile.instructions" />
+            </label>
+            <Textarea
+              id="instructions"
+              maxLength={INSTRUCTIONS_MAX_LENGTH}
+              value={instructions}
               onChange={(event) => {
-                setAddress(event.target.value)
+                setInstructions(event.target.value)
               }}
             />
           </div>
@@ -91,7 +118,7 @@ function ProfileForm({ profile }: { profile: ProfileView }) {
           <Button
             type="submit"
             className="h-11 w-full lg:h-8 lg:w-auto"
-            disabled={update.isPending}
+            disabled={update.isPending || editedWithoutPick || !hasAddress}
           >
             <FormattedMessage id="profile.save" />
           </Button>

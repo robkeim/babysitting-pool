@@ -156,9 +156,6 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Area")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("TEXT");
 
@@ -168,7 +165,13 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("system");
 
+                    b.Property<string>("Commune")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DepartmentNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DisplayName")
@@ -179,6 +182,12 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("InseeCode")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Instructions")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
 
@@ -187,6 +196,9 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("en-US");
+
+                    b.Property<string>("Postcode")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

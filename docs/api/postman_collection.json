@@ -1583,7 +1583,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "body": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\",\n  \"commune\": \"<null,string>\",\n  \"inseeCode\": \"<null,string>\",\n  \"departmentNumber\": \"<null,string>\",\n  \"postcode\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -1695,7 +1695,7 @@
                     "method": "PUT",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "raw": "{\n  \"banId\": \"<null,string>\",\n  \"label\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -1734,7 +1734,7 @@
                         "method": "PUT",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                          "raw": "{\n  \"banId\": \"<null,string>\",\n  \"label\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -1751,7 +1751,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                      "body": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\",\n  \"commune\": \"<null,string>\",\n  \"inseeCode\": \"<null,string>\",\n  \"departmentNumber\": \"<null,string>\",\n  \"postcode\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },
@@ -1783,7 +1783,7 @@
                         "method": "PUT",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                          "raw": "{\n  \"banId\": \"<null,string>\",\n  \"label\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -1832,7 +1832,7 @@
                         "method": "PUT",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                          "raw": "{\n  \"banId\": \"<null,string>\",\n  \"label\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -1881,7 +1881,7 @@
                         "method": "PUT",
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"area\": \"<null,string>\",\n  \"address\": \"<null,string>\"\n}",
+                          "raw": "{\n  \"banId\": \"<null,string>\",\n  \"label\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -1892,6 +1892,55 @@
                       },
                       "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
                       "code": 422,
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/problem+json"
+                        }
+                      ],
+                      "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
+                      "cookie": [],
+                      "_postman_previewlanguage": "json"
+                    },
+                    {
+                      "name": "Service Unavailable",
+                      "originalRequest": {
+                        "url": {
+                          "path": [
+                            "api",
+                            "me",
+                            "profile"
+                          ],
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "query": [],
+                          "variable": []
+                        },
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/problem+json"
+                          }
+                        ],
+                        "method": "PUT",
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"banId\": \"<null,string>\",\n  \"label\": \"<null,string>\",\n  \"instructions\": \"<null,string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        }
+                      },
+                      "status": "Service Unavailable",
+                      "code": 503,
                       "header": [
                         {
                           "key": "Content-Type",

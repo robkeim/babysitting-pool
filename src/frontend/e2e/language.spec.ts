@@ -10,7 +10,7 @@ test('a Member switches Language, the visible text changes and the choice outliv
   await page.goto('/profile')
   await expect(page.getByRole('heading', { level: 1, name: 'Babysitting Pool' })).toBeVisible()
 
-  await page.getByLabel('Language').selectOption({ label: '🏴‍☠️ Ünïcödé Tëst' })
+  await page.locator('#language').selectOption({ label: '🏴‍☠️ Ünïcödé Tëst' })
   await expect(page.getByRole('heading', { level: 1, name: /^⏩/u })).toBeVisible()
   await expect(page.locator('#language')).toHaveValue('en-XA')
 

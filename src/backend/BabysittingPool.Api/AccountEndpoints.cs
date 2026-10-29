@@ -1,4 +1,5 @@
 using BabysittingPool.Application;
+using BabysittingPool.Application.Addresses;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
@@ -51,7 +52,7 @@ internal static class AccountEndpoints
         {
             try
             {
-                var command = new UpdateMyProfileCommand(context.CurrentMember().MemberId, body.Area, body.Address);
+                var command = new UpdateMyProfileCommand(context.CurrentMember().MemberId, body.BanId, body.Label, body.Instructions);
                 return await handler.HandleAsync(command, cancellationToken) is { } profile
                     ? Results.Ok(profile)
                     : Problems.MemberNotFound();
@@ -60,13 +61,18 @@ internal static class AccountEndpoints
             {
                 return Problems.DomainRule(ex);
             }
+            catch (AddressServiceUnavailableException)
+            {
+                return Problems.AddressServiceUnavailable();
+            }
         })
         .RequireAuthorization()
         .WithName("UpdateMyProfile")
         .Produces<ProfileView>()
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
         app.MapGet("/api/rules", (GetRulesHandler handler) => Results.Ok(handler.Handle()))
         .RequireAuthorization()
@@ -75,5 +81,5 @@ internal static class AccountEndpoints
         .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 
-    private sealed record ProfileBody(string? Area, string? Address);
+    private sealed record ProfileBody(string? BanId, string? Label, string? Instructions);
 }

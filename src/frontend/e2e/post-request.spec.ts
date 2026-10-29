@@ -35,7 +35,7 @@ test('a Member posts a Request at the sitter’s house with no area or address, 
   ).toHaveCount(1)
 })
 
-test('a Member sets their area and address once on their profile, and a Request at their house uses them', async ({
+test('a Member sets their address once on their profile, and a Request at their house uses them', async ({
   page,
   backend,
 }) => {
@@ -48,8 +48,9 @@ test('a Member sets their area and address once on their profile, and a Request 
   await expect(page.getByRole('button', { name: /post request/i })).toBeDisabled()
 
   await page.goto('/profile')
-  await page.getByLabel(/^area/i).fill('Riverside')
-  await page.getByLabel(/exact address/i).fill('12 River Rd')
+  await page.getByRole('combobox', { name: /search for your address/i }).fill('12 River Rd')
+  await page.getByRole('option', { name: '12 River Rd 80000 Riverside' }).click()
+  await expect(page.getByText(/other members will see: riverside \(80\)/i)).toBeVisible()
   await page.getByRole('button', { name: /save/i }).click()
   await expect(page.getByRole('status')).toContainText(/saved/i)
 
@@ -57,7 +58,7 @@ test('a Member sets their area and address once on their profile, and a Request 
   await page.getByLabel(/start time/i).fill('2026-03-02T10:00')
   await page.getByLabel(/duration/i).fill('120')
   await page.getByLabel('Location').selectOption('RequestingFamilysHouse')
-  await expect(page.getByText(/riverside, 12 river rd/i)).toBeVisible()
+  await expect(page.getByText(/riverside \(80\), 12 river rd/i)).toBeVisible()
   await expect(page.getByText('2.50 credits')).toBeVisible()
   await page.getByRole('button', { name: /post request/i }).click()
 

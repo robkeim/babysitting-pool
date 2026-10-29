@@ -72,6 +72,12 @@ builder.Services.AddHttpClient<IAddressSuggester, BanAddressSuggester>(client =>
 })
 // The default handlers log the full request URL, which holds the query: a partial home address (ADR 0010).
 .RemoveAllLoggers();
+if (builder.Environment.IsEnvironment(TestEndpoints.Environment))
+{
+    // Browser journeys must not call the real BAN service.
+    builder.Services.AddSingleton<IAddressSuggester, E2eAddressSuggester>();
+}
+
 builder.Services.AddSessionAuthentication();
 builder.Services.AddFeatureFlags();
 builder.Services.AddApiRateLimiting(builder.Configuration);

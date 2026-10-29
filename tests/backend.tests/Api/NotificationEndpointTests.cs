@@ -53,7 +53,7 @@ public class NotificationEndpointTests : IDisposable
 
         var item = list.GetProperty("items").EnumerateArray().Single();
         item.GetProperty("kind").GetString().Should().Be("request_posted");
-        item.GetProperty("area").GetString().Should().Be("Riverside");
+        item.GetProperty("area").GetString().Should().Be("Riverside (80)");
         item.GetProperty("startsAt").GetString().Should().Be("2026-03-01T19:00:00Z");
         item.GetRawText().Should().NotContain("River Rd");
         list.GetProperty("nextCursor").ValueKind.Should().Be(JsonValueKind.Null);
