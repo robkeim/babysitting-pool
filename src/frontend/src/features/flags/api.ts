@@ -21,11 +21,17 @@ export function useFeatureFlags(enabled = true) {
   })
 }
 
-/** Whether the flag is on for the caller. Off while the flags load, fail to load, or the name is not declared. */
-export function useFeatureFlag(name: string): boolean {
+/** The flag's value for the caller, or undefined while the flags load or fail to load. */
+export function useFeatureFlagValue(name: string): boolean | undefined {
   const overrides = useFeatureFlagOverrides()
   const flags = useFeatureFlags(overrides === undefined)
-  return (overrides ?? flags.data)?.[name] ?? false
+  const resolved = overrides ?? flags.data
+  return resolved === undefined ? undefined : (resolved[name] ?? false)
+}
+
+/** Whether the flag is on for the caller. Off while the flags load, fail to load, or the name is not declared. */
+export function useFeatureFlag(name: string): boolean {
+  return useFeatureFlagValue(name) ?? false
 }
 
 export const adminFlagKeys = {

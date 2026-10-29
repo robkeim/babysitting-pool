@@ -7,6 +7,9 @@ import { FRONTEND_ROOT } from '../paths.ts'
 // The design check for agents (docs/design.md): every key screen in each Language, colour scheme and width,
 // saved as PNGs to look at. Run with `npm run design:screenshots`; it is not part of the gate.
 const OUTPUT = path.join(FRONTEND_ROOT, 'design-screenshots')
+const THEME = process.env.DESIGN_THEME === 'vacation' ? 'vacation' : undefined
+// True once the flag is on, so a screenshot waits for the page to have applied it.
+let themeFlagOn = false
 
 const LANGUAGES = [
   { tag: 'en-US', label: '🇺🇸 English', heading: /^Babysitting Pool$/ },
@@ -112,20 +115,22 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   await joiningPage.getByRole('button').click()
   await expect(joiningPage.getByRole('heading', { level: 2 })).toBeVisible()
   const adminCookies = await joining.cookies()
-  // The bell and its panel are behind the `notifications` flag (ADR 0019). Only the reader gets it: the bell polls,
-  // and on every screen the viewer would exceed the per-minute rate limit at this speed.
-  const flagResponse = await joining.request.put(`${backend.appUrl}/api/admin/feature-flags`, {
-    headers: { 'x-requested-with': 'fetch' },
-    data: {
-      name: 'notifications',
-      enabled: true,
-      rolloutPercent: 0,
-      allowedMemberIds: [readerId],
-      deniedMemberIds: [],
-      roleRollouts: [],
-    },
-  })
-  expect(flagResponse.ok()).toBe(true)
+  // `DESIGN_THEME=vacation` shows vacation mode: the flag is on for everyone, as an Admin would set it.
+  if (THEME) {
+    const flagResponse = await joining.request.put(`${backend.appUrl}/api/admin/feature-flags`, {
+      headers: { 'x-requested-with': 'fetch' },
+      data: {
+        name: 'vacationMode',
+        enabled: true,
+        rolloutPercent: 100,
+        allowedMemberIds: [],
+        deniedMemberIds: [],
+        roleRollouts: [],
+      },
+    })
+    expect(flagResponse.ok()).toBe(true)
+    themeFlagOn = true
+  }
   await joining.close()
 
   let minutes = 0
@@ -194,7 +199,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
         await expect(adminPage.getByRole('heading', { level: 2 })).toBeVisible()
         await capture(adminPage, 'feature-flags', `${language.tag}-${scheme}-${viewport.name}`)
         // The Admin tab's sheet (mobile) or dropdown (desktop), open over the page.
-        await adminPage.getByRole('navigation').getByRole('button').click()
+        await adminPage.getByRole('navigation').getByRole('button').first().click()
         const menu = adminPage.getByRole('dialog').or(adminPage.getByRole('menu'))
         await expect(menu).toBeVisible()
         await expect(menu).not.toHaveAttribute('data-starting-style')
@@ -216,6 +221,11 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
 })
 
 async function capture(page: Page, screen: string, variant: string) {
+  if (themeFlagOn) {
+    await page.waitForFunction("document.documentElement.dataset.theme === 'vacation'")
+    // Colours transition over 150ms; a shot taken sooner catches the old ones halfway.
+    await page.waitForTimeout(300)
+  }
   // Grow the viewport to the whole page so fixed bars sit where a reader would see them, then check nothing
   // forces a sideways scroll, the commonest way a long translation breaks a layout.
   const { width } = page.viewportSize() ?? { width: 1280 }

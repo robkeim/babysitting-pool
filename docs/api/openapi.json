@@ -2190,7 +2190,10 @@
             "type": "boolean"
           },
           "removalIssue": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "format": "int32"
           },
           "enabled": {

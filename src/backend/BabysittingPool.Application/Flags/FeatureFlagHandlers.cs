@@ -5,7 +5,7 @@ namespace BabysittingPool.Application.Flags;
 public sealed record FeatureFlagView(
     string Name,
     bool DefaultEnabled,
-    int RemovalIssue,
+    int? RemovalIssue,
     bool Enabled,
     int RolloutPercent,
     IReadOnlyList<Guid> AllowedMemberIds,

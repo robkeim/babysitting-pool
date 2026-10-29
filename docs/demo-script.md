@@ -124,6 +124,16 @@ Run this scenario right after Scenario 5 if the story flows better that way.
 7. Open **Feature flags**, toggle one and show it takes effect without a restart.
 8. As a non-Admin, open `/admin/members` to show it is refused.
 
+## Scenario 10: The Admin flips the whole app to vacation mode
+
+*Shows: runtime feature flags, no deploy, no restart.*
+
+1. In the Admin window, open **Admin** then **Feature flags** and find `vacationMode`: an operator toggle, off.
+2. Keep Ryan's or Sarah's window visible next to it, on any screen.
+3. Tick **Enabled** and **Save**. The Admin's own window turns coral at once; the other windows follow within about a minute, or as soon as you click back into them.
+4. To target a few people first, untick the rollout, set a Member's id in the always-on list and save: only that Member's window changes.
+5. Untick **Enabled** and save to put everything back.
+
 ## Optional extras
 
 - **Dark mode:** follows the system appearance setting ([`design.md`](design.md)); flip it in OS settings to show it.

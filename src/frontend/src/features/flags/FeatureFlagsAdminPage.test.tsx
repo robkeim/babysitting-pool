@@ -39,6 +39,16 @@ describe('FeatureFlagsAdminPage', () => {
     expect(within(card).getByLabelText(/always on/i)).toHaveValue(MEMBER)
   })
 
+  it('says an operator toggle stays for good instead of naming a removal issue', async () => {
+    server.use(adminFlagsHandler([{ ...sampleFlag, name: 'vacationMode', removalIssue: null }]))
+
+    renderWithProviders(<FeatureFlagsAdminPage />)
+
+    const card = await screen.findByRole('group', { name: 'vacationMode' })
+    expect(within(card).getByText('Operator toggle: stays for good')).toBeInTheDocument()
+    expect(within(card).queryByText(/removed by issue/i)).not.toBeInTheDocument()
+  })
+
   it('saves the edited settings whole', async () => {
     const user = userEvent.setup()
     const saved: UpdateFeatureFlagRequest[] = []

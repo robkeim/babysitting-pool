@@ -640,7 +640,7 @@ export interface components {
             name: string;
             defaultEnabled: boolean;
             /** Format: int32 */
-            removalIssue: number;
+            removalIssue: null | number;
             enabled: boolean;
             /** Format: int32 */
             rolloutPercent: number;

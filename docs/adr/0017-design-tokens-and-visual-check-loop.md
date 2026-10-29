@@ -16,4 +16,6 @@ Pixel-diff baselines were rejected: they fail on every font or date change and s
 
 **Amendment (2026-10-27, navigation overflow).** Eight tabs for an Admin did not fit the bar and broke label by letter. The bar now holds four Member tabs and, for Admins, a More tab holding the Admin pages: a bottom sheet below `lg`, a dropdown menu from `lg` up. It is still one `nav` element. The Language picker moved from the top bar to the Profile page to give the tabs room. The shell never splits a word, so `overflow-wrap:anywhere` is gone from navigation labels.
 
+**Amendment (2026-10-29, vacation mode).** One alternative theme exists: `vacationMode`, an operator toggle (ADR 0016) that swaps the tokens for sand, coral and dusk values. The SPA sets `data-theme="vacation"` on `<html>` from the flag and remembers it in `localStorage` (a convenience that may be missing, so the page works without it) so a reload does not flash the default colours. The values live in `:root[data-theme='vacation']` blocks in `index.css`, with a light and a dark set, and no component knows about the theme. A new token needs a value there too. There is one theme and no Member-chosen picker.
+
 Related: ADR 0003 (stack; shadcn stays vanilla except for tokens), ADR 0005 (`components/` holds shared composed components such as the shell), ADR 0009 (the test Language is the layout stress test).

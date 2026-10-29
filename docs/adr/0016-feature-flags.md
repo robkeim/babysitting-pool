@@ -18,3 +18,5 @@ Flags are short-lived release and rollout toggles: hide an unfinished slice on `
 
 
 **Amendment (2026-10-25, admin screen).** The admin screen is at `/admin/feature-flags`, linked in the nav for Admins only. Each flag is a form over the whole settings (master switch, rollout percent, a rollout percent for each of the two roles, allow and deny lists as member ids one per line) that saves with `PUT /api/admin/feature-flags`. The list is read in one page; the API never returns a next cursor.
+
+**Amendment (2026-10-29, operator toggles).** A flag declared with a `null` removal issue is an operator toggle: it is not a rollout and nothing retires it. It exists so an Admin can change how the whole app behaves at runtime, and to show the flag machinery working in a demo. The registry comment says why it stays, the admin screen shows "Operator toggle: stays for good" in place of the removal issue, and `removalIssue` in the API is nullable. The first is `vacationMode` (ADR 0017), off by default.
