@@ -66,7 +66,7 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
                 cancellationToken);
         await db.Invitations.Where(i => i.Email == formerEmail.Value && i.ConsumedAt == null)
             .ExecuteDeleteAsync(cancellationToken);
-        await db.Invitations.Where(i => i.Email == formerEmail.Value && i.ConsumedAt != null)
+        await db.Invitations.Where(i => i.AcceptedByMemberId == member.Id)
             .ExecuteUpdateAsync(i => i.SetProperty(x => x.Email, member.Email.Value), cancellationToken);
         await db.SignInLinks.Where(l => l.MemberId == member.Id).ExecuteDeleteAsync(cancellationToken);
         await db.Notifications.Where(n => n.MemberId == member.Id).ExecuteDeleteAsync(cancellationToken);
@@ -150,6 +150,7 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
     {
         var record = await db.Invitations.SingleAsync(i => i.Id == invitation.Id, cancellationToken);
         record.ConsumedAt = now;
+        record.AcceptedByMemberId = member.Id;
         record.Version++;
 
         db.Members.Add(new MemberRecord

@@ -136,7 +136,8 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         await using (var scope = _database.CreateScope())
         {
             await _database.NewContext(scope).Invitations
-                .ExecuteUpdateAsync(i => i.SetProperty(x => x.ConsumedAt, (DateTime?)Now));
+                .Where(i => i.Email == email)
+                .ExecuteUpdateAsync(i => i.SetProperty(x => x.ConsumedAt, (DateTime?)Now).SetProperty(x => x.AcceptedByMemberId, (Guid?)_leaver));
         }
 
         await OffboardAsync(_leaver);
@@ -145,6 +146,31 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         await using var after = _database.CreateScope();
         var emails = await _database.NewContext(after).Invitations.AsNoTracking().Select(i => i.Email).ToListAsync();
         emails.Should().BeEquivalentTo(["Former member", "someone.else@example.test"]);
+    }
+
+    [Fact]
+    public async Task Erasing_an_earlier_member_leaves_the_accepted_invitation_of_a_later_member_with_the_same_email()
+    {
+        var email = (await MemberAsync(_leaver)).Email;
+        var later = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await AddInvitationAsync(email);
+        await AddInvitationAsync(email);
+        await using (var scope = _database.CreateScope())
+        {
+            var ids = await _database.NewContext(scope).Invitations.AsNoTracking().OrderBy(i => i.Id).Select(i => i.Id).ToListAsync();
+            var db = _database.NewContext(scope);
+            await db.Invitations.Where(i => i.Id == ids[0])
+                .ExecuteUpdateAsync(i => i.SetProperty(x => x.ConsumedAt, (DateTime?)Now).SetProperty(x => x.AcceptedByMemberId, (Guid?)_leaver));
+            await db.Invitations.Where(i => i.Id == ids[1])
+                .ExecuteUpdateAsync(i => i.SetProperty(x => x.ConsumedAt, (DateTime?)Now).SetProperty(x => x.AcceptedByMemberId, (Guid?)later));
+        }
+
+        await OffboardAsync(_leaver);
+        await EraseAsync(_leaver);
+
+        await using var after = _database.CreateScope();
+        var emails = await _database.NewContext(after).Invitations.AsNoTracking().Select(i => i.Email).ToListAsync();
+        emails.Should().BeEquivalentTo(["Former member", email]);
     }
 
     [Fact]
