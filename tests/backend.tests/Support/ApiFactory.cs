@@ -3,6 +3,7 @@ using BabysittingPool.Application.Flags;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
+using BabysittingPool.E2E;
 using BabysittingPool.Infrastructure;
 using BabysittingPool.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
@@ -16,16 +17,57 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace backend.tests.Support;
 
-/// <summary>The real API over HTTP on a throwaway SQLite file and a fake clock.</summary>
+/// <summary>
+/// The E2E host (the API plus the test-only endpoints) over HTTP on a throwaway SQLite file and a fake clock. Its
+/// clients carry the E2E token unless the test turns that off.
+/// </summary>
 internal sealed class ApiFactory(
-    string environment = "E2E",
     string? bootstrapAdminEmail = null,
     FeatureFlag[]? flags = null,
     Dictionary<string, string>? features = null,
+    string? e2eToken = E2ETokens.Default,
+    bool sendE2EToken = true,
+    Dictionary<string, string>? settings = null,
+    Action<IServiceCollection>? configureServices = null)
+    : ApiFactoryBase<E2EHost>("E2E", bootstrapAdminEmail, flags, features, e2eToken, settings, true, configureServices)
+{
+    private readonly string? _clientToken = sendE2EToken ? e2eToken : null;
+
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        if (_clientToken is not null)
+        {
+            client.DefaultRequestHeaders.Add("X-E2E-Token", _clientToken);
+        }
+    }
+}
+
+internal static class E2ETokens
+{
+    public const string Default = "e2e-test-token";
+}
+
+/// <summary>The API alone, as Production (or Development) runs it: no test-only code.</summary>
+internal sealed class PlainApiFactory(
+    string environment = "Production",
+    string? bootstrapAdminEmail = null,
+    Dictionary<string, string>? features = null,
     string? e2eToken = null,
     Dictionary<string, string>? settings = null,
-    bool smtpConfigured = true,
-    Action<IServiceCollection>? configureServices = null) : WebApplicationFactory<Program>
+    bool smtpConfigured = true)
+    : ApiFactoryBase<Program>(environment, bootstrapAdminEmail, null, features, e2eToken, settings, smtpConfigured, null);
+
+internal abstract class ApiFactoryBase<TEntry>(
+    string environment,
+    string? bootstrapAdminEmail,
+    FeatureFlag[]? flags,
+    Dictionary<string, string>? features,
+    string? e2eToken,
+    Dictionary<string, string>? settings,
+    bool smtpConfigured,
+    Action<IServiceCollection>? configureServices) : WebApplicationFactory<TEntry>
+    where TEntry : class
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-api-{Guid.NewGuid():N}.db");
 

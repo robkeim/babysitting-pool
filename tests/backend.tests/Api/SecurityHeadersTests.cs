@@ -72,7 +72,7 @@ public class SecurityHeadersTests : IDisposable
     [Fact]
     public async Task Sends_HSTS_in_Production_over_https_only()
     {
-        using var production = new ApiFactory("Production", "admin@coop.example");
+        using var production = new PlainApiFactory("Production", "admin@coop.example");
         using var secure = production.CreateClient(new() { BaseAddress = new Uri("https://coop.example") });
         using var secureE2E = _factory.CreateClient(new() { BaseAddress = new Uri("https://coop.example") });
 

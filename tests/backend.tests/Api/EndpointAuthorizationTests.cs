@@ -25,7 +25,7 @@ public class EndpointAuthorizationTests : IDisposable
     ];
 
     // Production, so the Development and E2E endpoints (/api/dev, /api/test) are not mapped and cannot hide a gap.
-    private readonly ApiFactory _factory = new("Production", bootstrapAdminEmail: "admin@example.test");
+    private readonly PlainApiFactory _factory = new("Production", bootstrapAdminEmail: "admin@example.test");
 
     public void Dispose() => _factory.Dispose();
 

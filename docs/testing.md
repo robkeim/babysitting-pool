@@ -27,8 +27,8 @@ Time-dependent frontend code is display formatting only (countdown labels, co-op
 
 ## End-to-end (Playwright, Chromium, part of the full gate)
 
-- Real API plus SPA, no API mocks. A worker-scoped fixture starts one backend per Playwright worker (own port, temp-file SQLite, own `FakeTimeProvider`, `E2E` environment).
-- Test-only endpoints, registered only in `E2E` (an API test asserts 404 in Production): set the server clock, read the email outbox, seed state through application code.
+- Real API plus SPA, no API mocks. A worker-scoped fixture starts one backend per Playwright worker (the E2E host: own port, temp-file SQLite, own `FakeTimeProvider`, `E2E` environment, random token).
+- Test-only endpoints, in the `BabysittingPool.TestSupport` project that only the `BabysittingPool.E2E` host references (API tests assert 404 in Production and that the API assembly does not reference it), each needing the per-worker `E2E:Token`: set the server clock, read the email outbox, seed state through application code.
 - Each test sets the clock to an absolute time at its start and creates uniquely named Members. Browser time uses `page.clock`, kept in step with the server clock.
 - Sign-in flows read the magic link from the fake outbox.
 - Journeys, one file each: Invitation to account (10.0 Credits); Admin invites, re-sends and the person joins (own stack via the `ownBackend` fixture, because it consumes the bootstrap Admin Invitation that the shared stack keeps for the sign-in journey); post, claim and complete a Request with balances on both sides; cancel with refund; claim race (two browser contexts); Demurrage after a time jump.

@@ -24,7 +24,7 @@ public sealed class EmailWiringTests
     [InlineData("Testing")]
     public async Task Test_environments_never_resolve_the_smtp_sender_even_when_configured(string environment)
     {
-        using var factory = new ApiFactory(environment, settings: Smtp);
+        using var factory = new PlainApiFactory(environment, settings: Smtp);
         using var client = factory.CreateSpaClient();
 
         factory.Services.GetService<SmtpEmailSender>().Should().BeNull();
@@ -38,7 +38,7 @@ public sealed class EmailWiringTests
     [Fact]
     public async Task Development_without_secrets_seeds_example_test_members_through_the_outbox_only()
     {
-        using var factory = new ApiFactory("Development");
+        using var factory = new PlainApiFactory("Development");
         using var client = factory.CreateSpaClient();
 
         factory.Services.GetService<SmtpEmailSender>().Should().BeNull();
@@ -50,7 +50,7 @@ public sealed class EmailWiringTests
     [Fact]
     public async Task Development_with_secrets_seeds_plus_addresses_and_does_not_send_at_startup()
     {
-        using var factory = new ApiFactory("Development", settings: Smtp);
+        using var factory = new PlainApiFactory("Development", settings: Smtp);
         using var client = factory.CreateSpaClient();
 
         factory.Services.GetService<SmtpEmailSender>().Should().NotBeNull();
@@ -68,7 +68,7 @@ public sealed class EmailWiringTests
     [Fact]
     public async Task An_smtp_failure_surfaces_with_the_message_already_in_the_outbox()
     {
-        using var factory = new ApiFactory("Development", settings: Smtp);
+        using var factory = new PlainApiFactory("Development", settings: Smtp);
         var outbox = factory.Services.GetRequiredService<EmailOutbox>();
 
         var act = () => factory.InviteAsync("new.person@example.com");
