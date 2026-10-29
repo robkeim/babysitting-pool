@@ -44,12 +44,17 @@ async function serveBuild(apiUrl: string, csp: string): Promise<{ url: string; s
         response.on('close', () => {
           if (!response.writableFinished) aborted.abort()
         })
+        // Aborting before the headers arrive rejects the fetch; the browser has gone, so there is nobody to answer.
         const upstream = await fetch(apiUrl + url.pathname + url.search, {
           signal: aborted.signal,
           method: request.method,
           headers: request.headers as Record<string, string>,
           body: chunks.length > 0 ? Buffer.concat(chunks) : undefined,
-        })
+        }).catch(() => undefined)
+        if (!upstream) {
+          response.destroy()
+          return
+        }
         const headers = Object.fromEntries(upstream.headers)
         delete headers['content-encoding']
         delete headers['content-length']
