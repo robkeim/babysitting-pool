@@ -7,9 +7,6 @@ namespace BabysittingPool.Api;
 
 internal static class NotificationEndpoints
 {
-    /// <summary>The flag that hides in-app Notifications (ADR 0016, ADR 0019); removed by #160.</summary>
-    private const string Flag = "notifications";
-
     public const string StreamPath = "/api/notifications/stream";
 
     /// <summary>A comment line that keeps proxies from closing an idle stream (ADR 0019).</summary>
@@ -20,7 +17,6 @@ internal static class NotificationEndpoints
         // Not in OpenAPI: it cannot model an event stream, so the contract is in ADR 0019 and the spec.
         app.MapGet(StreamPath, StreamAsync)
             .RequireAuthorization()
-            .RequireFeature(Flag)
             .ExcludeFromDescription();
 
         app.MapGet("/api/notifications", async (
@@ -36,12 +32,10 @@ internal static class NotificationEndpoints
             }
         })
         .RequireAuthorization()
-        .RequireFeature(Flag)
         .WithName("ListNotifications")
         .Produces<Page<NotificationView>>()
         .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound);
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         app.MapDelete("/api/notifications/{id:guid}", async (
             Guid id, HttpContext context, DismissNotificationHandler handler, CancellationToken cancellationToken) =>
@@ -49,7 +43,6 @@ internal static class NotificationEndpoints
                 ? Results.NoContent()
                 : Problems.NotificationNotFound())
         .RequireAuthorization()
-        .RequireFeature(Flag)
         .WithName("DismissNotification")
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -62,11 +55,9 @@ internal static class NotificationEndpoints
             return Results.NoContent();
         })
         .RequireAuthorization()
-        .RequireFeature(Flag)
         .WithName("DismissAllNotifications")
         .Produces(StatusCodes.Status204NoContent)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound);
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 
     /// <summary>

@@ -9,13 +9,11 @@ namespace backend.tests.Api;
 
 public class NotificationEndpointTests : IDisposable
 {
-    private readonly ApiFactory _on = new(features: new Dictionary<string, string> { ["notifications"] = "true" });
-    private readonly ApiFactory _off = new();
+    private readonly ApiFactory _on = new();
 
     public void Dispose()
     {
         _on.Dispose();
-        _off.Dispose();
     }
 
     private static async Task<Guid> SeedAsync(ApiFactory factory) =>
@@ -35,26 +33,9 @@ public class NotificationEndpointTests : IDisposable
         })).StatusCode.Should().Be(HttpStatusCode.Created);
 
     [Fact]
-    public async Task While_the_flag_is_off_every_endpoint_answers_404_feature_off()
+    public async Task Signed_out_callers_get_401()
     {
-        using var client = _off.CreateMemberClient(await SeedAsync(_off));
-
-        foreach (var response in new[]
-        {
-            await client.GetAsync("/api/notifications"),
-            await client.DeleteAsync($"/api/notifications/{Guid.NewGuid()}"),
-            await client.DeleteAsync("/api/notifications"),
-        })
-        {
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-            (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be("feature_off");
-        }
-    }
-
-    [Fact]
-    public async Task Signed_out_callers_get_401_even_while_the_flag_is_off()
-    {
-        using var client = _off.CreateSpaClient();
+        using var client = _on.CreateSpaClient();
 
         (await client.GetAsync("/api/notifications")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }

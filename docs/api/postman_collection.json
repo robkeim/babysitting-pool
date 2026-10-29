@@ -4127,60 +4127,6 @@
                   "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
                   "cookie": [],
                   "_postman_previewlanguage": "json"
-                },
-                {
-                  "name": "Not Found",
-                  "originalRequest": {
-                    "url": {
-                      "path": [
-                        "api",
-                        "notifications"
-                      ],
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "query": [
-                        {
-                          "disabled": false,
-                          "description": {
-                            "content": "",
-                            "type": "text/plain"
-                          },
-                          "key": "cursor",
-                          "value": "<string>"
-                        },
-                        {
-                          "disabled": false,
-                          "description": {
-                            "content": "",
-                            "type": "text/plain"
-                          },
-                          "key": "limit",
-                          "value": "<integer>"
-                        }
-                      ],
-                      "variable": []
-                    },
-                    "header": [
-                      {
-                        "key": "Accept",
-                        "value": "application/problem+json"
-                      }
-                    ],
-                    "method": "GET",
-                    "body": {}
-                  },
-                  "status": "Not Found",
-                  "code": 404,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/problem+json"
-                    }
-                  ],
-                  "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
-                  "cookie": [],
-                  "_postman_previewlanguage": "json"
                 }
               ],
               "event": [],
@@ -4263,41 +4209,6 @@
                   },
                   "status": "Unauthorized",
                   "code": 401,
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "application/problem+json"
-                    }
-                  ],
-                  "body": "{\n  \"type\": \"<null,string>\",\n  \"title\": \"<null,string>\",\n  \"status\": \"<null,integer>\",\n  \"detail\": \"<null,string>\",\n  \"instance\": \"<null,string>\"\n}",
-                  "cookie": [],
-                  "_postman_previewlanguage": "json"
-                },
-                {
-                  "name": "Not Found",
-                  "originalRequest": {
-                    "url": {
-                      "path": [
-                        "api",
-                        "notifications"
-                      ],
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "query": [],
-                      "variable": []
-                    },
-                    "header": [
-                      {
-                        "key": "Accept",
-                        "value": "application/problem+json"
-                      }
-                    ],
-                    "method": "DELETE",
-                    "body": {}
-                  },
-                  "status": "Not Found",
-                  "code": 404,
                   "header": [
                     {
                       "key": "Content-Type",
