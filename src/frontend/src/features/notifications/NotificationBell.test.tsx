@@ -5,6 +5,7 @@ import { renderWithProviders } from '@/test/render'
 import { server } from '@/test/server'
 import { NotificationBell } from './NotificationBell'
 import {
+  cancelledNotification,
   claimedNotification,
   claimedRequestsHandler,
   dismissAllNotificationsHandler,
@@ -177,6 +178,22 @@ describe('NotificationBell', () => {
     const panel = await openPanel()
 
     expect(await within(panel).findByText('A sitter claimed your request.')).toBeInTheDocument()
+  })
+
+  it('tells the Sitter a claimed Request was cancelled and links to their claims', async () => {
+    server.use(
+      notificationsHandler([cancelledNotification]),
+      openRequestIdsHandler([]),
+      claimedRequestsHandler([]),
+    )
+    renderBell()
+
+    const panel = await openPanel()
+
+    const link = await within(panel).findByRole('link', {
+      name: 'A request you claimed for Mar 2, 2026, 10:00 AM UTC was cancelled',
+    })
+    expect(link).toHaveAttribute('href', '/claims')
   })
 
   it('says it could not load the Notifications', async () => {

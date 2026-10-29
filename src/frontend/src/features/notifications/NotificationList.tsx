@@ -64,6 +64,17 @@ export function NotificationList() {
         href: '/open-requests',
       }
     }
+    if (notification.kind === NOTIFICATION_KINDS.requestCancelled) {
+      const date = notification.startsAt ? formatInstant(notification.startsAt) : ''
+      return {
+        text: intl.formatMessage(
+          { id: date ? 'notifications.cancelled.dated' : 'notifications.cancelled.generic' },
+          { date },
+        ),
+        stale: false,
+        href: '/claims',
+      }
+    }
     const request = myRequests.find((candidate) => candidate.id === notification.requestId)
     const date = request ? formatInstant(request.startsAt) : ''
     const id: MessageId = !request

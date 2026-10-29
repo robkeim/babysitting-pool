@@ -159,7 +159,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         }
     }
 
-    public async Task SaveReleasedAsync(
+    public async Task<IReadOnlyList<NotificationDelivery>> SaveReleasedAsync(
         Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
     {
         await SetRequestStateAsync(request, cancellationToken);
@@ -169,7 +169,25 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             AddLedgerEntry(request.RequesterId, request, LedgerEntryKind.Refund, now);
         }
 
+        // A Cancelled Request keeps its Sitter, so only a cancelled claim has someone to tell (a withdrawal clears it).
+        // Same SaveChanges as the cancel, so a lost race leaves no Notification (ADR 0019).
+        NotificationRecord? notification = null;
+        if (request is { Status: RequestStatus.Cancelled, SitterId: { } sitterId })
+        {
+            notification = new NotificationRecord
+            {
+                Id = Guid.NewGuid(),
+                MemberId = sitterId,
+                Kind = NotificationKinds.RequestCancelled,
+                CreatedAt = now,
+                RequestId = request.Id,
+                StartsAt = request.StartsAt,
+            };
+            db.Notifications.Add(notification);
+        }
+
         await SaveAsync(cancellationToken);
+        return notification is null ? [] : [new NotificationDelivery(notification.MemberId, notification.ToView())];
     }
 
     public async Task<IReadOnlyList<NotificationDelivery>> AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
