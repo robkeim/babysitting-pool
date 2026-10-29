@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using BabysittingPool.Api;
 using BabysittingPool.Application;
+using BabysittingPool.Application.Addresses;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure;
@@ -64,6 +65,13 @@ else
     builder.Services.AddEmailOutbox();
 }
 
+builder.Services.AddHttpClient<IAddressSuggester, BanAddressSuggester>(client =>
+{
+    client.BaseAddress = new Uri(BanAddressSuggester.BaseAddress);
+    client.Timeout = BanAddressSuggester.Timeout;
+})
+// The default handlers log the full request URL, which holds the query: a partial home address (ADR 0010).
+.RemoveAllLoggers();
 builder.Services.AddSessionAuthentication();
 builder.Services.AddFeatureFlags();
 builder.Services.AddApiRateLimiting(builder.Configuration);
@@ -129,6 +137,7 @@ app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapRequestEndpoints();
 app.MapNotificationEndpoints();
+app.MapAddressEndpoints();
 app.MapAdminEndpoints();
 app.MapFeatureFlagEndpoints();
 

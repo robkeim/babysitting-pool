@@ -357,6 +357,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/address-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SuggestAddresses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/feature-flags": {
         parameters: {
             query?: never;
@@ -564,6 +580,15 @@ export interface components {
             escrowedQuarterCredits: number;
             ledger: components["schemas"]["PageOfLedgerEntryView"];
         };
+        AddressSuggestion: {
+            banId: string;
+            label: string;
+            commune: string;
+            inseeCode: string;
+            departmentNumber: string;
+            postcode: string;
+            type: string;
+        };
         AdminMemberView: {
             /** Format: uuid */
             id: string;
@@ -770,6 +795,10 @@ export interface components {
             costQuarterCredits: number;
             /** Format: date-time */
             claimCutoffAt: string;
+        };
+        PageOfAddressSuggestion: {
+            items: components["schemas"]["AddressSuggestion"][];
+            nextCursor: null | string;
         };
         PageOfAdminMemberView: {
             items: components["schemas"]["AdminMemberView"][];
@@ -1852,6 +1881,64 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SuggestAddresses: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageOfAddressSuggestion"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

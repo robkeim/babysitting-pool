@@ -24,7 +24,8 @@ internal sealed class ApiFactory(
     Dictionary<string, string>? features = null,
     string? e2eToken = null,
     Dictionary<string, string>? settings = null,
-    bool smtpConfigured = true) : WebApplicationFactory<Program>
+    bool smtpConfigured = true,
+    Action<IServiceCollection>? configureServices = null) : WebApplicationFactory<Program>
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-api-{Guid.NewGuid():N}.db");
 
@@ -81,6 +82,7 @@ internal sealed class ApiFactory(
 
             services.Replace(ServiceDescriptor.Singleton<TimeProvider>(Clock));
             services.Replace(ServiceDescriptor.Singleton(Clock));
+            configureServices?.Invoke(services);
         });
     }
 
