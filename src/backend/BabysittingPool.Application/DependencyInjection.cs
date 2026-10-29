@@ -1,3 +1,4 @@
+using BabysittingPool.Application.Addresses;
 using BabysittingPool.Application.Admin;
 using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Flags;
@@ -14,6 +15,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<GetMyAccountHandler>();
+        services.AddScoped<SuggestAddressesHandler>();
         services.AddSingleton(new CoopSettings());
         services.AddScoped<InvitationMailer>();
         services.AddScoped<GetRulesHandler>();

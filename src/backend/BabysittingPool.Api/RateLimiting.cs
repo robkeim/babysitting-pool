@@ -38,6 +38,8 @@ internal static class RateLimiting
 
     private const int StreamLimit = 30;
 
+    private const int AddressSuggestionLimit = 60;
+
     /// <summary>Sign-in link request, per email, so a Member's inbox cannot be flooded. Checked by the endpoint.</summary>
     public static Task<RateLimitDecision> HitSignInLinkEmailAsync(
         this SqliteRateLimitStore store, string email, CancellationToken cancellationToken) =>
@@ -153,6 +155,12 @@ internal static class RateLimiting
         if (path.StartsWithSegments(NotificationEndpoints.StreamPath, StringComparison.Ordinal))
         {
             return new Rule($"notification-stream:{member}", StreamLimit, MemberWindow);
+        }
+
+        // Typeahead fires per keystroke and each call reaches BAN (ADR 0020), so it has its own, tighter bucket.
+        if (path.StartsWithSegments(AddressEndpoints.Path, StringComparison.Ordinal))
+        {
+            return new Rule($"address-suggestions:{member}", AddressSuggestionLimit, MemberWindow);
         }
 
         // Client logs are batched by the SPA, so a Member sending them faster than this is a bug or abuse.

@@ -1123,6 +1123,75 @@
         }
       }
     },
+    "/api/address-suggestions": {
+      "get": {
+        "tags": [
+          "BabysittingPool.Api"
+        ],
+        "operationId": "SuggestAddresses",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfAddressSuggestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/feature-flags": {
       "get": {
         "tags": [
@@ -1958,6 +2027,41 @@
           }
         }
       },
+      "AddressSuggestion": {
+        "required": [
+          "banId",
+          "label",
+          "commune",
+          "inseeCode",
+          "departmentNumber",
+          "postcode",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "banId": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "commune": {
+            "type": "string"
+          },
+          "inseeCode": {
+            "type": "string"
+          },
+          "departmentNumber": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
       "AdminMemberView": {
         "required": [
           "id",
@@ -2626,6 +2730,27 @@
           "claimCutoffAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "PageOfAddressSuggestion": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressSuggestion"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },

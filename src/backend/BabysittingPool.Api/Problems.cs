@@ -38,6 +38,9 @@ internal static class Problems
     public static IResult TooManyRequests() =>
         Problem(StatusCodes.Status429TooManyRequests, "rate_limited", "Too many requests; try again later.");
 
+    public static IResult AddressServiceUnavailable() =>
+        Problem(StatusCodes.Status503ServiceUnavailable, "address_service_unavailable", "The address service is unavailable; try again later.");
+
     public static IResult InvalidRequest(string field, string fieldCode) =>
         Problem(
             StatusCodes.Status400BadRequest,
