@@ -57,7 +57,7 @@ The state of a Request once a Sitter has taken it. The first claim wins and need
 _Avoid_: Approved, accepted
 
 **Notification**:
-An in-app message kept for one Member until they dismiss it: a Request was Posted (sent to every other open Member) or a Request was Claimed (sent to its Requester), or a Claimed Request was cancelled (sent to its Sitter). It carries ids and a few facts, never an address or a name. Not an email.
+An in-app message kept for one Member until they dismiss it: a Request was Posted (sent to every other open Member) or a Request was Claimed (sent to its Requester), a Claimed Request was cancelled (sent to its Sitter), or a Sitter withdrew from a Request (sent to its Requester). It carries ids and a few facts, never an address or a name. Not an email.
 _Avoid_: Alert, message, publication, accepted
 
 **Minimum Lead Time**:

@@ -296,6 +296,8 @@
   "notifications.claimed.generic": "Un baby-sitter a pris votre demande.",
   "notifications.cancelled.dated": "Une demande que vous aviez prise pour le {date} a été annulée",
   "notifications.cancelled.generic": "Une demande que vous aviez prise a été annulée.",
+  "notifications.withdrawn.dated": "Le baby-sitter s'est retiré de votre demande du {date}",
+  "notifications.withdrawn.generic": "Le baby-sitter s'est retiré de votre demande.",
   "notifications.row.unavailable": "Plus disponible",
   "notifications.row.dismiss": "Ignorer : {summary}"
 }

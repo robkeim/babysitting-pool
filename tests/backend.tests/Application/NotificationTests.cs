@@ -165,23 +165,66 @@ public class NotificationTests : IAsyncLifetime
         (await AllAsync()).Should().BeEmpty();
     }
 
+    private async Task WithdrawAsync(Guid requestId, Guid sitter)
+    {
+        await using var scope = _database.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<WithdrawClaimHandler>()
+            .HandleAsync(new WithdrawClaimCommand(requestId, sitter), default);
+    }
+
+    private async Task ClearNotificationsAsync()
+    {
+        await using var scope = _database.CreateScope();
+        await _database.NewContext(scope).Notifications.ExecuteDeleteAsync();
+    }
+
     [Fact]
-    public async Task Withdrawing_a_claim_notifies_nobody()
+    public async Task Withdrawing_a_claim_notifies_the_requester_with_only_the_start_time_and_does_not_renotify_the_pool()
+    {
+        var posted = await PostAsync(_requester, atHome: true);
+        await ClaimAsync(posted.Id, _sitter);
+        await ClearNotificationsAsync();
+
+        await WithdrawAsync(posted.Id, _sitter);
+
+        var row = (await AllAsync()).Should().ContainSingle().Subject;
+        row.MemberId.Should().Be(_requester);
+        row.Kind.Should().Be("request_withdrawn");
+        row.RequestId.Should().Be(posted.Id);
+        row.StartsAt.Should().Be(Now.AddHours(10));
+        row.Area.Should().BeNull();
+        row.SitterId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Withdrawing_after_the_claim_cutoff_still_notifies_the_requester_though_the_request_expires()
     {
         var posted = await PostAsync(_requester);
         await ClaimAsync(posted.Id, _sitter);
-        await using (var scope = _database.CreateScope())
-        {
-            await _database.NewContext(scope).Notifications.ExecuteDeleteAsync();
-        }
+        await ClearNotificationsAsync();
+        _database.Clock.Advance(TimeSpan.FromHours(8));
+
+        await WithdrawAsync(posted.Id, _sitter);
+
+        var row = (await AllAsync()).Should().ContainSingle().Subject;
+        row.MemberId.Should().Be(_requester);
+        row.Kind.Should().Be("request_withdrawn");
+    }
+
+    [Fact]
+    public async Task Offboarding_a_sitter_stores_a_withdrawn_notification_for_the_requester()
+    {
+        var posted = await PostAsync(_requester);
+        await ClaimAsync(posted.Id, _sitter);
+        await ClearNotificationsAsync();
 
         await using (var scope = _database.CreateScope())
         {
-            await scope.ServiceProvider.GetRequiredService<WithdrawClaimHandler>()
-                .HandleAsync(new WithdrawClaimCommand(posted.Id, _sitter), default);
+            await scope.ServiceProvider.GetRequiredService<OffboardMemberHandler>()
+                .HandleAsync(new OffboardMemberCommand(_sitter), default);
         }
 
-        (await AllAsync()).Should().BeEmpty();
+        (await AllAsync()).Should().ContainSingle(n => n.MemberId == _requester && n.Kind == "request_withdrawn");
     }
 
     [Fact]

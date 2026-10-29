@@ -75,6 +75,17 @@ export function NotificationList() {
         href: '/claims',
       }
     }
+    if (notification.kind === NOTIFICATION_KINDS.requestWithdrawn) {
+      const date = notification.startsAt ? formatInstant(notification.startsAt) : ''
+      return {
+        text: intl.formatMessage(
+          { id: date ? 'notifications.withdrawn.dated' : 'notifications.withdrawn.generic' },
+          { date },
+        ),
+        stale: false,
+        href: '/requests',
+      }
+    }
     const request = myRequests.find((candidate) => candidate.id === notification.requestId)
     const date = request ? formatInstant(request.startsAt) : ''
     const id: MessageId = !request

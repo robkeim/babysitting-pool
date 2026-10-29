@@ -169,26 +169,37 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             AddLedgerEntry(request.RequesterId, request, LedgerEntryKind.Refund, now);
         }
 
-        // A Cancelled Request keeps its Sitter, so only a cancelled claim has someone to tell (a withdrawal clears it).
-        // Same SaveChanges as the cancel, so a lost race leaves no Notification (ADR 0019).
+        // A Cancelled Request keeps its Sitter, so only a cancelled claim has someone to tell the Sitter. A withdrawal
+        // clears the Sitter and ends Posted or Expired, and it is the Requester who hears of it. Same SaveChanges as
+        // the release, so a lost race leaves no Notification (ADR 0019).
         NotificationRecord? notification = null;
         if (request is { Status: RequestStatus.Cancelled, SitterId: { } sitterId })
         {
-            notification = new NotificationRecord
-            {
-                Id = Guid.NewGuid(),
-                MemberId = sitterId,
-                Kind = NotificationKinds.RequestCancelled,
-                CreatedAt = now,
-                RequestId = request.Id,
-                StartsAt = request.StartsAt,
-            };
+            notification = ReleaseNotification(sitterId, NotificationKinds.RequestCancelled, request, now);
+        }
+        else if (request.Status is RequestStatus.Posted or RequestStatus.Expired)
+        {
+            notification = ReleaseNotification(request.RequesterId, NotificationKinds.RequestWithdrawn, request, now);
+        }
+
+        if (notification is not null)
+        {
             db.Notifications.Add(notification);
         }
 
         await SaveAsync(cancellationToken);
         return notification is null ? [] : [new NotificationDelivery(notification.MemberId, notification.ToView())];
     }
+
+    private static NotificationRecord ReleaseNotification(Guid memberId, string kind, Request request, DateTime now) => new()
+    {
+        Id = Guid.NewGuid(),
+        MemberId = memberId,
+        Kind = kind,
+        CreatedAt = now,
+        RequestId = request.Id,
+        StartsAt = request.StartsAt,
+    };
 
     public async Task<IReadOnlyList<NotificationDelivery>> AddPostedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
     {
