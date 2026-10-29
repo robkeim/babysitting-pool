@@ -7,4 +7,5 @@ export type NotificationPage = components['schemas']['PageOfNotificationView']
 export const NOTIFICATION_KINDS = {
   requestPosted: 'request_posted',
   requestClaimed: 'request_claimed',
+  requestCancelled: 'request_cancelled',
 } as const

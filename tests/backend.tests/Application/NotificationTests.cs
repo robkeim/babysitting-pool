@@ -123,6 +123,67 @@ public class NotificationTests : IAsyncLifetime
         row.StartsAt.Should().BeNull();
     }
 
+    private async Task CancelAsync(Guid requestId, Guid member)
+    {
+        await using var scope = _database.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<CancelRequestHandler>()
+            .HandleAsync(new CancelRequestCommand(requestId, member), default);
+    }
+
+    [Fact]
+    public async Task Cancelling_a_claimed_request_notifies_the_sitter_with_only_the_start_time()
+    {
+        var posted = await PostAsync(_requester, atHome: true);
+        await ClaimAsync(posted.Id, _sitter);
+        await using (var scope = _database.CreateScope())
+        {
+            await _database.NewContext(scope).Notifications.ExecuteDeleteAsync();
+        }
+
+        await CancelAsync(posted.Id, _requester);
+
+        var row = (await AllAsync()).Should().ContainSingle().Subject;
+        row.MemberId.Should().Be(_sitter);
+        row.Kind.Should().Be("request_cancelled");
+        row.RequestId.Should().Be(posted.Id);
+        row.StartsAt.Should().Be(Now.AddHours(10));
+        row.Area.Should().BeNull();
+        row.SitterId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Cancelling_a_posted_request_notifies_nobody()
+    {
+        var posted = await PostAsync(_requester);
+        await using (var scope = _database.CreateScope())
+        {
+            await _database.NewContext(scope).Notifications.ExecuteDeleteAsync();
+        }
+
+        await CancelAsync(posted.Id, _requester);
+
+        (await AllAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Withdrawing_a_claim_notifies_nobody()
+    {
+        var posted = await PostAsync(_requester);
+        await ClaimAsync(posted.Id, _sitter);
+        await using (var scope = _database.CreateScope())
+        {
+            await _database.NewContext(scope).Notifications.ExecuteDeleteAsync();
+        }
+
+        await using (var scope = _database.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<WithdrawClaimHandler>()
+                .HandleAsync(new WithdrawClaimCommand(posted.Id, _sitter), default);
+        }
+
+        (await AllAsync()).Should().BeEmpty();
+    }
+
     [Fact]
     public async Task A_post_that_loses_to_a_concurrent_change_writes_no_notifications()
     {

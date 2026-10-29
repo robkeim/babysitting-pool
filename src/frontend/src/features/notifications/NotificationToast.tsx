@@ -36,7 +36,9 @@ export function NotificationToast({
             { area: notification.area, date },
           )
         : intl.formatMessage({ id: 'notifications.posted.noArea' }, { date })
-      : intl.formatMessage({ id: 'notifications.claimed.generic' })
+      : notification.kind === NOTIFICATION_KINDS.requestCancelled
+        ? intl.formatMessage({ id: 'notifications.cancelled.generic' })
+        : intl.formatMessage({ id: 'notifications.claimed.generic' })
 
   return (
     <div
