@@ -2,6 +2,7 @@ using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace BabysittingPool.Infrastructure;
@@ -244,7 +245,12 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
             LastUsedAt = session.LastUsedAt,
         });
 
-    /// <summary>Saves, reporting a lost race (consumed meanwhile, or the address taken) as false instead of throwing.</summary>
+    private const int SqliteUniqueConstraint = 2067; // SQLITE_CONSTRAINT_UNIQUE
+
+    /// <summary>
+    /// Saves, reporting a lost race (consumed meanwhile, or the address taken) as false instead of throwing.
+    /// Any other database failure still surfaces.
+    /// </summary>
     private async Task<bool> TrySaveAsync(CancellationToken cancellationToken)
     {
         try
@@ -252,11 +258,14 @@ internal sealed class IdentityStore(BabysittingPoolDbContext db) : IIdentityStor
             await db.SaveChangesAsync(cancellationToken);
             return true;
         }
-        catch (DbUpdateException)
+        catch (Exception e) when (e is DbUpdateConcurrencyException || IsUniqueViolation(e))
         {
             return false;
         }
     }
+
+    private static bool IsUniqueViolation(Exception e) =>
+        e is DbUpdateException { InnerException: SqliteException { SqliteExtendedErrorCode: SqliteUniqueConstraint } };
 
     private static Invitation? ToDomain(InvitationRecord? r) => r is null
         ? null
