@@ -92,6 +92,7 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         await using var scope = _database.CreateScope();
         var requests = _database.NewContext(scope).Requests.AsNoTracking();
         (await requests.SingleAsync(r => r.Id == theirs)).Address.Should().BeNull();
+        (await requests.SingleAsync(r => r.Id == theirs)).Instructions.Should().BeNull();
         var erased = await _database.NewContext(scope).Members.AsNoTracking().SingleAsync(m => m.Id == _leaver);
         erased.Commune.Should().BeNull();
         erased.InseeCode.Should().BeNull();
@@ -100,6 +101,7 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         erased.Instructions.Should().BeNull();
         erased.Address.Should().BeNull();
         (await requests.SingleAsync(r => r.Id == others)).Address.Should().Be("12 River Rd");
+        (await requests.SingleAsync(r => r.Id == others)).Instructions.Should().Be("ring twice");
     }
 
     [Fact]

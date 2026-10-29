@@ -271,6 +271,9 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<int>("DurationMinutes")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Instructions")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("TEXT");

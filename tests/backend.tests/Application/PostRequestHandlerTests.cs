@@ -44,6 +44,7 @@ public class PostRequestHandlerTests : IAsyncLifetime
         stored.RequesterId.Should().Be(memberId);
         stored.Area.Should().BeNull();
         stored.Address.Should().BeNull();
+        stored.Instructions.Should().BeNull();
         var ledger = await db.LedgerEntries.AsNoTracking().SingleAsync(e => e.Kind == LedgerEntryKind.Escrow);
         ledger.RequestId.Should().Be(view.Id);
         ledger.MemberId.Should().Be(memberId);
@@ -61,10 +62,12 @@ public class PostRequestHandlerTests : IAsyncLifetime
 
         view!.Area.Should().Be("Riverside (80)");
         view.Address.Should().Be("12 River Rd");
+        view.Instructions.Should().Be("ring twice");
         await using var scope = _database.CreateScope();
         var stored = await _database.NewContext(scope).Requests.AsNoTracking().SingleAsync();
         stored.Area.Should().Be("Riverside (80)");
         stored.Address.Should().Be("12 River Rd");
+        stored.Instructions.Should().Be("ring twice");
     }
 
     [Fact]

@@ -4,7 +4,7 @@ using BabysittingPool.Domain.Requests;
 namespace BabysittingPool.Application.Requests;
 
 /// <summary>
-/// A Request as its Requester sees it, exact address included when it has one (spec §4.6). <see cref="SitterDisplayName"/>
+/// A Request as its Requester sees it, exact address and instructions included when it has them (spec §4.6). <see cref="SitterDisplayName"/>
 /// names the Sitter of a Claimed Request and is set only when the Requester lists their Requests; it is how the
 /// Claimed Notification shows who claimed (ADR 0019).
 /// </summary>
@@ -20,6 +20,7 @@ public sealed record RequestView(
     bool Dinner,
     string? Area,
     string? Address,
+    string? Instructions,
     long CostQuarterCredits,
     DateTime ClaimCutoffAt,
     DateTime PostedAt,
@@ -28,7 +29,7 @@ public sealed record RequestView(
 
 /// <summary>
 /// A Posted Request as other Members browse it: the rough area only (none at the Sitter's house), never the exact
-/// address or the Requester (spec §4.6).
+/// address, its instructions or the Requester (spec §4.6).
 /// </summary>
 public sealed record OpenRequestView(
     Guid Id,
@@ -55,6 +56,7 @@ public sealed record RequestRead(
     MealOption Meals,
     string? Area,
     string? Address,
+    string? Instructions,
     long CostQuarterCredits,
     DateTime ClaimCutoffAt,
     DateTime PostedAt,
@@ -63,12 +65,13 @@ public sealed record RequestRead(
     public static RequestRead From(Request request) => new(
         request.Id, request.StartsAt, request.Details.DurationMinutes, request.Details.ChildCount,
         request.Details.Location, request.Details.Transport, request.Details.Meals, request.Area, request.Address,
+        request.Instructions,
         request.Cost.QuarterCredits, request.ClaimCutoffAt, request.PostedAt, request.Status);
 
     public RequestView ToView(DateTime now, string? sitterDisplayName = null) => new(
         Id, StartsAt, DurationMinutes, ChildCount, Location, Transport,
         Meals.HasFlag(MealOption.Lunch), Meals.HasFlag(MealOption.Snack), Meals.HasFlag(MealOption.Dinner),
-        Area, Address, CostQuarterCredits, ClaimCutoffAt, PostedAt,
+        Area, Address, Instructions, CostQuarterCredits, ClaimCutoffAt, PostedAt,
         Request.StatusAt(Status, ClaimCutoffAt, StartsAt, now), sitterDisplayName);
 
     public OpenRequestView ToOpenView() => new(

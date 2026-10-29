@@ -1,4 +1,4 @@
-import { CalendarClock, Clock, Coins, House, MapPin } from 'lucide-react'
+import { CalendarClock, Clock, Coins, House, MapPin, NotebookText } from 'lucide-react'
 import { type ReactNode } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,6 +11,8 @@ interface RequestCardProps {
   area?: string | null
   /** The exact address, only for the Requester and the Sitter who claimed it (spec §4.6). */
   address?: string | null
+  /** The address instructions, shown on the same terms as the address (ADR 0020). */
+  instructions?: string | null
   durationMinutes: number
   childCount: number
   costQuarterCredits: number
@@ -47,6 +49,7 @@ export function RequestCard({
   startsAt,
   area,
   address,
+  instructions,
   durationMinutes,
   childCount,
   costQuarterCredits,
@@ -66,6 +69,14 @@ export function RequestCard({
           {address && (
             <Line icon={House} className="text-muted-foreground">
               {address}
+            </Line>
+          )}
+          {instructions && (
+            <Line icon={NotebookText} className="text-muted-foreground">
+              <span className="sr-only">
+                <FormattedMessage id="requests.instructions" />
+              </span>
+              {instructions}
             </Line>
           )}
           <Line icon={Clock} className="text-muted-foreground">

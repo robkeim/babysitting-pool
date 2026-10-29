@@ -124,15 +124,16 @@ public class RequestTests
     }
 
     [Fact]
-    public void Posting_at_the_requesting_familys_house_copies_the_requesters_area_and_address()
+    public void Posting_at_the_requesting_familys_house_copies_the_requesters_area_address_and_instructions()
     {
         var account = CreditAccount.Open();
 
         var request = Request.Post(
-            _requesterId, account, AtFamilyHouse, Start, HomeLocation.Create("12 River Rd 80000 Amiens", " Amiens ", "80021", "80", "80000", null), Now, LeadTime, Cutoff);
+            _requesterId, account, AtFamilyHouse, Start, HomeLocation.Create("12 River Rd 80000 Amiens", " Amiens ", "80021", "80", "80000", "ring twice"), Now, LeadTime, Cutoff);
 
         request.Area.Should().Be("Amiens (80)");
         request.Address.Should().Be("12 River Rd 80000 Amiens");
+        request.Instructions.Should().Be("ring twice");
     }
 
     [Fact]
@@ -152,10 +153,11 @@ public class RequestTests
         var account = CreditAccount.Open();
 
         var request = Request.Post(
-            _requesterId, account, TwoHours, Start, HomeLocation.Create("12 River Rd 80000 Amiens", "Amiens", "80021", "80", "80000", null), Now, LeadTime, Cutoff);
+            _requesterId, account, TwoHours, Start, HomeLocation.Create("12 River Rd 80000 Amiens", "Amiens", "80021", "80", "80000", "ring twice"), Now, LeadTime, Cutoff);
 
         request.Area.Should().BeNull();
         request.Address.Should().BeNull();
+        request.Instructions.Should().BeNull();
     }
 
     [Fact]

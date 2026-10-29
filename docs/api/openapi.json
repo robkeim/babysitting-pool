@@ -3310,6 +3310,7 @@
           "dinner",
           "area",
           "address",
+          "instructions",
           "costQuarterCredits",
           "claimCutoffAt",
           "postedAt",
@@ -3355,6 +3356,12 @@
             ]
           },
           "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instructions": {
             "type": [
               "null",
               "string"
