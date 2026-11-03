@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabysittingPool.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabysittingPool.Api", "BabysittingPool.Api\BabysittingPool.Api.csproj", "{E749B3A1-38AE-4227-B68B-2E394435556D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "backend.tests", "..\..\tests\backend.tests\backend.tests.csproj", "{7CACECC5-2082-46E5-BFAF-F6D7F180349E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabysittingPool.Tests", "BabysittingPool.Tests\BabysittingPool.Tests.csproj", "{7CACECC5-2082-46E5-BFAF-F6D7F180349E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabysittingPool.TestSupport", "BabysittingPool.TestSupport\BabysittingPool.TestSupport.csproj", "{D7FA1369-ED95-46A7-868E-F37D35EAA75B}"
 EndProject
