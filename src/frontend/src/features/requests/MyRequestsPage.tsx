@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { formatInstant } from '@/features/credits'
 import { useCancelRequest, useMyRequests } from './api'
+import { EditNotes } from './EditNotes'
 import { releaseFailure } from './releaseFailure'
 import { RequestCard } from './RequestCard'
 
@@ -53,6 +54,16 @@ export function MyRequestsPage() {
           <li key={request.id}>
             <RequestCard
               {...request}
+              footer={
+                (request.status === 'Posted' || request.status === 'Claimed') && (
+                  <EditNotes
+                    key={request.notes ?? ''}
+                    requestId={request.id}
+                    notes={request.notes}
+                    status={request.status}
+                  />
+                )
+              }
               action={
                 (request.status === 'Posted' || request.status === 'Claimed') && (
                   <Button

@@ -91,4 +91,22 @@ describe('MyClaimsPage', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/no longer exists/i)
   })
+
+  it('shows the notes beside the address, including on a Completed Request', async () => {
+    server.use(
+      myClaimsHandler({
+        items: [
+          { ...sampleRequest, status: 'Claimed', notes: 'the youngest has a cold' },
+          { ...sampleRequest, id: 'b', status: 'Completed', notes: 'allergic to nuts' },
+        ],
+        nextCursor: null,
+      }),
+    )
+
+    renderWithProviders(<MyClaimsPage />)
+
+    expect(await screen.findByText('the youngest has a cold')).toBeInTheDocument()
+    expect(screen.getByText('allergic to nuts')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /edit notes/i })).not.toBeInTheDocument()
+  })
 })

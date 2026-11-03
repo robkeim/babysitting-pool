@@ -49,7 +49,12 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   await backend.signIn(requester, requesterId)
   const requesterPage = await requester.newPage()
   for (const request of [
-    { start: '2026-03-02T10:00', minutes: '120', area: 'Riverside' },
+    {
+      start: '2026-03-02T10:00',
+      minutes: '120',
+      area: 'Riverside',
+      notes: 'Bedtime is at 8. The dog is friendly.',
+    },
     { start: '2026-03-03T18:30', minutes: '240', area: 'Hilltop Meadows' },
     { start: '2026-03-04T08:15', minutes: '90', area: 'Old Mill District' },
   ]) {
@@ -65,6 +70,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
     start: '2026-03-05T09:00',
     minutes: '180',
     area: 'Maple Court',
+    notes: 'The youngest has a cold, so no cold drinks please.',
   })
   await postRequest(viewerPage, backend.appUrl, {
     start: '2026-03-06T17:00',
@@ -164,7 +170,9 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
           await expect(
             screen.name === 'post-request'
               ? page.locator('#startsAt')
-              : page.getByRole('listitem').first(),
+              : screen.name === 'profile'
+                ? page.locator('#language')
+                : page.getByRole('listitem').first(),
           ).toBeVisible()
           await capture(page, screen.name, `${language.tag}-${scheme}-${viewport.name}`)
         }
@@ -253,12 +261,17 @@ async function capture(page: Page, screen: string, variant: string) {
 async function postRequest(
   page: Page,
   appUrl: string,
-  request: { start: string; minutes: string; area: string },
+  request: { start: string; minutes: string; area: string; notes?: string },
 ) {
   // The area and address come from the profile, so set the profile before each Request.
+  const profileLoaded = page.waitForResponse(
+    (response) =>
+      response.url().endsWith('/api/me/profile') && response.request().method() === 'GET',
+  )
   await page.goto(`${appUrl}/profile`)
+  await profileLoaded
   await page.getByRole('combobox', { name: /search for your address/i }).fill(request.area)
-  await page.getByRole('option').first().click()
+  await page.getByRole('option', { name: new RegExp(request.area, 'i') }).click()
   await page.getByRole('button', { name: /save/i }).click()
   await expect(page.getByRole('status')).toContainText(/saved/i)
 
@@ -266,6 +279,7 @@ async function postRequest(
   await page.getByLabel('Location').selectOption('RequestingFamilysHouse')
   await page.getByLabel(/start time/i).fill(request.start)
   await page.getByLabel(/duration/i).fill(request.minutes)
+  if (request.notes) await page.getByLabel(/notes for the sitter/i).fill(request.notes)
   await page.getByRole('button', { name: /post request/i }).click()
   await expect(
     page.getByRole('listitem').filter({ hasText: new RegExp(request.area, 'i') }),

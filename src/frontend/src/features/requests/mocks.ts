@@ -189,3 +189,21 @@ export function profileHandler(profile: { area: string | null; address: string |
 }
 
 export const sampleProfile = { area: 'Riverside', address: '12 River Rd' }
+
+/** Calls `onEdit` with the Request id and the new notes, then answers 200 with the Request carrying them. */
+export function editNotesHandler(onEdit: (requestId: string, notes: string | null) => void) {
+  return http.put('*/api/requests/:id/notes', async ({ params, request }) => {
+    const { notes } = (await request.json()) as { notes: string | null }
+    onEdit(String(params.id), notes)
+    return HttpResponse.json({ ...sampleRequest, notes })
+  })
+}
+
+export function editNotesRejectedHandler(status: number, code: string) {
+  return http.put('*/api/requests/:id/notes', () =>
+    HttpResponse.json(
+      { status, title: code, code },
+      { status, headers: { 'content-type': 'application/problem+json' } },
+    ),
+  )
+}

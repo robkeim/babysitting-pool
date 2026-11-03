@@ -135,3 +135,21 @@ export function useCancelRequest() {
 export function useWithdrawClaim() {
   return useReleaseRequest('withdraw')
 }
+
+/** Changes (or clears) a Request's notes; the claim stays, so only the two lists that show notes are stale. */
+export function useEditNotes() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ requestId, notes }: { requestId: string; notes: string }) =>
+      apiFetch<RequestView>(`/api/requests/${requestId}/notes`, {
+        method: 'PUT',
+        body: { notes },
+      }),
+    onSuccess: async () => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: requestsKeys.mine() }),
+        client.invalidateQueries({ queryKey: requestsKeys.claims() }),
+      ])
+    },
+  })
+}

@@ -4,6 +4,8 @@ import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { MyRequestsPage } from './MyRequestsPage'
 import {
+  editNotesHandler,
+  editNotesRejectedHandler,
   myRequestsFailureHandler,
   myRequestsHandler,
   releaseRequestHandler,
@@ -114,5 +116,83 @@ describe('MyRequestsPage', () => {
     )
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/start time has passed/i)
+  })
+
+  it('shows the notes on Posted and Claimed cards', async () => {
+    server.use(
+      myRequestsHandler({
+        items: [
+          { ...sampleRequest, notes: 'the youngest has a cold' },
+          { ...sampleRequest, id: 'b', status: 'Claimed', notes: 'bedtime at 8' },
+        ],
+        nextCursor: null,
+      }),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+
+    expect(await screen.findByText('the youngest has a cold')).toBeInTheDocument()
+    expect(screen.getByText('bedtime at 8')).toBeInTheDocument()
+  })
+
+  it('saves edited notes and says the claim is unaffected', async () => {
+    const user = userEvent.setup()
+    const edits: [string, string | null][] = []
+    server.use(
+      myRequestsHandler({
+        items: [{ ...sampleRequest, status: 'Claimed', notes: 'old' }],
+        nextCursor: null,
+      }),
+      editNotesHandler((id, notes) => edits.push([id, notes])),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+    await user.click(await screen.findByRole('button', { name: /edit notes/i }))
+    expect(screen.getByText(/doesn.t affect the claim/i)).toBeInTheDocument()
+    const field = screen.getByLabelText(/notes for the sitter/i)
+    await user.clear(field)
+    await user.type(field, 'new')
+    expect(screen.getByText('3 of 500 characters')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /save notes/i }))
+
+    await vi.waitFor(() => {
+      expect(edits).toEqual([[sampleRequest.id, 'new']])
+    })
+  })
+
+  it('clears the notes by saving them empty', async () => {
+    const user = userEvent.setup()
+    const edits: (string | null)[] = []
+    server.use(
+      myRequestsHandler({ items: [{ ...sampleRequest, notes: 'old' }], nextCursor: null }),
+      editNotesHandler((_, notes) => edits.push(notes)),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+    await user.click(await screen.findByRole('button', { name: /edit notes/i }))
+    await user.clear(screen.getByLabelText(/notes for the sitter/i))
+    await user.click(screen.getByRole('button', { name: /save notes/i }))
+
+    await vi.waitFor(() => {
+      expect(edits).toEqual([''])
+    })
+  })
+
+  it.each([
+    ['start_passed', 422, /start time has passed/i],
+    ['invalid_state', 409, /no longer available/i],
+  ])('explains a rejected notes edit (%s)', async (code, status, message) => {
+    const user = userEvent.setup()
+    server.use(
+      myRequestsHandler({ items: [sampleRequest], nextCursor: null }),
+      editNotesRejectedHandler(status, code),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+    await user.click(await screen.findByRole('button', { name: /add notes/i }))
+    await user.type(screen.getByLabelText(/notes for the sitter/i), 'x')
+    await user.click(screen.getByRole('button', { name: /save notes/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(message)
   })
 })

@@ -1,4 +1,13 @@
-import { CalendarClock, Clock, Coins, House, MapPin, NotebookText, UserCheck } from 'lucide-react'
+import {
+  CalendarClock,
+  Clock,
+  Coins,
+  House,
+  MapPin,
+  MessageSquareText,
+  NotebookText,
+  UserCheck,
+} from 'lucide-react'
 import { type ReactNode } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,12 +22,16 @@ interface RequestCardProps {
   address?: string | null
   /** The address instructions, shown on the same terms as the address (ADR 0020). */
   instructions?: string | null
+  /** The Requester's free-text notes, shown on the same terms as the address (spec §4.1). */
+  notes?: string | null
   /** The Sitter who claimed it, for the Requester's own list. */
   sitterDisplayName?: string | null
   durationMinutes: number
   childCount: number
   costQuarterCredits: number
   status?: RequestStatus
+  /** Below the details, e.g. the Requester's notes editor. */
+  footer?: ReactNode
   /** The one thing the viewer can do with it, if anything. */
   action?: ReactNode
 }
@@ -52,11 +65,13 @@ export function RequestCard({
   area,
   address,
   instructions,
+  notes,
   sitterDisplayName,
   durationMinutes,
   childCount,
   costQuarterCredits,
   status,
+  footer,
   action,
 }: RequestCardProps) {
   return (
@@ -82,6 +97,14 @@ export function RequestCard({
               {instructions}
             </Line>
           )}
+          {notes && (
+            <Line icon={MessageSquareText} className="whitespace-pre-line text-muted-foreground">
+              <span className="sr-only">
+                <FormattedMessage id="requests.notes.label" />
+              </span>
+              {notes}
+            </Line>
+          )}
           {sitterDisplayName && (
             <Line icon={UserCheck} className="text-muted-foreground">
               <FormattedMessage id="requests.claimedBy" values={{ sitter: sitterDisplayName }} />
@@ -93,6 +116,7 @@ export function RequestCard({
               values={{ minutes: durationMinutes, children: childCount }}
             />
           </Line>
+          {footer}
         </div>
         <div className="flex flex-col gap-3 lg:items-end">
           <div className="flex flex-wrap items-center gap-2">
