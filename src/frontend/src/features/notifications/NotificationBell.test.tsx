@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { delay, http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { renderWithProviders } from '@/test/render'
 import { server } from '@/test/server'
 import { NotificationBell } from './NotificationBell'
@@ -38,9 +38,13 @@ async function openPanel() {
 
 describe('NotificationBell', () => {
   it('shows that the Notifications are loading until they arrive', async () => {
+    let release: (value?: undefined) => void = vi.fn()
+    const gate = new Promise((resolve) => {
+      release = resolve
+    })
     server.use(
       http.get('/api/notifications', async () => {
-        await delay(300)
+        await gate
         return HttpResponse.json({ items: [], nextCursor: null })
       }),
       ...listsHandlers(),
@@ -50,6 +54,8 @@ describe('NotificationBell', () => {
     const panel = await openPanel()
 
     expect(within(panel).getByRole('status')).toHaveTextContent('Loading your notifications…')
+
+    release()
     expect(await within(panel).findByText("You're all caught up.")).toBeInTheDocument()
     expect(within(panel).queryByRole('status')).not.toBeInTheDocument()
   })
