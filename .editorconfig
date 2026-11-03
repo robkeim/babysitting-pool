@@ -63,7 +63,7 @@ dotnet_diagnostic.CA1063.severity = none
 dotnet_diagnostic.CA2234.severity = none
 dotnet_diagnostic.CA1849.severity = none
 
-[tests/**.cs]
+[**/BabysittingPool.Tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1816.severity = none
 dotnet_diagnostic.CA1861.severity = none
