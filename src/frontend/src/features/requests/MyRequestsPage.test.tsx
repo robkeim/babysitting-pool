@@ -47,6 +47,19 @@ describe('MyRequestsPage', () => {
     expect(card).not.toHaveTextContent(/river/i)
   })
 
+  it('names the Sitter on a Claimed Request', async () => {
+    server.use(
+      myRequestsHandler({
+        items: [{ ...sampleRequest, status: 'Claimed', sitterDisplayName: 'Alice Martin' }],
+        nextCursor: null,
+      }),
+    )
+
+    renderWithProviders(<MyRequestsPage />)
+
+    expect(await screen.findByText('Claimed by Alice Martin')).toBeInTheDocument()
+  })
+
   it('says so when nothing has been posted', async () => {
     server.use(myRequestsHandler({ items: [], nextCursor: null }))
 

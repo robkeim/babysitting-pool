@@ -131,6 +131,7 @@
   "requests.open.area": "Area",
   "requests.open.details": "Details",
   "requests.instructions": "Instructions for the address",
+  "requests.claimedBy": "Claimed by {sitter}",
   "requests.open.credits": "Credits",
   "requests.open.claim": "Claim",
   "requests.open.claimFailed.title": "We couldn't claim that request",
