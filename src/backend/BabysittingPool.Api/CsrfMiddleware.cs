@@ -2,7 +2,6 @@ namespace BabysittingPool.Api;
 
 /// <summary>
 /// State-changing <c>/api</c> calls must carry <c>X-Requested-With</c>, which a cross-site form cannot send (ADR 0006).
-/// Test-only endpoints are exempt.
 /// </summary>
 internal static class CsrfMiddleware
 {
@@ -13,7 +12,6 @@ internal static class CsrfMiddleware
         {
             var request = context.Request;
             if (request.Path.StartsWithSegments("/api", StringComparison.Ordinal)
-                && !request.Path.StartsWithSegments("/api/test", StringComparison.Ordinal)
                 && !HttpMethods.IsGet(request.Method) && !HttpMethods.IsHead(request.Method)
                 && !HttpMethods.IsOptions(request.Method)
                 && string.IsNullOrEmpty(request.Headers[HeaderName]))

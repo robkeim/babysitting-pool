@@ -52,6 +52,10 @@ _Avoid_: Login
 A Member's posted ask for childcare, which is born Posted and ends Completed, Cancelled or Expired.
 _Avoid_: Booking, job, session
 
+**Notes**:
+Optional free text the Requester adds to a Request ("the youngest has a cold"), at most 500 characters. Different from the address instructions, which come from the profile. Visible like the exact address: to the Sitter only while the Request is Claimed (and after Completion), never in Notifications, logs, Admin views or email. Erasure deletes them.
+_Avoid_: Comments, instructions
+
 **Claimed**:
 The state of a Request once a Sitter has taken it. The first claim wins and needs no approval.
 _Avoid_: Approved, accepted

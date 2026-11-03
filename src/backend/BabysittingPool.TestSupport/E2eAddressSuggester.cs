@@ -1,9 +1,9 @@
 using BabysittingPool.Application.Addresses;
 
-namespace BabysittingPool.Api;
+namespace BabysittingPool.TestSupport;
 
 /// <summary>
-/// Stands in for BAN in the E2E host (<see cref="TestEndpoints.Environment"/>) so browser journeys never call the
+/// Stands in for BAN in the E2E host  so browser journeys never call the
 /// real service. A suggestion matches when every word of the query appears in its label.
 /// </summary>
 internal sealed class E2eAddressSuggester : IAddressSuggester

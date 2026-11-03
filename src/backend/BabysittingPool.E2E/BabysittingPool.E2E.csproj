@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <UserSecretsId>babysitting-pool-e2e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BabysittingPool.Api\BabysittingPool.Api.csproj" />
+    <ProjectReference Include="..\BabysittingPool.TestSupport\BabysittingPool.TestSupport.csproj" />
+  </ItemGroup>
+
+</Project>

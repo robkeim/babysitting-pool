@@ -106,12 +106,7 @@ test('the SPA loads and works under the API CSP without violations', async ({ pa
 
     await backend.setClock('2026-03-01T09:00:00Z')
     const memberId = await backend.seedMember([40])
-    const response = await fetch(`${backend.apiUrl}/api/test/sessions`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ memberId }),
-    })
-    const { token } = (await response.json()) as { token: string }
+    const token = await backend.sessionToken(memberId)
     await page.context().addCookies([{ name: 'session', value: token, url }])
 
     await page.goto(`${url}/credits`)

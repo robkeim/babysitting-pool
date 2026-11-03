@@ -17,3 +17,5 @@ Development seed data is written by an Infrastructure seeder rather than through
 **Amendment, 2026-10-25 (#123):** `IEmailSender` now has a real implementation, `SmtpEmailSender`, used in Development when SMTP secrets exist (ADR 0011) and in Production when `Email:Smtp:*` is set; Production with nothing configured still throws (#23). Bodies are plain text, English only: one line explaining the link and its expiry, a blank line, then the link. HTML and i18n are left to #23.
 
 **Amendment (2026-10-27, #23).** The production email provider is Gmail SMTP through `SmtpEmailSender` and the `Email:Smtp:*` settings (ADR 0018); no new sender is written. HTML and i18n remain open.
+
+**Amendment (2026-10-29, #101).** The CSRF header check no longer exempts `/api/test`; the test-only endpoints sit in the E2E host only (ADR 0016) and callers send the header like the SPA does. In E2E the fake outbox is read at `GET /api/test/outbox` with the E2E token; `GET /api/dev/outbox` is Development only.

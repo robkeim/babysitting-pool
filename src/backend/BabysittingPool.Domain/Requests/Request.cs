@@ -215,7 +215,7 @@ public sealed class Request
 
         if (Status is not (RequestStatus.Posted or RequestStatus.Claimed))
         {
-            throw new DomainException($"A {Status} request cannot be cancelled.", "invalid_state");
+            throw new DomainException($"A {Status} request cannot be cancelled.", DomainException.InvalidStateCode);
         }
 
         RequireBeforeStart(now);
@@ -292,7 +292,7 @@ public sealed class Request
     {
         if (Status != expected)
         {
-            throw new DomainException($"A {Status} request cannot be {action}.", "invalid_state");
+            throw new DomainException($"A {Status} request cannot be {action}.", DomainException.InvalidStateCode);
         }
     }
 
