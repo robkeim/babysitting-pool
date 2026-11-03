@@ -12,3 +12,5 @@ Stamps are per level (`.git/check-stamp-fast`, `.git/check-stamp-full`) and hold
 Supersedes the CI parts of ADR 0008 (the `ci.yml` workflow, `ci-ok`, caches, draft-PR rules and the minutes budget); its single gate command, hooks and agent guardrails stand.
 
 Amendment (2026-10-23): the `commit-msg` hook (`scripts/check-commit-msg.sh`) now lints each commit subject as a Conventional Commit. The squash-merge title on GitHub is the PR title, which nothing checks; the `pr` skill sets it.
+
+Amendment (2026-11-03): PRs open ready for review, not as drafts. The full gate has already passed before `gh pr create`, so a draft state carries no information. The `PreToolUse` hook also covers `gh pr ready` and `gh pr merge`, and the `ship` skill defines opening and merging (merge `origin/main`, resolve conflicts, full gate green, squash-merge).

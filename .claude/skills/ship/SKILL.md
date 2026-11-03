@@ -1,0 +1,25 @@
+---
+name: ship
+description: Open a PR, or merge one. Use for "open/create a PR" or finishing a ticket's branch (Open), and for "merge" once the human has reviewed (Merge).
+---
+
+A PR exists only for validated work, so it opens ready for review, never as a draft. Green means `scripts/check.sh all --full --stamped --quiet` passes on the exact tree being shipped (the stamp is per tree hash, so a changed tree re-runs it).
+
+## Open
+
+Opening ends the run: the human reviews the PR next, and Merge starts only when they ask for it.
+
+1. Run the full gate. Done when it prints green.
+2. Push branch `<issue>-<slug>` and run `gh pr create` with a Conventional Commit title and the body from the `pr` skill, ending in `Closes #n`.
+
+Done when `gh pr view --json isDraft,url` shows `isDraft: false`.
+
+## Merge
+
+Runs on the human's explicit request, after their review.
+
+1. `git fetch origin && git merge origin/main`. Resolve every conflict, keeping both sides' intent (read the spec section for domain code), then commit.
+2. Run the full gate on the merged tree. When red, fix the cause and re-run; merge nothing until green.
+3. `git push`, then `gh pr merge --squash`. The PR title becomes the squash commit, and the remote branch is deleted on merge.
+
+Done when `gh pr view --json state` shows `MERGED`.
