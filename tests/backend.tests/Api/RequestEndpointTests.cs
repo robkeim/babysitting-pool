@@ -17,7 +17,7 @@ public class RequestEndpointTests : IDisposable
     public void Dispose() => _factory.Dispose();
 
     private object Body(
-        int hoursAhead = 10, int durationMinutes = 120, string transport = "None", string location = "SittersHouse") => new
+        int hoursAhead = 10, int durationMinutes = 120, string transport = "None", string location = "SittersHouse", string? notes = null) => new
         {
             startsAt = _factory.Clock.GetUtcNow().AddHours(hoursAhead),
             durationMinutes,
@@ -27,6 +27,7 @@ public class RequestEndpointTests : IDisposable
             lunch = false,
             snack = false,
             dinner = false,
+            notes,
         };
 
     [Fact]
@@ -233,6 +234,125 @@ public class RequestEndpointTests : IDisposable
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
         (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").EnumerateArray().Single()
             .TryGetProperty("instructions", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task The_notes_are_hidden_while_posted_shown_after_claim_and_hidden_again_after_withdrawal()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(notes: "  the cat bites  "))).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        posted.GetProperty("notes").GetString().Should().Be("the cat bites");
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").EnumerateArray().Single()
+            .TryGetProperty("notes", out _).Should().BeFalse();
+
+        var claimed = await (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).Content.ReadFromJsonAsync<JsonElement>();
+        claimed.GetProperty("notes").GetString().Should().Be("the cat bites");
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").EnumerateArray().Single()
+            .GetProperty("notes").GetString().Should().Be("the cat bites");
+
+        var withdrawn = await (await sitterClient.PostAsync($"/api/requests/{id}/withdraw", null)).Content.ReadFromJsonAsync<JsonElement>();
+        withdrawn.GetProperty("notes").ValueKind.Should().Be(JsonValueKind.Null);
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").GetArrayLength().Should().Be(0);
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/requests/open")).GetProperty("items").EnumerateArray().Single()
+            .TryGetProperty("notes", out _).Should().BeFalse();
+        (await ownerClient.GetFromJsonAsync<JsonElement>("/api/me/requests")).GetProperty("items").EnumerateArray().Single()
+            .GetProperty("notes").GetString().Should().Be("the cat bites");
+    }
+
+    [Fact]
+    public async Task Editing_the_notes_of_a_claimed_request_keeps_the_claim_and_shows_the_sitter_the_new_text()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        var notificationsBefore = (await ownerClient.GetFromJsonAsync<JsonElement>("/api/notifications")).GetProperty("items").GetArrayLength();
+        var sitterNotificationsBefore = (await sitterClient.GetFromJsonAsync<JsonElement>("/api/notifications")).GetProperty("items").GetArrayLength();
+
+        var response = await ownerClient.PutAsJsonAsync($"/api/requests/{id}/notes", new { notes = "bedtime at 8" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("status").GetString().Should().Be("Claimed");
+        var claim = (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").EnumerateArray().Single();
+        claim.GetProperty("status").GetString().Should().Be("Claimed");
+        claim.GetProperty("notes").GetString().Should().Be("bedtime at 8");
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/notifications")).GetProperty("items").GetArrayLength().Should().Be(sitterNotificationsBefore);
+        (await ownerClient.GetFromJsonAsync<JsonElement>("/api/notifications")).GetProperty("items").GetArrayLength().Should().Be(notificationsBefore);
+
+        (await ownerClient.PutAsJsonAsync($"/api/requests/{id}/notes", new { notes = " " })).EnsureSuccessStatusCode();
+        (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").EnumerateArray().Single()
+            .GetProperty("notes").ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
+    public async Task The_sitter_of_a_completed_request_keeps_seeing_the_notes()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(notes: "spare key under the pot"))).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        _factory.Clock.Advance(TimeSpan.FromHours(11));
+
+        var claim = (await sitterClient.GetFromJsonAsync<JsonElement>("/api/me/claims")).GetProperty("items").EnumerateArray().Single();
+        claim.GetProperty("status").GetString().Should().Be("Completed");
+        claim.GetProperty("notes").GetString().Should().Be("spare key under the pot");
+    }
+
+    [Fact]
+    public async Task Editing_the_notes_is_frozen_after_the_start_time()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body())).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+        _factory.Clock.Advance(TimeSpan.FromHours(11));
+
+        var response = await ownerClient.PutAsJsonAsync($"/api/requests/{id}/notes", new { notes = "too late" });
+
+        await AssertProblemAsync(response, HttpStatusCode.UnprocessableEntity, "start_passed");
+    }
+
+    [Fact]
+    public async Task Notes_over_500_characters_answer_422_on_post_and_on_edit()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(owner);
+
+        var tooLong = await client.PostAsJsonAsync("/api/requests", Body(notes: new string('x', 501)));
+        var posted = await (await client.PostAsJsonAsync("/api/requests", Body(notes: new string('x', 500)))).Content.ReadFromJsonAsync<JsonElement>();
+        var editTooLong = await client.PutAsJsonAsync($"/api/requests/{posted.GetProperty("id").GetString()}/notes", new { notes = new string('x', 501) });
+
+        await AssertProblemAsync(tooLong, HttpStatusCode.UnprocessableEntity, "invalid_notes");
+        await AssertProblemAsync(editTooLong, HttpStatusCode.UnprocessableEntity, "invalid_notes");
+        posted.GetProperty("notes").GetString().Should().HaveLength(500);
+    }
+
+    [Fact]
+    public async Task Only_the_requester_can_edit_the_notes()
+    {
+        var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var ownerClient = _factory.CreateMemberClient(owner);
+        using var sitterClient = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+        var posted = await (await ownerClient.PostAsJsonAsync("/api/requests", Body(notes: "mine"))).Content.ReadFromJsonAsync<JsonElement>();
+        var id = posted.GetProperty("id").GetString();
+        (await sitterClient.PostAsync($"/api/requests/{id}/claim", null)).EnsureSuccessStatusCode();
+
+        var bySitter = await sitterClient.PutAsJsonAsync($"/api/requests/{id}/notes", new { notes = "hijack" });
+
+        await AssertProblemAsync(bySitter, HttpStatusCode.NotFound, "request_not_found");
+        (await ownerClient.GetFromJsonAsync<JsonElement>("/api/me/requests")).GetProperty("items").EnumerateArray().Single()
+            .GetProperty("notes").GetString().Should().Be("mine");
     }
 
     [Fact]

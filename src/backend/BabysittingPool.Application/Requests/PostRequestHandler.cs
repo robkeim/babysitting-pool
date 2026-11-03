@@ -9,7 +9,8 @@ namespace BabysittingPool.Application.Requests;
 public sealed record PostRequestCommand(
     Guid RequesterId,
     DateTime StartsAt,
-    CreditRequestDetails Details);
+    CreditRequestDetails Details,
+    string? Notes = null);
 
 /// <summary>Posts a Request and escrows its cost from the Requester's Available Balance (spec §4.1).</summary>
 public sealed class PostRequestHandler(
@@ -30,7 +31,7 @@ public sealed class PostRequestHandler(
             : null;
         var request = Request.Post(
             command.RequesterId, account, command.Details, command.StartsAt, home,
-            now, settings.MinimumLeadTime, settings.ClaimCutoff);
+            now, settings.MinimumLeadTime, settings.ClaimCutoff, command.Notes);
         announcer.Created(await store.AddPostedAsync(request, account, now, cancellationToken));
 
         return RequestRead.From(request).ToView(now);

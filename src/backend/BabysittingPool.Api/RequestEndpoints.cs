@@ -16,7 +16,7 @@ internal static class RequestEndpoints
             var member = context.CurrentMember();
 
             var command = new PostRequestCommand(
-                member.MemberId, body.StartsAt.UtcDateTime, body.ToDetails());
+                member.MemberId, body.StartsAt.UtcDateTime, body.ToDetails(), body.Notes);
             return await handler.HandleAsync(command, cancellationToken) is { } view
                 ? Results.Created($"/api/me/requests#{view.Id}", view)
                 : Problems.AccountNotFound();
@@ -134,6 +134,23 @@ internal static class RequestEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
 
+        app.MapPut("/api/requests/{id:guid}/notes", async (
+            Guid id, EditNotesBody body, HttpContext context, EditRequestNotesHandler handler, CancellationToken cancellationToken) =>
+        {
+            var member = context.CurrentMember();
+
+            return await handler.HandleAsync(new EditRequestNotesCommand(id, member.MemberId, body.Notes), cancellationToken) is { } view
+                ? Results.Ok(view)
+                : Problems.RequestNotFound();
+        })
+        .RequireAuthorization()
+        .WithName("EditRequestNotes")
+        .Produces<RequestView>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
         app.MapGet("/api/requests/quote", ([AsParameters] QuoteQuery query) =>
         {
             return Results.Ok(QuoteRequest.Handle(query.ToDetails()));
@@ -153,11 +170,14 @@ internal static class RequestEndpoints
         TransportOption Transport,
         bool Lunch,
         bool Snack,
-        bool Dinner)
+        bool Dinner,
+        string? Notes = null)
     {
         public CreditRequestDetails ToDetails() =>
             new(DurationMinutes, ChildCount, Location, Transport, Meals(Lunch, Snack, Dinner));
     }
+
+    private sealed record EditNotesBody(string? Notes);
 
     private sealed record QuoteQuery(
         [FromQuery] int DurationMinutes,
