@@ -47,11 +47,11 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         return await _database.NewContext(scope).Members.AsNoTracking().SingleAsync(m => m.Id == memberId);
     }
 
-    private async Task<Guid> PostAsync(Guid requester)
+    private async Task<Guid> PostAsync(Guid requester, string? notes = null)
     {
         await using var scope = _database.CreateScope();
         var command = new PostRequestCommand(
-            requester, Now.AddHours(10), new CreditRequestDetails(120, 1, BabysittingLocation.RequestingFamilysHouse));
+            requester, Now.AddHours(10), new CreditRequestDetails(120, 1, BabysittingLocation.RequestingFamilysHouse), notes);
         return (await scope.ServiceProvider.GetRequiredService<PostRequestHandler>().HandleAsync(command, default))!.Id;
     }
 
@@ -83,8 +83,8 @@ public class EraseMemberHandlerTests : IAsyncLifetime
     public async Task Erasing_clears_the_profile_and_the_address_of_the_members_requests_and_leaves_other_members_alone()
     {
         var other = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
-        var theirs = await PostAsync(_leaver);
-        var others = await PostAsync(other);
+        var theirs = await PostAsync(_leaver, "the youngest has a cold");
+        var others = await PostAsync(other, "allergic to peanuts");
         await OffboardAsync(_leaver);
 
         await EraseAsync(_leaver);
@@ -93,6 +93,7 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         var requests = _database.NewContext(scope).Requests.AsNoTracking();
         (await requests.SingleAsync(r => r.Id == theirs)).Address.Should().BeNull();
         (await requests.SingleAsync(r => r.Id == theirs)).Instructions.Should().BeNull();
+        (await requests.SingleAsync(r => r.Id == theirs)).Notes.Should().BeNull();
         var erased = await _database.NewContext(scope).Members.AsNoTracking().SingleAsync(m => m.Id == _leaver);
         erased.Commune.Should().BeNull();
         erased.InseeCode.Should().BeNull();
@@ -102,6 +103,26 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         erased.Address.Should().BeNull();
         (await requests.SingleAsync(r => r.Id == others)).Address.Should().Be("12 River Rd");
         (await requests.SingleAsync(r => r.Id == others)).Instructions.Should().Be("ring twice");
+        (await requests.SingleAsync(r => r.Id == others)).Notes.Should().Be("allergic to peanuts");
+    }
+
+    [Fact]
+    public async Task Erasing_a_sitter_leaves_the_notes_of_the_requests_they_claimed()
+    {
+        var requester = await _database.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        var request = await PostAsync(requester, "the youngest has a cold");
+        await using (var scope = _database.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<ClaimRequestHandler>()
+                .HandleAsync(new ClaimRequestCommand(request, _leaver), default);
+        }
+
+        await OffboardAsync(_leaver);
+        await EraseAsync(_leaver);
+
+        await using var check = _database.CreateScope();
+        (await _database.NewContext(check).Requests.AsNoTracking().SingleAsync(r => r.Id == request))
+            .Notes.Should().Be("the youngest has a cold");
     }
 
     [Fact]
