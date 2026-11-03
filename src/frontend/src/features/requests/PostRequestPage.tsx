@@ -13,6 +13,7 @@ import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useQuote, usePostRequest } from './api'
 import { CostReceipt } from './CostReceipt'
+import { NotesField } from './NotesField'
 import type { BabysittingLocation, QuoteDetails, TransportOption } from './types'
 
 interface PostRequestPageProps {
@@ -39,6 +40,7 @@ const POST_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   insufficient_credits: 'error.insufficient_credits',
   concurrent_update: 'error.concurrent_update',
   home_location_required: 'error.home_location_required',
+  invalid_notes: 'error.invalid_notes',
 }
 
 function postFailure(error: unknown, leadKnown: boolean): MessageId {
@@ -63,6 +65,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   const [lunch, setLunch] = useState(false)
   const [snack, setSnack] = useState(false)
   const [dinner, setDinner] = useState(false)
+  const [notes, setNotes] = useState('')
 
   const details: QuoteDetails = {
     durationMinutes,
@@ -113,7 +116,10 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
 
   function submit(event: SyntheticEvent) {
     event.preventDefault()
-    post.mutate({ ...details, startsAt: new Date(startsAt).toISOString() }, { onSuccess: onPosted })
+    post.mutate(
+      { ...details, startsAt: new Date(startsAt).toISOString(), notes: notes.trim() || null },
+      { onSuccess: onPosted },
+    )
   }
 
   return (
@@ -345,6 +351,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
               </span>
             </label>
           </fieldset>
+          <NotesField id="notes" value={notes} onChange={setNotes} />
           {transportLocked && home && (
             <p className="text-sm text-muted-foreground">
               <FormattedMessage

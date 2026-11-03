@@ -1,4 +1,12 @@
-import { CalendarClock, Clock, Coins, House, MapPin, NotebookText } from 'lucide-react'
+import {
+  CalendarClock,
+  Clock,
+  Coins,
+  House,
+  MapPin,
+  MessageSquareText,
+  NotebookText,
+} from 'lucide-react'
 import { type ReactNode } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,10 +21,14 @@ interface RequestCardProps {
   address?: string | null
   /** The address instructions, shown on the same terms as the address (ADR 0020). */
   instructions?: string | null
+  /** The Requester's free-text notes, shown on the same terms as the address (spec §4.1). */
+  notes?: string | null
   durationMinutes: number
   childCount: number
   costQuarterCredits: number
   status?: RequestStatus
+  /** Below the details, e.g. the Requester's notes editor. */
+  footer?: ReactNode
   /** The one thing the viewer can do with it, if anything. */
   action?: ReactNode
 }
@@ -50,10 +62,12 @@ export function RequestCard({
   area,
   address,
   instructions,
+  notes,
   durationMinutes,
   childCount,
   costQuarterCredits,
   status,
+  footer,
   action,
 }: RequestCardProps) {
   return (
@@ -79,12 +93,21 @@ export function RequestCard({
               {instructions}
             </Line>
           )}
+          {notes && (
+            <Line icon={MessageSquareText} className="whitespace-pre-line text-muted-foreground">
+              <span className="sr-only">
+                <FormattedMessage id="requests.notes.label" />
+              </span>
+              {notes}
+            </Line>
+          )}
           <Line icon={Clock} className="text-muted-foreground">
             <FormattedMessage
               id="requests.details"
               values={{ minutes: durationMinutes, children: childCount }}
             />
           </Line>
+          {footer}
         </div>
         <div className="flex flex-col gap-3 lg:items-end">
           <div className="flex flex-wrap items-center gap-2">

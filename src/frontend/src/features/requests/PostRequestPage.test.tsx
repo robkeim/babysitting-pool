@@ -273,4 +273,42 @@ describe('PostRequestPage', () => {
     )
     expect(details).toBeVisible()
   })
+
+  it('sends the notes with a counter, and null when left blank', async () => {
+    const user = userEvent.setup()
+    const posted: PostRequestBody[] = []
+    server.use(
+      availableBalanceHandler(40),
+      quoteHandler({ costQuarterCredits: 8 }),
+      postRequestHandler((body) => posted.push(body)),
+    )
+
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+    await fillRequiredFields(user)
+    expect(screen.getByText('0 of 500 characters')).toBeInTheDocument()
+    await user.type(screen.getByLabelText(/notes for the sitter/i), 'has a cold')
+    expect(screen.getByText('10 of 500 characters')).toBeInTheDocument()
+    expect(await screen.findByText('2.00 credits')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /post request/i }))
+
+    await vi.waitFor(() => {
+      expect(posted[0]).toMatchObject({ notes: 'has a cold' })
+    })
+  })
+
+  it('shows invalid_notes without exposing the server message', async () => {
+    const user = userEvent.setup()
+    server.use(
+      availableBalanceHandler(40),
+      quoteHandler({ costQuarterCredits: 8 }),
+      postRequestRejectedHandler('invalid_notes'),
+    )
+
+    renderWithProviders(<PostRequestPage onPosted={vi.fn()} />)
+    await fillRequiredFields(user)
+    expect(await screen.findByText('2.00 credits')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /post request/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/notes are too long/i)
+  })
 })
