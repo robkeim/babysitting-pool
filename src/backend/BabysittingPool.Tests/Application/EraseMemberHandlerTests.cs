@@ -6,6 +6,7 @@ using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
 using BabysittingPool.Domain.Requests;
 using BabysittingPool.Infrastructure.Persistence;
+using BabysittingPool.Infrastructure.Persistence.Migrations;
 using BabysittingPool.Tests.Support;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -146,6 +147,29 @@ public class EraseMemberHandlerTests : IAsyncLifetime
         await using var after = _database.CreateScope();
         var emails = await _database.NewContext(after).Invitations.AsNoTracking().Select(i => i.Email).ToListAsync();
         emails.Should().BeEquivalentTo(["Former member", "someone.else@example.test"]);
+    }
+
+    [Fact]
+    public async Task The_backfill_migration_repairs_invitations_accepted_before_the_accepting_member_id_existed()
+    {
+        var email = (await MemberAsync(_leaver)).Email;
+        await AddInvitationAsync(email);
+        await AddInvitationAsync("erased.long.ago@example.test");
+        await using (var scope = _database.CreateScope())
+        {
+            await _database.NewContext(scope).Invitations
+                .ExecuteUpdateAsync(i => i.SetProperty(x => x.ConsumedAt, (DateTime?)Now));
+            var db = _database.NewContext(scope);
+            await db.Database.ExecuteSqlRawAsync(BackfillInvitationAcceptedBy.TombstoneOrphansSql);
+            await db.Database.ExecuteSqlRawAsync(BackfillInvitationAcceptedBy.LinkToMemberSql);
+        }
+
+        await OffboardAsync(_leaver);
+        await EraseAsync(_leaver);
+
+        await using var after = _database.CreateScope();
+        var emails = await _database.NewContext(after).Invitations.AsNoTracking().Select(i => i.Email).ToListAsync();
+        emails.Should().BeEquivalentTo(["Former member", "Former member"]);
     }
 
     [Fact]

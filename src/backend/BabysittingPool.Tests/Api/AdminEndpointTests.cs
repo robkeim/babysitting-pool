@@ -104,6 +104,29 @@ public class AdminEndpointTests : IDisposable
     }
 
     [Fact]
+    public async Task Erasing_a_member_who_joined_by_invitation_removes_their_email_from_the_invitations_list()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        await _factory.InviteAsync("leaver@example.com");
+        using var plain = _factory.CreateClient();
+        var outbox = await plain.GetFromJsonAsync<JsonElement>("/api/test/outbox?to=leaver%40example.com");
+        var link = outbox.EnumerateArray().Last().GetProperty("link").GetString()!;
+        var token = System.Web.HttpUtility.ParseQueryString(new Uri(link).Query)["token"]!;
+        using var joiner = _factory.CreateClient(new() { HandleCookies = true });
+        joiner.DefaultRequestHeaders.Add("X-Requested-With", "fetch");
+        (await joiner.PostAsJsonAsync("/api/invitations/accept", new { token, displayName = "Leaver" })).EnsureSuccessStatusCode();
+        var memberId = (await joiner.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("memberId").GetGuid();
+        using var adminClient = _factory.CreateMemberClient(admin);
+        (await adminClient.PostAsync($"/api/admin/members/{memberId}/offboard", null)).EnsureSuccessStatusCode();
+        (await adminClient.PostAsync($"/api/admin/members/{memberId}/erase", null)).EnsureSuccessStatusCode();
+
+        var json = await adminClient.GetStringAsync("/api/admin/invitations");
+
+        json.Should().NotContain("leaver@example.com");
+    }
+
+    [Fact]
     public async Task Listing_members_shows_open_and_closed_ones_and_who_is_erased()
     {
         var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
