@@ -5,6 +5,6 @@ cd "$(dirname "$0")/.."
 
 trap 'kill 0' EXIT INT TERM
 
-dotnet run --project src/backend/BabysittingPool.Api --launch-profile http &
+(cd src/backend && dotnet run --project BabysittingPool.Api --launch-profile http) &
 (cd src/frontend && npm run dev) &
 wait

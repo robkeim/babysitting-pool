@@ -6,6 +6,7 @@ import {
   MapPin,
   MessageSquareText,
   NotebookText,
+  UserCheck,
 } from 'lucide-react'
 import { type ReactNode } from 'react'
 import { FormattedMessage } from 'react-intl'
@@ -23,6 +24,8 @@ interface RequestCardProps {
   instructions?: string | null
   /** The Requester's free-text notes, shown on the same terms as the address (spec §4.1). */
   notes?: string | null
+  /** The Sitter who claimed it, for the Requester's own list. */
+  sitterDisplayName?: string | null
   durationMinutes: number
   childCount: number
   costQuarterCredits: number
@@ -63,6 +66,7 @@ export function RequestCard({
   address,
   instructions,
   notes,
+  sitterDisplayName,
   durationMinutes,
   childCount,
   costQuarterCredits,
@@ -99,6 +103,11 @@ export function RequestCard({
                 <FormattedMessage id="requests.notes.label" />
               </span>
               {notes}
+            </Line>
+          )}
+          {sitterDisplayName && (
+            <Line icon={UserCheck} className="text-muted-foreground">
+              <FormattedMessage id="requests.claimedBy" values={{ sitter: sitterDisplayName }} />
             </Line>
           )}
           <Line icon={Clock} className="text-muted-foreground">

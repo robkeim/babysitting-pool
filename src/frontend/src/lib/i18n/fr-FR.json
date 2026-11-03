@@ -141,6 +141,7 @@
   "requests.open.area": "Secteur",
   "requests.open.details": "Détails",
   "requests.instructions": "Consignes pour l'adresse",
+  "requests.claimedBy": "Réservée par {sitter}",
   "requests.open.credits": "Crédits",
   "requests.open.claim": "Réserver",
   "requests.open.claimFailed.title": "Nous n’avons pas pu réserver cette demande",
