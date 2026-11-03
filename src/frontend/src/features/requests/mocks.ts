@@ -21,6 +21,7 @@ export const sampleRequest: RequestView = {
   area: 'Riverside',
   address: '12 River Rd',
   instructions: 'ring twice',
+  notes: null,
   costQuarterCredits: 8,
   claimCutoffAt: '2026-03-02T07:00:00Z',
   postedAt: '2026-03-01T09:00:00Z',

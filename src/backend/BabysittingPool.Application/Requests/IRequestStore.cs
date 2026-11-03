@@ -51,6 +51,9 @@ public interface IRequestStore
     /// </summary>
     Task<IReadOnlyList<NotificationDelivery>> SaveReleasedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
 
+    /// <summary>Saves a Request whose notes changed. Only the notes move, so no account, Ledger entry or Notification does (ADR 0014). Throws <see cref="ConcurrencyConflictException"/> if the Request changed since it was read.</summary>
+    Task SaveNotesAsync(Request request, CancellationToken cancellationToken);
+
     /// <summary>
     /// Saves an Expired Request, the Requester's refunded account and the Refund Ledger entry in one transaction.
     /// Throws <see cref="ConcurrencyConflictException"/> if the Request or account changed since it was read.
@@ -89,7 +92,7 @@ public interface IRequestReader
         Guid excludeRequesterId, DateTime now, PageRequest page, CancellationToken cancellationToken);
 
     /// <summary>
-    /// The Requests the Member claimed as Sitter, latest start first, exact address and instructions included: the Sitter holds the
+    /// The Requests the Member claimed as Sitter, latest start first, exact address, instructions and notes included: the Sitter holds the
     /// claim (spec §4.6). A Request the Sitter withdrew from has no Sitter any more, so it drops off the list.
     /// </summary>
     Task<Page<RequestView>> ListClaimedByAsync(

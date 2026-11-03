@@ -33,6 +33,65 @@ public class RequestTests
     }
 
     [Fact]
+    public void Editing_the_notes_of_a_claimed_request_keeps_the_claim()
+    {
+        var request = Claimed(CreditAccount.Open());
+
+        request.EditNotes(_requesterId, "  bedtime at 8  ", Now);
+
+        request.Notes.Should().Be("bedtime at 8");
+        request.Status.Should().Be(RequestStatus.Claimed);
+        request.SitterId.Should().Be(_sitterId);
+    }
+
+    [Fact]
+    public void Blank_notes_clear_them()
+    {
+        var request = Post(CreditAccount.Open());
+        request.EditNotes(_requesterId, "something", Now);
+
+        request.EditNotes(_requesterId, "   ", Now);
+
+        request.Notes.Should().BeNull();
+    }
+
+    [Fact]
+    public void Notes_are_frozen_from_the_start_time()
+    {
+        var request = Claimed(CreditAccount.Open());
+
+        var act = () => request.EditNotes(_requesterId, "late", Start);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("start_passed");
+    }
+
+    [Fact]
+    public void Notes_over_the_limit_are_refused_and_the_limit_itself_is_fine()
+    {
+        var request = Post(CreditAccount.Open());
+
+        request.EditNotes(_requesterId, new string('x', Request.MaxNotesLength), Now);
+        var act = () => request.EditNotes(_requesterId, new string('x', Request.MaxNotesLength + 1), Now);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("invalid_notes");
+        request.Notes.Should().HaveLength(Request.MaxNotesLength);
+    }
+
+    [Fact]
+    public void Only_the_requester_edits_the_notes_and_not_once_the_request_has_ended()
+    {
+        var account = CreditAccount.Open();
+        var request = Claimed(account);
+
+        var byOther = () => request.EditNotes(_sitterId, "x", Now);
+        request.Cancel(_requesterId, account, Now);
+        var afterCancel = () => request.EditNotes(_requesterId, "x", Now);
+
+        byOther.Should().Throw<DomainException>().Which.Code.Should().Be("not_the_requester");
+        afterCancel.Should().Throw<DomainException>().Which.Code.Should().Be("invalid_state");
+    }
+
+    [Fact]
     public void Posting_escrows_the_calculated_cost_and_snapshots_the_claim_cutoff()
     {
         var account = CreditAccount.Open();

@@ -284,6 +284,9 @@ namespace BabysittingPool.Infrastructure.Persistence.Migrations
                     b.Property<int>("Meals")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("PostedAt")
                         .HasColumnType("TEXT");
 

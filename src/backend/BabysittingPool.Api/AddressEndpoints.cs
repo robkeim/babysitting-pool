@@ -10,18 +10,7 @@ internal static class AddressEndpoints
     public static void MapAddressEndpoints(this IEndpointRouteBuilder app) =>
         app.MapGet(Path, async (string? q, SuggestAddressesHandler handler, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                return Results.Ok(await handler.HandleAsync(q, cancellationToken));
-            }
-            catch (AddressQueryTooShortException)
-            {
-                return Problems.InvalidRequest("q", "too_short");
-            }
-            catch (AddressServiceUnavailableException)
-            {
-                return Problems.AddressServiceUnavailable();
-            }
+            return Results.Ok(await handler.HandleAsync(q, cancellationToken));
         })
         .RequireAuthorization()
         .WithName("SuggestAddresses")

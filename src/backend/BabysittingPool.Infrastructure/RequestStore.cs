@@ -34,7 +34,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         return record is null ? null : Request.Restore(
             record.Id, record.RequesterId, record.SitterId,
             new CreditRequestDetails(record.DurationMinutes, record.ChildCount, record.Location, record.Transport, record.Meals),
-            record.StartsAt, record.Area, record.Address, record.Instructions, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status);
+            record.StartsAt, record.Area, record.Address, record.Instructions, record.Notes, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status);
     }
 
     private IDbContextTransaction? _claimTransaction;
@@ -56,7 +56,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         return records.Select(record => Request.Restore(
             record.Id, record.RequesterId, record.SitterId,
             new CreditRequestDetails(record.DurationMinutes, record.ChildCount, record.Location, record.Transport, record.Meals),
-            record.StartsAt, record.Area, record.Address, record.Instructions, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status)).ToList();
+            record.StartsAt, record.Area, record.Address, record.Instructions, record.Notes, record.Cost, record.ClaimCutoffAt, record.PostedAt, record.Status)).ToList();
     }
 
     public async Task<IReadOnlyList<NotificationDelivery>> SaveClaimedAsync(Request request, DateTime now, CancellationToken cancellationToken)
@@ -81,6 +81,12 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         }
 
         return [new NotificationDelivery(notification.MemberId, notification.ToView())];
+    }
+
+    public async Task SaveNotesAsync(Request request, CancellationToken cancellationToken)
+    {
+        await SetRequestStateAsync(request, cancellationToken);
+        await SaveAsync(cancellationToken);
     }
 
     public async Task SaveExpiredAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
@@ -123,6 +129,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             ?? throw new InvalidOperationException("The Request must be read before it is saved.");
         record.Status = request.Status;
         record.SitterId = request.SitterId;
+        record.Notes = request.Notes;
         record.Version++;
     }
 
@@ -222,6 +229,7 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
             Area = request.Area,
             Address = request.Address,
             Instructions = request.Instructions,
+            Notes = request.Notes,
             Cost = request.Cost,
             ClaimCutoffAt = request.ClaimCutoffAt,
             PostedAt = request.PostedAt,

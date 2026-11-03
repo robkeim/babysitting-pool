@@ -37,16 +37,9 @@ internal static class AdminEndpoints
         group.MapGet("/members/{id:guid}", async (
             Guid id, GetMemberDetailHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                return await handler.HandleAsync(id, cursor, limit, cancellationToken) is { } detail
-                    ? Results.Ok(detail)
-                    : Problems.MemberNotFound();
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            return await handler.HandleAsync(id, cursor, limit, cancellationToken) is { } detail
+                ? Results.Ok(detail)
+                : Problems.MemberNotFound();
         })
         .WithName("GetMember")
         .Produces<MemberDetailView>()
@@ -58,16 +51,9 @@ internal static class AdminEndpoints
         group.MapGet("/members/{id:guid}/requests", async (
             Guid id, ListMemberRequestsHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                return await handler.HandleAsync(id, cursor, limit, cancellationToken) is { } page
-                    ? Results.Ok(page)
-                    : Problems.MemberNotFound();
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            return await handler.HandleAsync(id, cursor, limit, cancellationToken) is { } page
+                ? Results.Ok(page)
+                : Problems.MemberNotFound();
         })
         .WithName("ListMemberRequests")
         .Produces<Page<MemberRequestView>>()
@@ -96,20 +82,9 @@ internal static class AdminEndpoints
         group.MapPost("/members/{id:guid}/offboard", async (
             Guid id, OffboardMemberHandler handler, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                return await handler.HandleAsync(new OffboardMemberCommand(id), cancellationToken) is { } result
-                    ? Results.Ok(result)
-                    : Problems.MemberNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
-            catch (ConcurrencyConflictException)
-            {
-                return Problems.Conflict();
-            }
+            return await handler.HandleAsync(new OffboardMemberCommand(id), cancellationToken) is { } result
+                ? Results.Ok(result)
+                : Problems.MemberNotFound();
         })
         .WithName("OffboardMember")
         .Produces<OffboardMemberResult>()
@@ -123,16 +98,9 @@ internal static class AdminEndpoints
         group.MapPost("/members/{id:guid}/erase", async (
             Guid id, EraseMemberHandler handler, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                return await handler.HandleAsync(new EraseMemberCommand(id), cancellationToken)
-                    ? Results.NoContent()
-                    : Problems.MemberNotFound();
-            }
-            catch (DomainException ex)
-            {
-                return Problems.DomainRule(ex);
-            }
+            return await handler.HandleAsync(new EraseMemberCommand(id), cancellationToken)
+                ? Results.NoContent()
+                : Problems.MemberNotFound();
         })
         .WithName("EraseMember")
         .Produces(StatusCodes.Status204NoContent)

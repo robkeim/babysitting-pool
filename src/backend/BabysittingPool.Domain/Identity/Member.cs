@@ -49,7 +49,7 @@ public sealed class Member
 
         if (IsClosed)
         {
-            throw new DomainException("The Member is already closed.", "invalid_state");
+            throw new DomainException("The Member is already closed.", DomainException.InvalidStateCode);
         }
 
         ClosedAt = now;
@@ -80,7 +80,7 @@ public sealed class Member
         ArgumentNullException.ThrowIfNull(home);
         if (IsClosed)
         {
-            throw new DomainException("A closed Member's profile cannot be changed.", "invalid_state");
+            throw new DomainException("A closed Member's profile cannot be changed.", DomainException.InvalidStateCode);
         }
 
         Home = home;

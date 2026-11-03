@@ -64,6 +64,6 @@ internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReade
             .ToListAsync(cancellationToken);
 
     private static RequestRead ToRead(RequestRecord r) => new(
-        r.Id, r.StartsAt, r.DurationMinutes, r.ChildCount, r.Location, r.Transport, r.Meals, r.Area, r.Address, r.Instructions,
+        r.Id, r.StartsAt, r.DurationMinutes, r.ChildCount, r.Location, r.Transport, r.Meals, r.Area, r.Address, r.Instructions, r.Notes,
         r.Cost.QuarterCredits, r.ClaimCutoffAt, r.PostedAt, r.Status);
 }

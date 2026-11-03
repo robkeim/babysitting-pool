@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<ClaimRequestHandler>();
         services.AddScoped<CancelRequestHandler>();
         services.AddScoped<WithdrawClaimHandler>();
+        services.AddScoped<EditRequestNotesHandler>();
         services.AddScoped<SettleHandler>();
         services.AddScoped<OffboardMemberHandler>();
         services.AddScoped<EraseMemberHandler>();

@@ -22,14 +22,7 @@ internal static class NotificationEndpoints
         app.MapGet("/api/notifications", async (
             HttpContext context, ListNotificationsHandler handler, string? cursor, int? limit, CancellationToken cancellationToken) =>
         {
-            try
-            {
-                return Results.Ok(await handler.HandleAsync(context.CurrentMember().MemberId, cursor, limit, cancellationToken));
-            }
-            catch (InvalidCursorException)
-            {
-                return Problems.InvalidRequest("cursor", "invalid");
-            }
+            return Results.Ok(await handler.HandleAsync(context.CurrentMember().MemberId, cursor, limit, cancellationToken));
         })
         .RequireAuthorization()
         .WithName("ListNotifications")
