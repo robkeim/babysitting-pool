@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { parse } from '@formatjs/icu-messageformat-parser'
 import { readFileSync } from 'node:fs'
+import { createIntl } from 'react-intl'
 import { LANGUAGES } from './languages'
 import { enUS } from './messages'
 
@@ -28,5 +29,21 @@ describe('message catalogs', () => {
       const messages = await language.load()
       expect(Object.keys(messages).sort(), language.tag).toEqual(Object.keys(enUS).sort())
     }
+  })
+
+  it('pluralizes credit amounts: 1.00 credit, 0.25 credits', async () => {
+    const english = createIntl({ locale: 'en-US', messages: enUS })
+    const id = 'requests.post.receipt.amount'
+    expect(english.formatMessage({ id }, { amount: 1 })).toBe('1.00 credit')
+    expect(english.formatMessage({ id }, { amount: 0.25 })).toBe('0.25 credits')
+    expect(english.formatMessage({ id }, { amount: 10.5 })).toBe('10.50 credits')
+
+    const french = createIntl({
+      locale: 'fr-FR',
+      messages: await (LANGUAGES.find((language) => language.tag === 'fr-FR')?.load() ?? enUS),
+    })
+    expect(french.formatMessage({ id: 'requests.post.receipt.after' }, { after: 0.25 })).toBe(
+      'Après publication : 0,25 crédit restant',
+    )
   })
 })

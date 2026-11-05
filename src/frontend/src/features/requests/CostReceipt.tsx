@@ -1,7 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { type ReactNode, useId, useState } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
-import { formatCredits } from '@/features/credits'
+import { creditsValue, formatCredits } from '@/features/credits'
 import type { CostQuote, QuoteDetails } from './types'
 
 interface CostReceiptProps {
@@ -79,7 +79,7 @@ export function CostReceipt({
             quote ? (
               <FormattedMessage
                 id="requests.post.receipt.amount"
-                values={{ amount: formatCredits(quote.costQuarterCredits) }}
+                values={{ amount: creditsValue(quote.costQuarterCredits) }}
               />
             ) : (
               <FormattedMessage id="requests.post.receipt.unknown" />
@@ -98,7 +98,7 @@ export function CostReceipt({
               {' · '}
               <FormattedMessage
                 id="requests.post.receipt.after"
-                values={{ after: formatCredits(available - quote.costQuarterCredits) }}
+                values={{ after: creditsValue(available - quote.costQuarterCredits) }}
               />
             </>
           )}
