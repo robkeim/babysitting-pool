@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl, type IntlShape } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CostReceipt } from '@/features/requests'
-import { formatCredits } from '@/features/credits'
+import { creditsValue, formatCredits } from '@/features/credits'
 import { useRules } from './api'
 import { formatDuration } from './formatDuration'
 import type { PricingExample, RulesView } from './types'
@@ -86,7 +86,7 @@ function Rules({ rules }: { rules: RulesView }) {
         <p>
           <FormattedMessage
             id="rules.credits.start"
-            values={{ amount: formatCredits(rules.startingBalanceQuarterCredits) }}
+            values={{ amount: creditsValue(rules.startingBalanceQuarterCredits) }}
           />
         </p>
         <p>
@@ -120,14 +120,14 @@ function Rules({ rules }: { rules: RulesView }) {
           <li>
             <FormattedMessage
               id="rules.pricing.familyHouse"
-              values={{ amount: formatCredits(prices.familyHouseQuarterCredits) }}
+              values={{ amount: creditsValue(prices.familyHouseQuarterCredits) }}
             />
           </li>
           <li>
             <FormattedMessage
               id="rules.pricing.transport"
               values={{
-                oneWay: formatCredits(prices.oneWayTransportQuarterCredits),
+                oneWay: creditsValue(prices.oneWayTransportQuarterCredits),
                 roundTrip: formatCredits(prices.roundTripTransportQuarterCredits),
               }}
             />
@@ -189,7 +189,7 @@ function Rules({ rules }: { rules: RulesView }) {
             id="rules.demurrage.charge"
             values={{
               days: rules.demurrageGraceDays,
-              amount: formatCredits(rules.demurrageChargeQuarterCredits),
+              amount: creditsValue(rules.demurrageChargeQuarterCredits),
               day: weekday(intl, rules.demurrageDay),
               time: rules.demurrageTime,
               zone: rules.timeZone,

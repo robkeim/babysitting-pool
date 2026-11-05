@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { formatCredits, formatInstant } from '@/features/credits'
+import { creditsValue, formatInstant } from '@/features/credits'
 import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useEraseMember, useMembers, useOffboardMember } from './api'
@@ -187,7 +187,7 @@ function MemberRow({ member }: { member: AdminMemberView }) {
                 cancelled: offboard.data.cancelled,
                 withdrawn: offboard.data.withdrawn,
                 settled: offboard.data.settled,
-                burned: formatCredits(offboard.data.burnedQuarterCredits),
+                burned: creditsValue(offboard.data.burnedQuarterCredits),
               }}
             />
           </p>
