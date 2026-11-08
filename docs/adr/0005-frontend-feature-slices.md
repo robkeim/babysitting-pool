@@ -10,3 +10,5 @@ Other rules:
 - API: one thin typed `fetch` wrapper in `lib/api/` (base URL, JSON, ProblemDetails into a typed `ApiError`). Each feature has an `api.ts` with its TanStack Query hooks and query-key factories. DTO types are generated from the backend OpenAPI document (generator chosen in the REST contract ticket). Zod is for forms only, not for re-validating responses.
 - State: server state only in TanStack Query, shareable UI state in the URL, local state in `useState`. No `useEffect` for data fetching or derived state.
 - Tests: colocated `Foo.test.tsx`; MSW handlers per feature in `features/<x>/mocks.ts` with a shared server and render helper in `src/test/` (QueryClient with retries off, router); accessible queries (`getByRole`, `getByLabelText`) rather than test ids; happy path plus main failure per feature; no snapshots, no coverage threshold.
+
+**Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.

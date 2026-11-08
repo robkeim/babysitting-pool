@@ -13,3 +13,5 @@ Playwright E2E runs the real API and SPA with no API mocks. Each Playwright work
 **Amendment (2026-10-27, #23).** Deployment settled the backup destination: a daily snapshot of the main database to a free-tier object store, 30 kept, with a restore drill before launch and quarterly (ADR 0018).
 
 **Amendment (2026-10-29, #101).** The E2E host is its own project, `BabysittingPool.E2E`, which adds `BabysittingPool.TestSupport` (the test-only endpoints, the settable fake clock and the stand-in address suggester) to the API. Production publishes only `BabysittingPool.Api` (ADR 0016).
+
+**Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.

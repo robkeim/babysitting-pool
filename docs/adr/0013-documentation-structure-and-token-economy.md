@@ -40,3 +40,5 @@ Soft targets, measured as characters ÷ 4 until a real `/context` reading replac
 | `AGENTS.md` + index + 2 ADRs | 9.5 KB | ~2.4k |
 
 Retune after the first feature slices land.
+
+**Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.

@@ -24,7 +24,7 @@ Calm and friendly, in the manner of LinkedIn/Facebook structure with Nextdoor/Ai
 The bar holds at most four tabs, plus one More tab for the rest (`ShellMore` on `AppShell`): the Admin pages, for Admins only. More opens a bottom sheet below `lg` and a dropdown menu from `lg` up, and is highlighted while one of its pages is open. Add a destination to the sheet, not a fifth tab. The top bar's right side is only the avatar, Profile, How it works and sign-out; settings such as Language live on the Profile page.
 
 ## Forms
-Inputs, selects, checkbox rows and the submit button are `h-11` on mobile; the submit button is full width below `lg`. Auth cards are `max-w-sm`, centred.
+Inputs, selects, checkbox rows and the submit button are `h-11` on mobile; the submit button is full width below `lg`. Auth cards are `max-w-sm`, centered.
 
 ## Long text
 Every string must survive the padded `en-XA` Language (about +100% on short labels). Give text containers `min-w-0`, let labels wrap between words rather than truncate, and never fix a width or a padding to the English text (the shell measures its fixed bottom bar for that reason). Never break inside a word: no `[overflow-wrap:anywhere]` on navigation labels, which clip (`line-clamp-2`) instead of splitting. A header that runs out of room gets fewer items, not narrower ones.

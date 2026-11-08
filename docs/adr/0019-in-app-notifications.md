@@ -28,4 +28,4 @@ Members learn of a Posted Request or a Claim inside the app, without reloading (
 
 **Amendment (2026-10-29, #158): pruned once the Request has started.** Settle also deletes every Notification, of any kind and for any Member, whose Request's start time has passed, since it can no longer be acted on. The 90-day backstop stays for rows whose Request never starts in that time. Settle still writes none (ADR 0007). Open bells drop such rows on their next list fetch; no `notification.dismissed` event is pushed for them.
 
-**Amendment (2026-11-08, #246).** Spelling is en-US throughout, so the Request status `Cancelled` is now `Canceled` and the Notification kind `request_cancelled` is `request_canceled`. This is a breaking change to the REST contract and to stored text; nothing is in production, and migration `CanceledSpelling` rewrites existing rows. Other British spellings in this and the other ADRs were corrected in place.
+**Amendment (2026-11-08, #246).** Spelled "canceled" (en-US) throughout, including the `request_canceled` kind; a migration renames stored rows. Stored `Requests.Status` text is converted by migration `CanceledSpelling`.

@@ -4,7 +4,7 @@ Every color in the frontend comes from a semantic token defined in `src/index.cs
 
 Dark mode follows `prefers-color-scheme` through a media query and a `dark` Tailwind variant bound to it. There is no toggle and no class set from JavaScript: a Member who changes their phone or browser setting sees it change, and there is nothing to store. A manual override (light, dark, system) is a later addition if asked for.
 
-Layout is mobile-first and borrows the LinkedIn/Facebook shape: a sticky top bar with the wordmark and account, a bottom tab bar below `lg` and the same tabs in the top bar from `lg` up, and one centred content column on a soft canvas of white cards. It is one `nav` element restyled by breakpoint, not two, so tests and screen readers see one set of links. `lg` and not `md` because four tabs, the wordmark and the account controls do not fit in a 768px bar.
+Layout is mobile-first and borrows the LinkedIn/Facebook shape: a sticky top bar with the wordmark and account, a bottom tab bar below `lg` and the same tabs in the top bar from `lg` up, and one centered content column on a soft canvas of white cards. It is one `nav` element restyled by breakpoint, not two, so tests and screen readers see one set of links. `lg` and not `md` because four tabs, the wordmark and the account controls do not fit in a 768px bar.
 
 An agent checks a screen against the design with three layers:
 
@@ -21,3 +21,5 @@ Pixel-diff baselines were rejected: they fail on every font or date change and s
 **Amendment (2026-10-29, Color Scheme).** A Member chooses light, dark or system (the default) on their profile, which supersedes the first paragraph's "no toggle". The choice is kept on the Member (`PUT /api/me/color-scheme`) and remembered in `localStorage` under `colorScheme` so a reload does not flash the wrong scheme. `lib/theme` sets a `dark` class on `<html>`: for system it follows `prefers-color-scheme` and its changes while the page is open. The `dark` Tailwind variant is bound to that class, and each dark token set is written once, as `:root.dark` and `:root[data-theme='vacation'].dark`. The class is a separate axis from `data-theme`, so vacation mode and a Color Scheme combine freely and no component knows about either.
 
 Related: ADR 0003 (stack; shadcn stays vanilla except for tokens), ADR 0005 (`components/` holds shared composed components such as the shell), ADR 0009 (the test Language is the layout stress test).
+
+**Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.
