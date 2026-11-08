@@ -70,7 +70,7 @@ internal sealed class AdminReader(BabysittingPoolDbContext db) : IAdminReader
     public async Task<IReadOnlyList<DormantMemberView>> ListDormantAsync(
         DateTime activeSince, CancellationToken cancellationToken)
     {
-        // A closed Member is out of the pool, so their last activity must not keep ageing onto the list (#46).
+        // A closed Member is out of the pool, so their last activity must not keep aging onto the list (#46).
         var members = await db.Members.AsNoTracking()
             .Where(m => m.ClosedAt == null && !m.IsAdmin)
             .Join(db.CreditAccounts.AsNoTracking(), m => m.Id, a => a.MemberId, (m, a) => new
@@ -110,7 +110,7 @@ internal sealed class AdminReader(BabysittingPoolDbContext db) : IAdminReader
     }
 
     // Credits is value-converted, so the query carries it as is and the view reads its quarter-credits afterwards.
-    // Member-initialised (not a constructor) so ordering and paging can see through the projection.
+    // Member-initialized (not a constructor) so ordering and paging can see through the projection.
     private IQueryable<SummaryRow> Summaries() =>
         db.Members.AsNoTracking()
             .Join(db.CreditAccounts.AsNoTracking(), m => m.Id, a => a.MemberId, (m, a) => new SummaryRow

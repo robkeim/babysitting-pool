@@ -10,7 +10,7 @@ const LABELS: Record<ColorScheme, MessageId> = {
   dark: 'auth.colorScheme.dark',
 }
 
-/** The Member's Colour Scheme, kept on the Member and not in the browser; renders nothing when nobody is signed in. */
+/** The Member's Color Scheme, kept on the Member and not in the browser; renders nothing when nobody is signed in. */
 export function ColorSchemeCard() {
   const me = useMe()
   const changeColorScheme = useChangeColorScheme()

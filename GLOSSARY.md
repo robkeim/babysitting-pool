@@ -90,7 +90,7 @@ _Avoid_: Venue, host's house
 
 **Area**:
 The commune a Member lives in, with its département number ("Amiens (80)"), worked out from their verified address and never typed. It sits on their profile with the address. Other Members see the Area of a Posted Request at the Requesting Family's House; the exact address goes only to the Requester and the Sitter who claimed it.
-_Avoid_: Neighbourhood, region, zone, city
+_Avoid_: Neighborhood, region, zone, city
 
 ### Credits
 
@@ -128,9 +128,9 @@ _Avoid_: Inactivity fee, decay
 The recurring run that applies every time-driven change that has become due: Expiry, Payout and Demurrage. It is not the same as a Payout.
 _Avoid_: Cron job, batch, sweep
 
-### Colour Scheme
+### Color Scheme
 
-**Colour Scheme**:
+**Color Scheme**:
 Whether a Member sees the co-op light, dark, or as their device is set, chosen by the Member and kept on their profile. System (follow the browser or operating system) is the default. It is separate from vacation mode, which changes the palette for everyone; the two combine.
 _Avoid_: Theme, dark mode setting
 

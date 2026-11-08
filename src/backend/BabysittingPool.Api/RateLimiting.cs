@@ -99,7 +99,7 @@ internal static class RateLimiting
         });
 
     /// <summary>
-    /// Forwarded headers are honoured only when a proxy or network is configured: with none the middleware
+    /// Forwarded headers are honored only when a proxy or network is configured: with none the middleware
     /// would trust every caller, and anyone could pick the IP they are limited under.
     /// </summary>
     public static IApplicationBuilder UseConfiguredForwardedHeaders(this WebApplication app) =>

@@ -49,7 +49,7 @@ public sealed class Request
     public DateTime EndsAt => StartsAt.AddMinutes(Details.DurationMinutes);
 
     /// <summary>
-    /// The rough neighbourhood, which is all other Members see while the Request is Posted (spec §4.6). Null when
+    /// The rough neighborhood, which is all other Members see while the Request is Posted (spec §4.6). Null when
     /// the babysitting is at the Sitter's house, where the Requester's location is irrelevant (spec §4.1).
     /// </summary>
     public string? Area { get; }

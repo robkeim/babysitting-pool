@@ -15,7 +15,7 @@ Read only the row that matches your task. Skip files the ticket's **Read first:*
 | Backend structure, persistence | [ADR index](docs/adr/README.md), then the ADRs tagged `backend` |
 | API change | [ADR 0006](docs/adr/0006-rest-contract.md), [`docs/development.md`](docs/development.md) (regenerating the contract) |
 | Frontend | ADRs tagged `frontend` in the [ADR index](docs/adr/README.md) |
-| UI look, layout, colours, dark mode | [`docs/design.md`](docs/design.md) |
+| UI look, layout, colors, dark mode | [`docs/design.md`](docs/design.md) |
 | Tests | [`docs/testing.md`](docs/testing.md) |
 | Run or configure locally | [`docs/development.md`](docs/development.md) |
 | Issues, labels, PRs | [`docs/agents/`](docs/agents/issue-tracker.md) |
@@ -25,7 +25,7 @@ Read only the row that matches your task. Skip files the ticket's **Read first:*
 ## Rules
 1. Never write code without first checking the relevant specification section.
 2. Domain models strictly enforce business invariants (e.g. balance floor > 0).
-3. Update the spec, glossary or an ADR in the same PR when behaviour or a decision changes. ADRs are append-only: supersede with a new ADR, or amend with a dated note.
+3. Update the spec, glossary or an ADR in the same PR when behavior or a decision changes. ADRs are append-only: supersede with a new ADR, or amend with a dated note.
 4. Commit messages are Conventional Commits (`type(scope): description`).
 
 ## Definition of done

@@ -110,7 +110,7 @@ The total cost of a request is calculated deterministically using the following 
    - The Requester may cancel a Posted or Claimed Request any time before the start time, with a full refund.
    - The Sitter may withdraw a claim before the start time. The Request returns to Posted if time remains; otherwise (the Claim Cutoff has passed) it expires and is refunded.
    - For v1, last-minute cancellations and withdrawals carry no penalty. Late-cancellation penalties are deferred to a future milestone.
-6. **Editing a Request (post-v1):** Not built in v1; to change a Request, a Requester cancels and re-posts. The rules below are the target behaviour for the milestone that adds editing.
+6. **Editing a Request (post-v1):** Not built in v1; to change a Request, a Requester cancels and re-posts. The rules below are the target behavior for the milestone that adds editing.
    - A Requester can edit a Posted or Claimed Request any time before the start time.
    - Cost drivers (start time, duration, child count, Location, transport, meals) re-price the Request. A higher cost needs enough Available Balance and escrows the difference; if the Requester can't cover it, the edit is rejected. A lower cost refunds the difference immediately.
    - A start-time edit must satisfy the same Minimum Lead Time rule as posting, measured against the current time.
@@ -118,7 +118,7 @@ The total cost of a request is calculated deterministically using the following 
    - The Requester sees who claimed a Claimed Request: "My Requests" shows "Claimed by {name}" from `sitterDisplayName` (§2A), and the name disappears with the claim.
    - Editing a Claimed Request drops the claim. Every field the Sitter relies on (all cost drivers, address and drop-off point) does this; only free-text notes are exempt (notes editing is built already, see §4.1). The Request returns to Posted with the new terms and its Escrow adjusted to the new cost. The former Sitter may claim it again like any other Member, first claim wins. Future: first rights for the former Sitter to reconfirm (backlog: #5).
    - After the Claim Cutoff, a Claimed Request can only have its free-text notes edited. An edit that would drop the claim is blocked with an explanation, so the Request does not silently expire.
-7. **Sitter overlap:** A Sitter cannot hold two Claimed Requests that share any time; a claim that would is rejected (422 `sitter_overlap`). Requests that touch end to start (3-5 PM and 5-7 PM) do not overlap. Withdrawing a claim frees the time. Sitter capacity is not modelled: a Sitter looks after one family at a time.
+7. **Sitter overlap:** A Sitter cannot hold two Claimed Requests that share any time; a claim that would is rejected (422 `sitter_overlap`). Requests that touch end to start (3-5 PM and 5-7 PM) do not overlap. Withdrawing a claim frees the time. Sitter capacity is not modeled: a Sitter looks after one family at a time.
 8. **Children (v1):** A Request records only the number of children (backlog for child profiles: #4). Any further child data needs its own ADR and privacy review first (ADR 0014).
 9. **Known v1 trade-off (Future Backlog):** Payout happens at the start time, so a no-show Sitter is still paid. Disputes and no-show handling are deferred.
 
@@ -141,7 +141,7 @@ The total cost of a request is calculated deterministically using the following 
 ### Dormant Members (Admin view)
 - A Member is **dormant** when their last activity is older than the dormancy threshold (default 6 weeks, configurable). The Admin is never listed.
 - Only the Admin sees the list; no other Member can tell who is dormant. It shows name, email, last activity date and Available Balance, sorted by longest dormant, and links to the Member detail. The Admin contacts the Member outside the app and decides whether to offboard.
-- A closed (offboarded) Member is never listed: they have left the pool, and their last activity would otherwise keep ageing.
+- A closed (offboarded) Member is never listed: they have left the pool, and their last activity would otherwise keep aging.
 - The list is derived from Requests and the Ledger; no page views or sign-ins are tracked.
 
 ---

@@ -27,7 +27,7 @@ function remember(scheme: ColorScheme) {
   }
 }
 
-/** Applies the last Colour Scheme before the first render, so a Member does not see the wrong one flash first. */
+/** Applies the last Color Scheme before the first render, so a Member does not see the wrong one flash first. */
 export function restoreColorScheme() {
   try {
     apply(parse(localStorage.getItem(STORAGE_KEY)))
@@ -37,7 +37,7 @@ export function restoreColorScheme() {
 }
 
 /**
- * Shows the app in the signed-in Member's Colour Scheme and, while it is `system`, follows the browser or OS setting
+ * Shows the app in the signed-in Member's Color Scheme and, while it is `system`, follows the browser or OS setting
  * as it changes. Leaves the remembered scheme alone while there is no Member.
  */
 export function useColorScheme(value: string | undefined) {
