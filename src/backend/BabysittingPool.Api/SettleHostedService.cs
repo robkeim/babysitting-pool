@@ -6,15 +6,16 @@ namespace BabysittingPool.Api;
 /// Runs Settle about every minute in the one API process (ADR 0007). Off in tests and E2E, which move the
 /// clock and call Settle directly.
 /// </summary>
-internal sealed partial class SettleHostedService(IServiceScopeFactory scopes, ILogger<SettleHostedService> logger) : BackgroundService
+internal sealed partial class SettleHostedService(
+    IServiceScopeFactory scopes, TimeProvider clock, ILogger<SettleHostedService> logger) : BackgroundService
 {
     public const string EnabledSetting = "Settle:Enabled";
 
-    private static readonly TimeSpan Interval = TimeSpan.FromSeconds(60);
+    public static readonly TimeSpan Interval = TimeSpan.FromSeconds(60);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(Interval);
+        using var timer = new PeriodicTimer(Interval, clock);
         do
         {
             try
