@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using BabysittingPool.Application;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Offboarding;
 using BabysittingPool.Application.Requests;
@@ -228,6 +229,68 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
         result.Should().Be(new OffboardMemberResult(0, 0, 0, 32));
         (await RequestAsync(done.Id)).Status.Should().Be(RequestStatus.Completed);
         (await RequestAsync(theirs.Id)).Status.Should().Be(RequestStatus.Posted);
+    }
+
+    [Fact]
+    public async Task A_request_that_completes_or_is_canceled_after_the_list_was_read_is_skipped()
+    {
+        var completing = await PostAsync(_leaver, hoursAhead: 7);
+        await ClaimAsync(completing.Id, _other);
+        var canceling = await PostAsync(_leaver);
+        var beforeBurn = await AccountAsync(_leaver);
+
+        // The Requests finish between the list and the release: the Requester cancels one, Settle pays the other.
+        var reader = new RacingReader(_database.Services.GetRequiredService<IRequestReader>(), async () =>
+        {
+            await using var scope = _database.CreateScope();
+            await scope.ServiceProvider.GetRequiredService<CancelRequestHandler>()
+                .HandleAsync(new CancelRequestCommand(canceling.Id, _leaver), default);
+            _database.Clock.Advance(TimeSpan.FromHours(8));
+            await scope.ServiceProvider.GetRequiredService<SettleHandler>().HandleAsync(default);
+        });
+        var handler = new OffboardMemberHandler(
+            _database.Services.GetRequiredService<IIdentityStore>(), reader,
+            _database.Services.GetRequiredService<IServiceScopeFactory>(), _database.Clock);
+
+        var result = await handler.HandleAsync(new OffboardMemberCommand(_leaver), default);
+
+        reader.Listed.Should().BeEquivalentTo([completing.Id, canceling.Id]);
+        result.Should().NotBeNull();
+        result!.Canceled.Should().Be(0);
+        result.Withdrawn.Should().Be(0);
+        result.Settled.Should().Be(0);
+        (await RequestAsync(completing.Id)).Status.Should().Be(RequestStatus.Completed);
+        (await RequestAsync(canceling.Id)).Status.Should().Be(RequestStatus.Canceled);
+        (await LedgerAsync(_leaver, LedgerEntryKind.Burn)).Should().ContainSingle();
+        (await AccountAsync(_leaver)).Available.Value.Should().Be(0m);
+        beforeBurn.Available.Value.Should().BeGreaterThan(0m);
+    }
+
+    private sealed class RacingReader(IRequestReader inner, Func<Task> meanwhile) : IRequestReader
+    {
+        public IReadOnlyList<Guid> Listed { get; private set; } = [];
+
+        public async Task<IReadOnlyList<Guid>> ListOpenInvolvingAsync(Guid memberId, CancellationToken cancellationToken)
+        {
+            Listed = await inner.ListOpenInvolvingAsync(memberId, cancellationToken);
+            await meanwhile();
+            return Listed;
+        }
+
+        public Task<Page<RequestView>> ListByRequesterAsync(Guid requesterId, DateTime now, PageRequest page, CancellationToken cancellationToken) =>
+            inner.ListByRequesterAsync(requesterId, now, page, cancellationToken);
+
+        public Task<Page<OpenRequestView>> ListOpenAsync(Guid excludeRequesterId, DateTime now, PageRequest page, CancellationToken cancellationToken) =>
+            inner.ListOpenAsync(excludeRequesterId, now, page, cancellationToken);
+
+        public Task<Page<RequestView>> ListClaimedByAsync(Guid sitterId, DateTime now, PageRequest page, CancellationToken cancellationToken) =>
+            inner.ListClaimedByAsync(sitterId, now, page, cancellationToken);
+
+        public Task<IReadOnlyList<Guid>> ListDueForExpiryAsync(DateTime now, CancellationToken cancellationToken) =>
+            inner.ListDueForExpiryAsync(now, cancellationToken);
+
+        public Task<IReadOnlyList<Guid>> ListDueForPayoutAsync(DateTime now, CancellationToken cancellationToken) =>
+            inner.ListDueForPayoutAsync(now, cancellationToken);
     }
 
     [Fact]
