@@ -3,9 +3,11 @@ using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
+using BabysittingPool.Infrastructure;
 using BabysittingPool.Tests.Support;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BabysittingPool.Tests.Application;
 
@@ -195,12 +197,13 @@ public class IdentityHandlerTests : IAsyncLifetime
         _database.Outbox.Messages.Should().BeEmpty();
     }
 
-    [Fact(Skip = "#240: the handler awaits the email sender for a Member, so response time reveals who is one.")]
+    [Fact]
     public async Task Requesting_a_link_does_not_wait_for_the_email_sender_for_a_member_or_a_stranger()
     {
         await AcceptAsync(await InviteAndGetTokenAsync("ada@example.com"));
         var neverFinishes = new TaskCompletionSource();
-        var slowSender = new SlowEmailSender(neverFinishes.Task);
+        // Production puts the queue in front of SMTP, so the handler never waits on the real sender.
+        var slowSender = new QueuedEmailSender(new SlowEmailSender(neverFinishes.Task), NullLogger<QueuedEmailSender>.Instance);
 
         async Task<bool> CompletesQuicklyAsync(string address) => await RunAsync(async sp =>
         {

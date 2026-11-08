@@ -120,6 +120,8 @@ public static class ApiHost
             builder.Services.AddHostedService<SettleHostedService>();
         }
 
+        builder.Services.AddHostedService<EmailDeliveryService>();
+
         host.ConfigureServices?.Invoke(builder.Services);
 
         var app = builder.Build();
