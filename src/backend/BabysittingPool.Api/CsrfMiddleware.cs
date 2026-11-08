@@ -11,7 +11,8 @@ internal static class CsrfMiddleware
         app.Use(async (context, next) =>
         {
             var request = context.Request;
-            if (request.Path.StartsWithSegments("/api", StringComparison.Ordinal)
+            // Routing ignores case, so this must too: `/API/...` reaches the same endpoints.
+            if (request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase)
                 && !HttpMethods.IsGet(request.Method) && !HttpMethods.IsHead(request.Method)
                 && !HttpMethods.IsOptions(request.Method)
                 && string.IsNullOrEmpty(request.Headers[HeaderName]))

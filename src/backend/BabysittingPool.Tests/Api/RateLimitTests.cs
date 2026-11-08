@@ -69,6 +69,25 @@ public class RateLimitTests : IDisposable
         await AssertRateLimitedAsync(await client.PostAsJsonAsync("/api/auth/sign-in-links", new { email = "member5@example.com" }));
     }
 
+    [Theory]
+    [InlineData("/API/auth/sign-in-links")]
+    [InlineData("/api/auth/sign-in-links/")]
+    [InlineData("/Api/Auth/Sign-In-Links/")]
+    public async Task Spelling_the_path_differently_does_not_escape_the_per_IP_limit(string path)
+    {
+        using var host = Behind(trustProxy: false);
+        using var client = SpaClient(host);
+
+        for (var i = 0; i < 5; i++)
+        {
+            (await client.PostAsJsonAsync(path, new { email = $"member{i}@example.com" }))
+                .StatusCode.Should().Be(HttpStatusCode.Accepted);
+        }
+
+        await AssertRateLimitedAsync(await client.PostAsJsonAsync("/api/auth/sign-in-links", new { email = "member5@example.com" }));
+        await AssertRateLimitedAsync(await client.PostAsJsonAsync(path, new { email = "member6@example.com" }));
+    }
+
     [Fact]
     public async Task Requesting_sign_in_links_is_limited_to_5_per_email_whoever_asks_and_whether_or_not_it_is_a_Member()
     {
