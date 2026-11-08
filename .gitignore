@@ -10,7 +10,8 @@ dist/
 *.rate-limits-shm
 *.rate-limits-wal
 
-# Claude Code local state; the shared settings and hooks are committed (ADR 0008)
+# Claude Code local state; the shared settings, hooks and skills are committed (ADR 0008)
 .claude/*
 !.claude/settings.json
 !.claude/hooks/
+!.claude/skills/

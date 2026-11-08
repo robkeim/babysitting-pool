@@ -131,7 +131,7 @@ public class NotificationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Cancelling_a_claimed_request_notifies_the_sitter_with_only_the_start_time()
+    public async Task Canceling_a_claimed_request_notifies_the_sitter_with_only_the_start_time()
     {
         var posted = await PostAsync(_requester, atHome: true);
         await ClaimAsync(posted.Id, _sitter);
@@ -144,7 +144,7 @@ public class NotificationTests : IAsyncLifetime
 
         var row = (await AllAsync()).Should().ContainSingle().Subject;
         row.MemberId.Should().Be(_sitter);
-        row.Kind.Should().Be("request_cancelled");
+        row.Kind.Should().Be("request_canceled");
         row.RequestId.Should().Be(posted.Id);
         row.StartsAt.Should().Be(Now.AddHours(10));
         row.Area.Should().BeNull();
@@ -152,7 +152,7 @@ public class NotificationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Cancelling_a_posted_request_notifies_nobody()
+    public async Task Canceling_a_posted_request_notifies_nobody()
     {
         var posted = await PostAsync(_requester);
         await using (var scope = _database.CreateScope())

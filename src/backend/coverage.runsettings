@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Coverage for the diff-coverage gate (ADR 0021): production assemblies only, no generated code. -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[BabysittingPool.Domain]*,[BabysittingPool.Application]*,[BabysittingPool.Infrastructure]*,[BabysittingPool.Api]*</Include>
+          <ExcludeByFile>**/Migrations/**,**/RateLimitMigrations/**,**/Program.cs</ExcludeByFile>
+          <ExcludeByAttribute>GeneratedCode,ExcludeFromCodeCoverage</ExcludeByAttribute>
+          <SkipAutoProps>true</SkipAutoProps>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

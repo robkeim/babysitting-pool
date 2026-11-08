@@ -74,19 +74,19 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task Cancelling_a_posted_or_claimed_request_refunds_it_in_full_with_one_ledger_entry(bool claimed)
+    public async Task Canceling_a_posted_or_claimed_request_refunds_it_in_full_with_one_ledger_entry(bool claimed)
     {
         var request = claimed ? await ClaimedAsync() : await PostAsync();
 
         var view = await CancelAsync(request.Id, _requester);
 
-        view!.Status.Should().Be(RequestStatus.Cancelled);
+        view!.Status.Should().Be(RequestStatus.Canceled);
         await AssertRequesterBalanceAsync(10m, 0m);
         (await RefundCountAsync()).Should().Be(1);
     }
 
     [Fact]
-    public async Task Cancelling_twice_refunds_only_once()
+    public async Task Canceling_twice_refunds_only_once()
     {
         var request = await PostAsync();
         await CancelAsync(request.Id, _requester);
@@ -99,7 +99,7 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Cancelling_at_the_start_time_is_rejected_and_nothing_is_refunded()
+    public async Task Canceling_at_the_start_time_is_rejected_and_nothing_is_refunded()
     {
         var request = await ClaimedAsync();
         _database.Clock.Advance(TimeSpan.FromHours(10));
@@ -112,7 +112,7 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Cancelling_after_payout_is_rejected()
+    public async Task Canceling_after_payout_is_rejected()
     {
         var request = await ClaimedAsync();
         await using (var scope = _database.CreateScope())
@@ -216,13 +216,13 @@ public class CancelAndWithdrawHandlerTests : IAsyncLifetime
         await using var second = _database.CreateScope();
         var firstStore = first.ServiceProvider.GetRequiredService<IRequestStore>();
         var secondStore = second.ServiceProvider.GetRequiredService<IRequestStore>();
-        var cancelled = (await firstStore.FindRequestAsync(request.Id, default))!;
+        var canceled = (await firstStore.FindRequestAsync(request.Id, default))!;
         var withdrawn = (await secondStore.FindRequestAsync(request.Id, default))!;
         var firstAccount = (await firstStore.FindAccountAsync(_requester, default))!;
         var secondAccount = (await secondStore.FindAccountAsync(_requester, default))!;
-        cancelled.Cancel(_requester, firstAccount, Now);
+        canceled.Cancel(_requester, firstAccount, Now);
         withdrawn.Withdraw(_sitter, secondAccount, Now);
-        await firstStore.SaveReleasedAsync(cancelled, firstAccount, Now, default);
+        await firstStore.SaveReleasedAsync(canceled, firstAccount, Now, default);
 
         var act = () => secondStore.SaveReleasedAsync(withdrawn, secondAccount, Now, default);
 

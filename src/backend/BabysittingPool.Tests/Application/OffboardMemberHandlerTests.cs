@@ -122,14 +122,14 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task A_posted_request_is_cancelled_and_its_escrow_refunded_before_the_burn()
+    public async Task A_posted_request_is_canceled_and_its_escrow_refunded_before_the_burn()
     {
         var posted = await PostAsync(_leaver);
 
         var result = await OffboardAsync(_leaver);
 
         result.Should().Be(new OffboardMemberResult(1, 0, 0, 40));
-        (await RequestAsync(posted.Id)).Status.Should().Be(RequestStatus.Cancelled);
+        (await RequestAsync(posted.Id)).Status.Should().Be(RequestStatus.Canceled);
         var account = await AccountAsync(_leaver);
         account.Available.Value.Should().Be(0m);
         account.Escrowed.Value.Should().Be(0m);
@@ -150,7 +150,7 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task A_request_the_member_posted_that_is_claimed_is_cancelled_and_the_sitter_is_free()
+    public async Task A_request_the_member_posted_that_is_claimed_is_canceled_and_the_sitter_is_free()
     {
         var posted = await PostAsync(_leaver);
         await ClaimAsync(posted.Id, _other);
@@ -159,7 +159,7 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
 
         result.Should().Be(new OffboardMemberResult(1, 0, 0, 40));
         var request = await RequestAsync(posted.Id);
-        request.Status.Should().Be(RequestStatus.Cancelled);
+        request.Status.Should().Be(RequestStatus.Canceled);
         (await AccountAsync(_other)).Available.Value.Should().Be(10m);
     }
 
@@ -195,7 +195,7 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task A_claimed_request_that_has_already_started_is_paid_out_not_cancelled()
+    public async Task A_claimed_request_that_has_already_started_is_paid_out_not_canceled()
     {
         var posted = await PostAsync(_other);
         await ClaimAsync(posted.Id, _leaver);

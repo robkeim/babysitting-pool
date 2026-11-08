@@ -4,7 +4,7 @@ import { type Page } from '@playwright/test'
 import { BOOTSTRAP_ADMIN_EMAIL, expect, test } from '../fixtures.ts'
 import { FRONTEND_ROOT } from '../paths.ts'
 
-// The design check for agents (docs/design.md): every key screen in each Language, colour scheme and width,
+// The design check for agents (docs/design.md): every key screen in each Language, color scheme and width,
 // saved as PNGs to look at. Run with `npm run design:screenshots`; it is not part of the gate.
 const OUTPUT = path.join(FRONTEND_ROOT, 'design-screenshots')
 const THEME = process.env.DESIGN_THEME === 'vacation' ? 'vacation' : undefined
@@ -62,7 +62,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   }
   await requester.close()
 
-  // The viewer has posted one Request and cancelled another, and claimed one, so every list has some states.
+  // The viewer has posted one Request and canceled another, and claimed one, so every list has some states.
   const setupViewer = await browser.newContext({ timezoneId: 'UTC' })
   await backend.signIn(setupViewer, viewerId)
   const viewerPage = await setupViewer.newPage()
@@ -155,7 +155,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
 
     for (const scheme of SCHEMES) {
       // The viewer is limited to 120 API requests a minute on the backend's clock, which is frozen here, so
-      // each colour scheme steps it a minute to get a fresh window (a 429 shows up as a list that never loads).
+      // each color scheme steps it a minute to get a fresh window (a 429 shows up as a list that never loads).
       await backend.setClock(new Date(Date.parse(CLOCK) + minutes++ * 60_000).toISOString())
       for (const viewport of VIEWPORTS) {
         const context = await browser.newContext({
@@ -232,7 +232,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
 async function capture(page: Page, screen: string, variant: string) {
   if (themeFlagOn) {
     await page.waitForFunction("document.documentElement.dataset.theme === 'vacation'")
-    // Colours transition over 150ms; a shot taken sooner catches the old ones halfway.
+    // Colors transition over 150ms; a shot taken sooner catches the old ones halfway.
     await page.waitForTimeout(300)
   }
   // Grow the viewport to the whole page so fixed bars sit where a reader would see them, then check nothing
@@ -246,7 +246,7 @@ async function capture(page: Page, screen: string, variant: string) {
   expect
     .soft(overflow, `${screen} ${variant} scrolls sideways by ${overflow}px`)
     .toBeLessThanOrEqual(0)
-  // Content spilling out of its own box overlaps its neighbours without scrolling the page.
+  // Content spilling out of its own box overlaps its neighbors without scrolling the page.
   const spilling = await page.evaluate<string[]>(`[...document.querySelectorAll('body *')]
     .filter((element) => !['SELECT', 'svg', 'path'].includes(element.tagName) && element.clientWidth > 0)
     .filter((element) => !String(element.className).includes('sr-only'))
