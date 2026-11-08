@@ -163,6 +163,7 @@ public static class ApiHost
 
         app.UseHttpsRedirection();
         app.UseSecurityHeaders();
+        app.UseRequestSizeLimit();
         var servesSpa = app.Environment.HasSpa();
         if (servesSpa)
         {

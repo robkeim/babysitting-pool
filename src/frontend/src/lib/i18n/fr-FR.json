@@ -7,6 +7,7 @@
   "error.invitation_invalid": "L’invitation est inconnue, déjà utilisée ou expirée.",
   "error.sign_in_link_invalid": "Le lien de connexion est inconnu, déjà utilisé ou expiré.",
   "error.rate_limited": "Trop de tentatives. Veuillez patienter quelques minutes et réessayer.",
+  "error.payload_too_large": "Cette demande est trop volumineuse pour être envoyée.",
   "error.address_service_unavailable": "La recherche d'adresse est indisponible pour le moment. Veuillez réessayer dans quelques minutes.",
   "error.invalid_request": "Certaines des informations saisies ne sont pas valides.",
   "error.account_not_found": "Vous n’avez pas encore de compte de crédits.",

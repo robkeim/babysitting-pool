@@ -46,6 +46,33 @@ public class SecurityHeadersTests : IDisposable
         missingCsrfHeader.Headers.CacheControl!.NoStore.Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData("/API/me/account")]
+    [InlineData("/Api/nope")]
+    public async Task Marks_api_responses_no_store_whatever_the_path_casing(string path)
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.GetAsync(path);
+
+        AssertHardened(response);
+        response.Headers.CacheControl!.NoStore.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Refuses_a_body_over_the_cap_with_413_before_reading_it()
+    {
+        using var client = _factory.CreateSpaClient();
+        using var content = new ByteArrayContent(new byte[256 * 1024 + 1]); // one byte over the 256 KiB cap (ADR 0014)
+        content.Headers.ContentType = new("application/json");
+
+        var response = await client.PostAsync("/api/invitations/preview", content);
+
+        response.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge);
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        AssertHardened(response);
+    }
+
     [Fact]
     public async Task Does_not_mark_non_api_responses_no_store()
     {
