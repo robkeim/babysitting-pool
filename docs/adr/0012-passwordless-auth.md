@@ -19,3 +19,5 @@ Development seed data is written by an Infrastructure seeder rather than through
 **Amendment (2026-10-27, #23).** The production email provider is Gmail SMTP through `SmtpEmailSender` and the `Email:Smtp:*` settings (ADR 0018); no new sender is written. HTML and i18n remain open.
 
 **Amendment (2026-10-29, #101).** The CSRF header check no longer exempts `/api/test`; the test-only endpoints sit in the E2E host only (ADR 0016) and callers send the header like the SPA does. In E2E the fake outbox is read at `GET /api/test/outbox` with the E2E token; `GET /api/dev/outbox` is Development only.
+
+**Amendment (2026-11-08, #240).** `SmtpEmailSender` sits behind `QueuedEmailSender`: `SendAsync` only enqueues, and a hosted service (`EmailDeliveryService`) delivers over SMTP. Requesting a sign-in link therefore takes the same time for a Member and for an unknown address, closing a timing oracle on membership. Delivery is best effort: a failure is logged by subject (never the address) and not retried, and it no longer reaches the caller, Invitations included. The fake outbox stays synchronous so tests and E2E read it straight after the request.
