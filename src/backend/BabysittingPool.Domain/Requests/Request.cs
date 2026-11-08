@@ -5,7 +5,7 @@ namespace BabysittingPool.Domain.Requests;
 
 /// <summary>
 /// A Member's ask for childcare (spec §4): born Posted with its cost in Escrow, then Claimed, and ending
-/// Completed, Cancelled or Expired. The Escrow belongs to the Request: every transition that releases it
+/// Completed, Canceled or Expired. The Escrow belongs to the Request: every transition that releases it
 /// leaves the Request in an end state, so it can be refunded or paid out at most once.
 /// </summary>
 public sealed class Request
@@ -215,11 +215,11 @@ public sealed class Request
 
         if (Status is not (RequestStatus.Posted or RequestStatus.Claimed))
         {
-            throw new DomainException($"A {Status} request cannot be cancelled.", DomainException.InvalidStateCode);
+            throw new DomainException($"A {Status} request cannot be canceled.", DomainException.InvalidStateCode);
         }
 
         RequireBeforeStart(now);
-        Refund(requester, RequestStatus.Cancelled);
+        Refund(requester, RequestStatus.Canceled);
     }
 
     /// <summary>

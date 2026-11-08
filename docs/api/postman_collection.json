@@ -6382,7 +6382,7 @@
                                   "value": "application/json"
                                 }
                               ],
-                              "body": "{\n  \"cancelled\": \"<integer>\",\n  \"withdrawn\": \"<integer>\",\n  \"settled\": \"<integer>\",\n  \"burnedQuarterCredits\": \"<long>\"\n}",
+                              "body": "{\n  \"canceled\": \"<integer>\",\n  \"withdrawn\": \"<integer>\",\n  \"settled\": \"<integer>\",\n  \"burnedQuarterCredits\": \"<long>\"\n}",
                               "cookie": [],
                               "_postman_previewlanguage": "json"
                             },
@@ -6883,7 +6883,7 @@
                           "value": "application/json"
                         }
                       ],
-                      "body": "{\n  \"creditsInCirculationQuarterCredits\": \"<long>\",\n  \"escrowedQuarterCredits\": \"<long>\",\n  \"burnedByDemurrageQuarterCredits\": \"<long>\",\n  \"burnedByOffboardingQuarterCredits\": \"<long>\",\n  \"openMembers\": \"<integer>\",\n  \"requests\": {\n    \"posted\": \"<integer>\",\n    \"claimed\": \"<integer>\",\n    \"completed\": \"<integer>\",\n    \"cancelled\": \"<integer>\",\n    \"expired\": \"<integer>\"\n  }\n}",
+                      "body": "{\n  \"creditsInCirculationQuarterCredits\": \"<long>\",\n  \"escrowedQuarterCredits\": \"<long>\",\n  \"burnedByDemurrageQuarterCredits\": \"<long>\",\n  \"burnedByOffboardingQuarterCredits\": \"<long>\",\n  \"openMembers\": \"<integer>\",\n  \"requests\": {\n    \"posted\": \"<integer>\",\n    \"claimed\": \"<integer>\",\n    \"completed\": \"<integer>\",\n    \"canceled\": \"<integer>\",\n    \"expired\": \"<integer>\"\n  }\n}",
                       "cookie": [],
                       "_postman_previewlanguage": "json"
                     },

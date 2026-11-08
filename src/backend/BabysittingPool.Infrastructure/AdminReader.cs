@@ -63,7 +63,7 @@ internal sealed class AdminReader(BabysittingPoolDbContext db) : IAdminReader
                 counts.GetValueOrDefault(RequestStatus.Posted),
                 counts.GetValueOrDefault(RequestStatus.Claimed),
                 counts.GetValueOrDefault(RequestStatus.Completed),
-                counts.GetValueOrDefault(RequestStatus.Cancelled),
+                counts.GetValueOrDefault(RequestStatus.Canceled),
                 counts.GetValueOrDefault(RequestStatus.Expired)));
     }
 

@@ -184,7 +184,7 @@ function MemberRow({ member }: { member: AdminMemberView }) {
             <FormattedMessage
               id="members.admin.offboard.result"
               values={{
-                cancelled: offboard.data.cancelled,
+                canceled: offboard.data.canceled,
                 withdrawn: offboard.data.withdrawn,
                 settled: offboard.data.settled,
                 burned: creditsValue(offboard.data.burnedQuarterCredits),

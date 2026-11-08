@@ -118,7 +118,7 @@ Run this scenario right after Scenario 5 if the story flows better that way.
 1. As the Admin, open **Members**. Show open and closed Members, with the Admin's own row offering no actions.
 2. Open a Member to see balances, Ledger and their Requests (area only, never the exact address).
 3. Open **Pool**: credits in circulation, escrowed, burned by Demurrage and at Offboarding, open Members, Requests by state, and the dormant list.
-4. Back in **Members**, select **Offboard** on a Member who has a Posted request (Oscar). Read the confirmation, confirm, and show the result: requests cancelled, claims withdrawn, escrow refunded.
+4. Back in **Members**, select **Offboard** on a Member who has a Posted request (Oscar). Read the confirmation, confirm, and show the result: requests canceled, claims withdrawn, escrow refunded.
 5. Select **Erase personal data** on the closed Member and show the name and email replaced by "Former member".
 6. As the offboarded Member, try to sign in: the same "Check your email" answer, but no link arrives.
 7. Open **Feature flags**, toggle one and show it takes effect without a restart.

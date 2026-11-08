@@ -43,7 +43,7 @@ internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReade
 
     // A Requester's cancellation drops the claim (the Sitter id stays for history), so the Sitter keeps no exact
     // details of a Request they no longer sit for (spec §4.6).
-    private static RequestView ToSitterView(RequestRecord r, DateTime now) => r.Status == RequestStatus.Cancelled
+    private static RequestView ToSitterView(RequestRecord r, DateTime now) => r.Status == RequestStatus.Canceled
         ? ToRead(r).ToView(now) with { Address = null, Instructions = null, Notes = null }
         : ToRead(r).ToView(now);
 

@@ -62,7 +62,7 @@ test('screenshots of the key screens', async ({ browser, backend }) => {
   }
   await requester.close()
 
-  // The viewer has posted one Request and cancelled another, and claimed one, so every list has some states.
+  // The viewer has posted one Request and canceled another, and claimed one, so every list has some states.
   const setupViewer = await browser.newContext({ timezoneId: 'UTC' })
   await backend.signIn(setupViewer, viewerId)
   const viewerPage = await setupViewer.newPage()

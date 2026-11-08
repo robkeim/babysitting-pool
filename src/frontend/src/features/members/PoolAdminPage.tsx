@@ -13,7 +13,7 @@ const REQUEST_STATES: readonly [keyof PoolOverview['requests'], MessageId][] = [
   ['posted', 'requests.status.Posted'],
   ['claimed', 'requests.status.Claimed'],
   ['completed', 'requests.status.Completed'],
-  ['cancelled', 'requests.status.Cancelled'],
+  ['canceled', 'requests.status.Canceled'],
   ['expired', 'requests.status.Expired'],
 ]
 

@@ -10,10 +10,10 @@ namespace BabysittingPool.Application.Offboarding;
 public sealed record OffboardMemberCommand(Guid MemberId);
 
 /// <summary>
-/// What Offboarding did: Requests cancelled, claims withdrawn, Requests already due that were settled instead, and
+/// What Offboarding did: Requests canceled, claims withdrawn, Requests already due that were settled instead, and
 /// the balance burned.
 /// </summary>
-public sealed record OffboardMemberResult(int Cancelled, int Withdrawn, int Settled, long BurnedQuarterCredits);
+public sealed record OffboardMemberResult(int Canceled, int Withdrawn, int Settled, long BurnedQuarterCredits);
 
 /// <summary>
 /// The Admin closes a Member's account (spec §2A). The account closes first, so the Member can do nothing more, then
@@ -42,7 +42,7 @@ public sealed class OffboardMemberHandler(
             await identity.CloseMemberAsync(member.Id, now, cancellationToken);
         }
 
-        int cancelled = 0, withdrawn = 0, settled = 0;
+        int canceled = 0, withdrawn = 0, settled = 0;
         foreach (var id in await reader.ListOpenInvolvingAsync(member.Id, cancellationToken))
         {
             // A scope per Request is its own transaction and its own tracked state (ADR 0004).
@@ -50,17 +50,17 @@ public sealed class OffboardMemberHandler(
             var store = scope.ServiceProvider.GetRequiredService<IRequestStore>();
             switch (await ReleaseAsync(store, id, member.Id, now, cancellationToken))
             {
-                case Release.Cancelled: cancelled++; break;
+                case Release.Canceled: canceled++; break;
                 case Release.Withdrawn: withdrawn++; break;
                 case Release.Settled: settled++; break;
             }
         }
 
         var burned = await BurnAsync(member.Id, now, cancellationToken);
-        return new OffboardMemberResult(cancelled, withdrawn, settled, burned.QuarterCredits);
+        return new OffboardMemberResult(canceled, withdrawn, settled, burned.QuarterCredits);
     }
 
-    private enum Release { Skipped, Cancelled, Withdrawn, Settled }
+    private enum Release { Skipped, Canceled, Withdrawn, Settled }
 
     private async Task<CreditAmount> BurnAsync(Guid memberId, DateTime now, CancellationToken cancellationToken)
     {
@@ -79,7 +79,7 @@ public sealed class OffboardMemberHandler(
     }
 
     /// <summary>
-    /// Posted: cancelled, or expired once past the Claim Cutoff. Claimed before its start: cancelled by the Requester
+    /// Posted: canceled, or expired once past the Claim Cutoff. Claimed before its start: canceled by the Requester
     /// or withdrawn by the Sitter. Claimed and already started: completed, as Settle would, so the Sitter is paid
     /// and nothing stays in Escrow.
     /// </summary>
@@ -114,7 +114,7 @@ public sealed class OffboardMemberHandler(
         {
             request.Cancel(memberId, requester, now);
             await store.SaveReleasedAsync(request, requester, now, cancellationToken);
-            return Release.Cancelled;
+            return Release.Canceled;
         }
 
         request.Withdraw(memberId, requester, now);
