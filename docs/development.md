@@ -50,6 +50,10 @@ The one definition of green, at two levels (ADR 0015). The **fast gate** (`all -
 
 Husky hooks install on `npm install` in `src/frontend`: pre-commit formats staged files; commit-msg rejects a subject that is not a Conventional Commit (`scripts/check-commit-msg.sh`); pre-push runs `scripts/check.sh all --full --stamped --quiet`. Claude Code runs the fast gate on `Stop` and the full gate before `git push` and `gh pr create`. Nothing runs on GitHub.
 
+## Black-box pentest
+
+`scripts/blackbox-pentest.sh [--with-spec]` starts a throwaway stack, seeds two Members and prepares a brief for a fresh agent that has never seen the code. Run it before each release; see [`docs/security/blackbox-pentest.md`](security/blackbox-pentest.md).
+
 ## Postman
 
 1. Run `scripts/dev.sh`.
