@@ -146,7 +146,7 @@ internal static class RateLimiting
     /// same endpoint as `/api/auth/sessions` and must be counted against the same limit.
     /// </summary>
     private static string Route(PathString path) =>
-#pragma warning disable CA1308 // Normalised for matching, never for security decisions.
+#pragma warning disable CA1308 // Normalized for matching, never for security decisions.
         (path.Value ?? string.Empty).TrimEnd('/').ToLowerInvariant();
 #pragma warning restore CA1308
 
