@@ -32,7 +32,7 @@ function stubSystem(initiallyDark: boolean) {
   }
 }
 
-describe('colour scheme', () => {
+describe('color scheme', () => {
   beforeEach(() => {
     localStorage.clear()
     root.classList.remove('dark')

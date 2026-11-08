@@ -54,6 +54,12 @@ public class IdentityTests
         DisplayName.TryCreate("Ada\nLovelace", out _).Should().BeFalse();
     }
 
+    [Theory(Skip = "#241: display names accept format characters, so one Member can spoof another's name.")]
+    [InlineData("Bob‮evil")]
+    [InlineData("Ad​min")]
+    public void Display_names_reject_bidi_and_zero_width_format_characters(string input) =>
+        DisplayName.TryCreate(input, out _).Should().BeFalse();
+
     [Fact]
     public void An_invitation_is_usable_until_it_is_consumed_or_expires()
     {

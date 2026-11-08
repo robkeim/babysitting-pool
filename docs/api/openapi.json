@@ -2813,14 +2813,14 @@
       },
       "OffboardMemberResult": {
         "required": [
-          "cancelled",
+          "canceled",
           "withdrawn",
           "settled",
           "burnedQuarterCredits"
         ],
         "type": "object",
         "properties": {
-          "cancelled": {
+          "canceled": {
             "type": "integer",
             "format": "int32"
           },
@@ -3362,7 +3362,7 @@
           "posted",
           "claimed",
           "completed",
-          "cancelled",
+          "canceled",
           "expired"
         ],
         "type": "object",
@@ -3379,7 +3379,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "cancelled": {
+          "canceled": {
             "type": "integer",
             "format": "int32"
           },
@@ -3394,7 +3394,7 @@
           "Posted",
           "Claimed",
           "Completed",
-          "Cancelled",
+          "Canceled",
           "Expired"
         ]
       },

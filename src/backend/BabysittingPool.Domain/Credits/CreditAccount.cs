@@ -51,7 +51,7 @@ public sealed class CreditAccount
         Escrowed += amount;
     }
 
-    /// <summary>Returns escrowed credits to Available (cancelled or expired request).</summary>
+    /// <summary>Returns escrowed credits to Available (canceled or expired request).</summary>
     public void Refund(decimal amount)
     {
         RequirePositive(amount);

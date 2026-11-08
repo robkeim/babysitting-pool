@@ -52,7 +52,7 @@
 :root {
   color-scheme: light dark;
 
-  /* The one knob for the brand colour: 192 is teal, 30 is coral (docs/design.md). */
+  /* The one knob for the brand color: 192 is teal, 30 is coral (docs/design.md). */
   --brand-hue: 192;
 
   --background: oklch(0.965 0.006 95);
@@ -90,7 +90,7 @@
   --sidebar-ring: oklch(0.6 0.1 var(--brand-hue));
 }
 
-/* Dark mode is the `dark` class on <html>, set from the Member's Colour Scheme: light, dark, or the system setting (docs/design.md). */
+/* Dark mode is the `dark` class on <html>, set from the Member's Color Scheme: light, dark, or the system setting (docs/design.md). */
 :root.dark {
   --background: oklch(0.18 0.012 215);
   --foreground: oklch(0.96 0.005 190);

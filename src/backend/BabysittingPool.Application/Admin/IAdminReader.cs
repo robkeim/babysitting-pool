@@ -57,7 +57,7 @@ public sealed record PoolOverview(
     int OpenMembers,
     RequestCounts Requests);
 
-public sealed record RequestCounts(int Posted, int Claimed, int Completed, int Cancelled, int Expired);
+public sealed record RequestCounts(int Posted, int Claimed, int Completed, int Canceled, int Expired);
 
 public sealed record DormantMemberView(
     Guid Id, string DisplayName, string Email, DateTime LastActivityAt, long AvailableQuarterCredits);

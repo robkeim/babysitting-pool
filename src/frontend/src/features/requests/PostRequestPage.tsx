@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { formatCredits, useMyAccount } from '@/features/credits'
+import { creditsValue, formatCredits, useMyAccount } from '@/features/credits'
 import { useMyProfile } from '@/features/profile'
 import { formatDuration, useRules } from '@/features/rules'
 import { ApiError } from '@/lib/api/client'
@@ -93,7 +93,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
   function priced(label: string, price: number | undefined) {
     return price === undefined
       ? label
-      : intl.formatMessage({ id: 'requests.post.priced' }, { label, price: formatCredits(price) })
+      : intl.formatMessage({ id: 'requests.post.priced' }, { label, price: creditsValue(price) })
   }
 
   function perChild(rate: number) {
@@ -176,7 +176,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                   <FormattedMessage
                     id="requests.post.duration.hint"
                     values={{
-                      rate: formatCredits(lines.hourlyRateQuarterCredits),
+                      rate: creditsValue(lines.hourlyRateQuarterCredits),
                       count: childCount,
                     }}
                   />

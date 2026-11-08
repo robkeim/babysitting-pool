@@ -25,5 +25,19 @@ export default defineConfig({
     globals: true,
     exclude: [...configDefaults.exclude, 'e2e/**'],
     setupFiles: ['./src/test/setup.ts'],
+    // Only used by `vitest run --coverage`, which the full gate runs for the diff-coverage check (ADR 0021).
+    coverage: {
+      provider: 'v8',
+      reporter: ['lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/**/*.d.ts',
+        'src/**/*.gen.ts',
+        'src/components/ui/**',
+        'src/test/**',
+        'src/main.tsx',
+      ],
+    },
   },
 })

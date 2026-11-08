@@ -77,7 +77,7 @@ public static class ApiHost
                 : "http://localhost:5173";
         }
 
-        // SMTP secrets (dotnet user-secrets, ADR 0011) are only ever honoured in Development and Production; E2E and
+        // SMTP secrets (dotnet user-secrets, ADR 0011) are only ever honored in Development and Production; E2E and
         // tests always use the fake outbox, even on a machine that has them.
         var smtp = builder.Configuration.SmtpSettings();
         Action<IServiceCollection> addEmailSender;
@@ -119,6 +119,8 @@ public static class ApiHost
         {
             builder.Services.AddHostedService<SettleHostedService>();
         }
+
+        builder.Services.AddHostedService<EmailDeliveryService>();
 
         host.ConfigureServices?.Invoke(builder.Services);
 
@@ -163,6 +165,7 @@ public static class ApiHost
 
         app.UseHttpsRedirection();
         app.UseSecurityHeaders();
+        app.UseRequestSizeLimit();
         var servesSpa = app.Environment.HasSpa();
         if (servesSpa)
         {

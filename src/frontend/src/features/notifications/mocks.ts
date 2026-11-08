@@ -21,9 +21,9 @@ export const claimedNotification: NotificationView = {
   sitterId: '7a7a1c3e-5d8a-4a38-9b1d-0a7a1c1b9e33',
 }
 
-export const cancelledNotification: NotificationView = {
+export const canceledNotification: NotificationView = {
   id: '5b0c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e03',
-  kind: 'request_cancelled',
+  kind: 'request_canceled',
   createdAt: '2026-03-01T11:00:00Z',
   requestId: '2f6c1c3e-5d8a-4a38-9b1d-0a7a1c1b9e44',
   area: null,

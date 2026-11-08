@@ -143,4 +143,26 @@ public class CreditCostCalculatorTests
 
         act.Should().Throw<DomainException>();
     }
+
+    [Fact]
+    public void An_unknown_transport_option_is_rejected()
+    {
+        var request = new CreditRequestDetails(60, 1, transport: (TransportOption)99);
+
+        var act = () => CreditCostCalculator.Calculate(request);
+
+        act.Should().Throw<DomainException>().WithMessage("Unknown transport option '99'.");
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void The_hourly_rate_and_option_prices_need_at_least_one_child(int children)
+    {
+        var rate = () => CreditCostCalculator.HourlyRate(children);
+        var prices = () => CreditCostCalculator.OptionPrices(children);
+
+        rate.Should().Throw<DomainException>().WithMessage("A request must include at least one child.");
+        prices.Should().Throw<DomainException>().WithMessage("A request must include at least one child.");
+    }
 }

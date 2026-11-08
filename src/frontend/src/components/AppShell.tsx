@@ -33,7 +33,7 @@ interface AppShellProps {
   children: ReactNode
 }
 
-/** How one item in the navigation looks: a labelled icon in the bottom bar, an icon and label in the top bar.
+/** How one item in the navigation looks: a labeled icon in the bottom bar, an icon and label in the top bar.
  * Labels wrap between words and never inside one; a single word too long for a tab on mobile is clipped, not split,
  * and from `lg` up a tab is never narrower than its longest word.
  */

@@ -451,7 +451,7 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task Cancelling_answers_200_refunds_the_requester_and_a_second_cancel_answers_409()
+    public async Task Canceling_answers_200_refunds_the_requester_and_a_second_cancel_answers_409()
     {
         var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var client = _factory.CreateMemberClient(owner);
@@ -461,7 +461,7 @@ public class RequestEndpointTests : IDisposable
         var response = await client.PostAsync($"/api/requests/{id}/cancel", null);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("status").GetString().Should().Be("Cancelled");
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("status").GetString().Should().Be("Canceled");
         var account = await client.GetFromJsonAsync<JsonElement>("/api/me/account");
         account.GetProperty("availableQuarterCredits").GetInt64().Should().Be(40);
         account.GetProperty("escrowedQuarterCredits").GetInt64().Should().Be(0);
@@ -469,7 +469,7 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task Cancelling_someone_elses_request_or_an_unknown_one_answers_404()
+    public async Task Canceling_someone_elses_request_or_an_unknown_one_answers_404()
     {
         var owner = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
         using var ownerClient = _factory.CreateMemberClient(owner);
@@ -526,7 +526,7 @@ public class RequestEndpointTests : IDisposable
     [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/claim")]
     [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/cancel")]
     [InlineData("POST", "/api/requests/6f1c2b1e-0a52-4f43-9d4f-2f2f6f1c2b1e/withdraw")]
-    public async Task Browsing_claiming_cancelling_and_withdrawing_without_a_session_answer_401(string method, string path)
+    public async Task Browsing_claiming_canceling_and_withdrawing_without_a_session_answer_401(string method, string path)
     {
         using var client = _factory.CreateSpaClient();
         using var request = new HttpRequestMessage(new HttpMethod(method), path);
@@ -549,7 +549,7 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task Quote_itemises_the_cost_so_the_lines_sum_to_the_total()
+    public async Task Quote_itemizes_the_cost_so_the_lines_sum_to_the_total()
     {
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
 

@@ -62,7 +62,7 @@ public class AuthEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task A_member_changes_their_colour_scheme_and_it_is_stored_on_the_member()
+    public async Task A_member_changes_their_color_scheme_and_it_is_stored_on_the_member()
     {
         using var client = await JoinAsync("ada@example.com");
         (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("colorScheme").GetString().Should().Be("system");
@@ -175,6 +175,9 @@ public class AuthEndpointTests : IDisposable
     [InlineData("DELETE", "/api/auth/sessions/current")]
     [InlineData("PUT", "/api/me/language")]
     [InlineData("PUT", "/api/me/color-scheme")]
+    // Routing ignores case, so the check must as well (white-box attack pass, #234).
+    [InlineData("POST", "/API/auth/sign-in-links")]
+    [InlineData("PUT", "/Api/me/language")]
     public async Task State_changing_calls_without_the_csrf_header_are_403(string method, string path)
     {
         using var client = _factory.CreateClient();

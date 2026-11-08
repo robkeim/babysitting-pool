@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Identity;
+using BabysittingPool.Infrastructure.Persistence;
 using BabysittingPool.Tests.Support;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -150,5 +151,55 @@ public class AdminInvitationHandlerTests : IAsyncLifetime
     public async Task Resending_an_unknown_invitation_is_not_found()
     {
         (await ResendAsync(Guid.NewGuid())).Outcome.Should().Be(ResendInvitationOutcome.NotFound);
+    }
+
+    [Fact]
+    public async Task Resending_to_an_address_that_became_a_member_is_refused_and_sends_nothing()
+    {
+        await InviteAsync("ada@example.com");
+        await using (var scope = _database.CreateScope())
+        {
+            var db = _database.NewContext(scope);
+            db.Members.Add(new MemberRecord
+            {
+                Id = Guid.NewGuid(),
+                Email = "ada@example.com",
+                DisplayName = "Ada",
+                CreatedAt = _database.Clock.GetUtcNow().UtcDateTime,
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var result = await ResendAsync((await ListAsync()).Single().Id);
+
+        result.Outcome.Should().Be(ResendInvitationOutcome.AlreadyAMember);
+        result.Invitation.Should().BeNull();
+        _database.Outbox.Messages.Should().ContainSingle(m => m.To == "ada@example.com");
+    }
+
+    [Fact]
+    public async Task Resending_an_invitation_accepted_after_it_was_read_is_refused_and_keeps_the_accepted_one()
+    {
+        await InviteAsync("ada@example.com");
+        var token = LastTokenFor("ada@example.com");
+        var id = (await ListAsync()).Single().Id;
+
+        var result = await RunAsync(async sp =>
+        {
+            // The acceptance lands after the handler has read the Invitation and before it reissues it.
+            var store = AcceptingAfterMemberLookup.Wrap(
+                sp.GetRequiredService<IIdentityStore>(), () => AcceptAsync(token));
+            var handler = new ResendInvitationHandler(
+                store,
+                sp.GetRequiredService<InvitationMailer>(),
+                sp.GetRequiredService<CoopSettings>(),
+                sp.GetRequiredService<TimeProvider>());
+            return await handler.HandleAsync(new ResendInvitationCommand(id), CancellationToken.None);
+        });
+
+        result.Outcome.Should().Be(ResendInvitationOutcome.AlreadyAccepted);
+        result.Invitation.Should().BeNull();
+        _database.Outbox.Messages.Should().ContainSingle(m => m.To == "ada@example.com");
+        (await ListAsync()).Single().Status.Should().Be(InvitationStatus.Accepted);
     }
 }

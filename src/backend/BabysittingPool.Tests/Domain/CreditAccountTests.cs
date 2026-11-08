@@ -120,6 +120,14 @@ public class CreditAccountTests
     }
 
     [Fact]
+    public void Restore_rejects_a_negative_escrow()
+    {
+        var act = () => CreditAccount.Restore(1m, -0.25m);
+
+        act.Should().Throw<DomainException>().WithMessage("Escrowed balance cannot be negative.");
+    }
+
+    [Fact]
     public void BurnAll_empties_the_available_balance_and_reports_it()
     {
         var account = CreditAccount.Restore(7.25m, 0m);

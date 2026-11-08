@@ -5,6 +5,11 @@ export function formatCredits(quarterCredits: number): string {
   return (quarterCredits / QUARTERS_PER_CREDIT).toFixed(2)
 }
 
+/** Quarter-credits as a number, for messages that pick "credit" or "credits" from it: 4 -> 1. */
+export function creditsValue(quarterCredits: number): number {
+  return quarterCredits / QUARTERS_PER_CREDIT
+}
+
 /** Stand-in until the co-op time zone setting exists (spec §2A): instants are shown in UTC. */
 export function formatInstant(iso: string): string {
   const formatted = new Intl.DateTimeFormat('en-US', {

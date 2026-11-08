@@ -99,7 +99,7 @@ internal static class RateLimiting
         });
 
     /// <summary>
-    /// Forwarded headers are honoured only when a proxy or network is configured: with none the middleware
+    /// Forwarded headers are honored only when a proxy or network is configured: with none the middleware
     /// would trust every caller, and anyone could pick the IP they are limited under.
     /// </summary>
     public static IApplicationBuilder UseConfiguredForwardedHeaders(this WebApplication app) =>
@@ -132,7 +132,7 @@ internal static class RateLimiting
         }
 
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        return request.Path.Value switch
+        return Route(request.Path) switch
         {
             "/api/auth/sign-in-links" => new Rule($"sign-in-link:{ip}", SignInLinkLimit, AuthWindow),
             "/api/invitations/accept" => new Rule($"redeem:{ip}", TokenLimit, AuthWindow),
@@ -141,30 +141,39 @@ internal static class RateLimiting
         };
     }
 
+    /// <summary>
+    /// The path as routing sees it: routing ignores case and a trailing slash, so `/API/auth/sessions/` reaches the
+    /// same endpoint as `/api/auth/sessions` and must be counted against the same limit.
+    /// </summary>
+    private static string Route(PathString path) =>
+#pragma warning disable CA1308 // Normalized for matching, never for security decisions.
+        (path.Value ?? string.Empty).TrimEnd('/').ToLowerInvariant();
+#pragma warning restore CA1308
+
     private static Rule? ByMember(HttpContext context, int memberLimit)
     {
         var path = context.Request.Path;
         if (context.User.FindFirstValue(ClaimTypes.NameIdentifier) is not { } member
-            || !path.StartsWithSegments("/api", StringComparison.Ordinal))
+            || !path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
 
         // One long-lived request, counted once when it opens. Its own bucket, so reconnecting is not starved by other
         // calls and a reconnect loop cannot eat the Member's budget for them.
-        if (path.StartsWithSegments(NotificationEndpoints.StreamPath, StringComparison.Ordinal))
+        if (path.StartsWithSegments(NotificationEndpoints.StreamPath, StringComparison.OrdinalIgnoreCase))
         {
             return new Rule($"notification-stream:{member}", StreamLimit, MemberWindow);
         }
 
         // Typeahead fires per keystroke and each call reaches BAN (ADR 0020), so it has its own, tighter bucket.
-        if (path.StartsWithSegments(AddressEndpoints.Path, StringComparison.Ordinal))
+        if (path.StartsWithSegments(AddressEndpoints.Path, StringComparison.OrdinalIgnoreCase))
         {
             return new Rule($"address-suggestions:{member}", AddressSuggestionLimit, MemberWindow);
         }
 
         // Client logs are batched by the SPA, so a Member sending them faster than this is a bug or abuse.
-        return path.StartsWithSegments("/api/client-logs", StringComparison.Ordinal)
+        return path.StartsWithSegments("/api/client-logs", StringComparison.OrdinalIgnoreCase)
             ? new Rule($"client-logs:{member}", ClientLogLimit, MemberWindow)
             : new Rule($"member:{member}", memberLimit, MemberWindow);
     }

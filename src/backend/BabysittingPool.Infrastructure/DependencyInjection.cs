@@ -52,8 +52,9 @@ public static class DependencyInjection
     public static IServiceCollection AddEmailOutboxOverSmtp(this IServiceCollection services, SmtpSettings settings)
     {
         services.AddSingleton(new SmtpEmailSender(settings));
+        services.AddQueuedSender();
         services.AddSingleton(sp => new EmailOutbox(
-            sp.GetRequiredService<ILogger<EmailOutbox>>(), sp.GetRequiredService<SmtpEmailSender>()));
+            sp.GetRequiredService<ILogger<EmailOutbox>>(), sp.GetRequiredService<QueuedEmailSender>()));
         services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<EmailOutbox>());
         return services;
     }
@@ -62,9 +63,15 @@ public static class DependencyInjection
     public static IServiceCollection AddSmtpEmailSender(this IServiceCollection services, SmtpSettings settings)
     {
         services.AddSingleton<SmtpEmailSender>(new SmtpEmailSender(settings));
-        services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SmtpEmailSender>());
+        services.AddQueuedSender();
+        services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<QueuedEmailSender>());
         return services;
     }
+
+    /// <summary>The queue in front of SMTP, drained by the API's hosted service.</summary>
+    private static void AddQueuedSender(this IServiceCollection services) =>
+        services.AddSingleton(sp => new QueuedEmailSender(
+            sp.GetRequiredService<SmtpEmailSender>(), sp.GetRequiredService<ILogger<QueuedEmailSender>>()));
 
     /// <summary>Applies the checked-in migrations; called at API startup (ADR 0004).</summary>
     public static async Task MigrateDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)

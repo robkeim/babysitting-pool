@@ -264,14 +264,14 @@ public class RequestTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Cancelling_a_posted_or_claimed_request_refunds_the_escrow(bool claimed)
+    public void Canceling_a_posted_or_claimed_request_refunds_the_escrow(bool claimed)
     {
         var account = CreditAccount.Open();
         var request = claimed ? Claimed(account) : Post(account);
 
         request.Cancel(_requesterId, account, Now.AddHours(1));
 
-        request.Status.Should().Be(RequestStatus.Cancelled);
+        request.Status.Should().Be(RequestStatus.Canceled);
         account.Available.Should().Be(10.0m);
         account.Escrowed.Should().Be(0m);
     }
@@ -289,7 +289,7 @@ public class RequestTests
     }
 
     [Fact]
-    public void A_request_cannot_be_cancelled_once_the_start_time_has_arrived()
+    public void A_request_cannot_be_canceled_once_the_start_time_has_arrived()
     {
         var account = CreditAccount.Open();
         var request = Claimed(account);
@@ -300,7 +300,7 @@ public class RequestTests
     }
 
     [Fact]
-    public void Cancelling_twice_does_not_refund_twice()
+    public void Canceling_twice_does_not_refund_twice()
     {
         var account = CreditAccount.Open();
         var request = Post(account);
@@ -349,7 +349,7 @@ public class RequestTests
     }
 
     [Fact]
-    public void A_cancelled_request_cannot_expire_so_it_is_not_refunded_twice()
+    public void A_canceled_request_cannot_expire_so_it_is_not_refunded_twice()
     {
         var account = CreditAccount.Open();
         var request = Post(account);
@@ -450,7 +450,7 @@ public class RequestTests
     }
 
     [Fact]
-    public void A_completed_request_cannot_be_cancelled_or_refunded()
+    public void A_completed_request_cannot_be_canceled_or_refunded()
     {
         var requester = CreditAccount.Open();
         var request = Claimed(requester);
@@ -465,7 +465,7 @@ public class RequestTests
     }
 
     [Fact]
-    public void A_cancelled_request_cannot_be_completed_or_claimed()
+    public void A_canceled_request_cannot_be_completed_or_claimed()
     {
         var requester = CreditAccount.Open();
         var request = Claimed(requester);
@@ -483,7 +483,7 @@ public class RequestTests
     [InlineData(RequestStatus.Posted, 7, RequestStatus.Expired)]
     [InlineData(RequestStatus.Claimed, 7, RequestStatus.Claimed)]
     [InlineData(RequestStatus.Claimed, 10, RequestStatus.Completed)]
-    [InlineData(RequestStatus.Cancelled, 10, RequestStatus.Cancelled)]
+    [InlineData(RequestStatus.Canceled, 10, RequestStatus.Canceled)]
     public void Readers_project_overdue_requests_before_settle_runs(RequestStatus stored, int hoursAfterPosting, RequestStatus shown)
     {
         var projected = Request.StatusAt(stored, Start.AddHours(-3), Start, Now.AddHours(hoursAfterPosting));

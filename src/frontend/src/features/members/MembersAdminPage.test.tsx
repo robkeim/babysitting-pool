@@ -87,7 +87,7 @@ describe('MembersAdminPage', () => {
     server.use(
       membersHandler([sampleMember]),
       offboardHandler((id) => offboarded.push(id), {
-        cancelled: 2,
+        canceled: 2,
         withdrawn: 1,
         settled: 0,
         burnedQuarterCredits: 42,
@@ -98,26 +98,26 @@ describe('MembersAdminPage', () => {
     await user.click(await screen.findByRole('button', { name: 'Offboard Ada Lovelace' }))
 
     const confirmation = screen.getByRole('alertdialog')
-    expect(confirmation).toHaveTextContent(/cancelled/)
+    expect(confirmation).toHaveTextContent(/canceled/)
     expect(confirmation).toHaveTextContent(/burned/)
     expect(offboarded).toEqual([])
 
     await user.click(within(confirmation).getByRole('button', { name: 'Offboard member' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent(
-      'Offboarded. 2 Requests cancelled, 1 claim withdrawn, 0 Requests settled, 10.50 credits burned.',
+      'Offboarded. 2 Requests canceled, 1 claim withdrawn, 0 Requests settled, 10.50 credits burned.',
     )
     expect(offboarded).toEqual([sampleMember.id])
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   })
 
-  it('does nothing when the offboard confirmation is cancelled', async () => {
+  it('does nothing when the offboard confirmation is canceled', async () => {
     const user = userEvent.setup()
     const offboarded: string[] = []
     server.use(
       membersHandler([sampleMember]),
       offboardHandler((id) => offboarded.push(id), {
-        cancelled: 0,
+        canceled: 0,
         withdrawn: 0,
         settled: 0,
         burnedQuarterCredits: 0,

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="BabysittingPool.TestSupport" />
+    <InternalsVisibleTo Include="BabysittingPool.Tests" />
   </ItemGroup>
 
   <ItemGroup>
