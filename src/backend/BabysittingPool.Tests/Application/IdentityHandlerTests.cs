@@ -195,6 +195,32 @@ public class IdentityHandlerTests : IAsyncLifetime
         _database.Outbox.Messages.Should().BeEmpty();
     }
 
+    [Fact(Skip = "#240: the handler awaits the email sender for a Member, so response time reveals who is one.")]
+    public async Task Requesting_a_link_does_not_wait_for_the_email_sender_for_a_member_or_a_stranger()
+    {
+        await AcceptAsync(await InviteAndGetTokenAsync("ada@example.com"));
+        var neverFinishes = new TaskCompletionSource();
+        var slowSender = new SlowEmailSender(neverFinishes.Task);
+
+        async Task<bool> CompletesQuicklyAsync(string address) => await RunAsync(async sp =>
+        {
+            var handler = new RequestSignInLinkHandler(
+                sp.GetRequiredService<IIdentityStore>(), slowSender, sp.GetRequiredService<AppLinks>(),
+                sp.GetRequiredService<CoopSettings>(), sp.GetRequiredService<TimeProvider>());
+            var request = handler.HandleAsync(Email(address), CancellationToken.None);
+            return await Task.WhenAny(request, Task.Delay(TimeSpan.FromMilliseconds(500))) == request;
+        });
+
+        (await CompletesQuicklyAsync("ghost@example.com")).Should().BeTrue();
+        (await CompletesQuicklyAsync("ada@example.com")).Should().BeTrue();
+        neverFinishes.SetResult();
+    }
+
+    private sealed class SlowEmailSender(Task gate) : IEmailSender
+    {
+        public Task SendAsync(EmailMessage message, CancellationToken cancellationToken) => gate;
+    }
+
     [Fact]
     public async Task A_session_slides_while_used_and_ends_after_thirty_idle_days()
     {

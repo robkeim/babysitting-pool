@@ -19,7 +19,7 @@ internal static class SecurityHeadersMiddleware
                 headers.ContentSecurityPolicy = ContentSecurityPolicy;
                 headers.XContentTypeOptions = "nosniff";
                 headers["Referrer-Policy"] = "no-referrer";
-                if (context.Request.Path.StartsWithSegments("/api", StringComparison.Ordinal))
+                if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
                 {
                     headers.CacheControl = "no-store";
                 }

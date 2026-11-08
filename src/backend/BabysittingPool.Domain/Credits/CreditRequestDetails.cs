@@ -30,6 +30,12 @@ public sealed record CreditRequestDetails
             throw new DomainException("A request must include at least one child.", "invalid_child_count");
         }
 
+        // The API accepts enums as numbers too, so `99` would otherwise be stored and shown to every Sitter.
+        if (!Enum.IsDefined(location))
+        {
+            throw new DomainException("Unknown location.", "invalid_location");
+        }
+
         if (location == BabysittingLocation.RequestingFamilysHouse && transport != TransportOption.None)
         {
             throw new DomainException(
