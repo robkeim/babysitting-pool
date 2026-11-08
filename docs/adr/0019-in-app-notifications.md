@@ -28,4 +28,4 @@ Members learn of a Posted Request or a Claim inside the app, without reloading (
 
 **Amendment (2026-10-29, #158): pruned once the Request has started.** Settle also deletes every Notification, of any kind and for any Member, whose Request's start time has passed, since it can no longer be acted on. The 90-day backstop stays for rows whose Request never starts in that time. Settle still writes none (ADR 0007). Open bells drop such rows on their next list fetch; no `notification.dismissed` event is pushed for them.
 
-**Amendment (2026-11-08, #246).** "cancelled" is spelled "canceled" (en-US) throughout, including the `request_canceled` kind; a migration renames stored rows.
+**Amendment (2026-11-08, #246).** Spelled "canceled" (en-US) throughout, including the `request_canceled` kind; a migration renames stored rows.
