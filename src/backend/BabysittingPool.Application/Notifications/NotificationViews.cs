@@ -9,8 +9,8 @@ public static class NotificationKinds
     /// <summary>A Request was Claimed; goes to its Requester.</summary>
     public const string RequestClaimed = "request_claimed";
 
-    /// <summary>A Claimed Request was cancelled by its Requester; goes to its Sitter.</summary>
-    public const string RequestCancelled = "request_cancelled";
+    /// <summary>A Claimed Request was canceled by its Requester; goes to its Sitter.</summary>
+    public const string RequestCanceled = "request_canceled";
 
     /// <summary>A Sitter withdrew their claim; goes to the Requester. The Request may be back to Posted or Expired.</summary>
     public const string RequestWithdrawn = "request_withdrawn";
@@ -19,7 +19,7 @@ public static class NotificationKinds
 /// <summary>
 /// One Notification as its Member sees it: ids, kind, time and a small payload, never an address, a name or free
 /// text. <see cref="Area"/> and <see cref="StartsAt"/> are set for a Posted Request (Area only if it has one),
-/// and <see cref="StartsAt"/> for a Cancelled or Withdrawn one;
+/// and <see cref="StartsAt"/> for a Canceled or Withdrawn one;
 /// <see cref="SitterId"/> for a Claimed one.
 /// </summary>
 public sealed record NotificationView(

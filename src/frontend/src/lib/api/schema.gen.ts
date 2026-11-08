@@ -807,7 +807,7 @@ export interface components {
         };
         OffboardMemberResult: {
             /** Format: int32 */
-            cancelled: number;
+            canceled: number;
             /** Format: int32 */
             withdrawn: number;
             /** Format: int32 */
@@ -944,12 +944,12 @@ export interface components {
             /** Format: int32 */
             completed: number;
             /** Format: int32 */
-            cancelled: number;
+            canceled: number;
             /** Format: int32 */
             expired: number;
         };
         /** @enum {unknown} */
-        RequestStatus: "Posted" | "Claimed" | "Completed" | "Cancelled" | "Expired";
+        RequestStatus: "Posted" | "Claimed" | "Completed" | "Canceled" | "Expired";
         RequestView: {
             /** Format: uuid */
             id: string;

@@ -1,7 +1,7 @@
 namespace BabysittingPool.Domain.Identity;
 
 /// <summary>
-/// Whether a Member sees the co-op light, dark, or as their device is set (GLOSSARY: Colour Scheme). System is the
+/// Whether a Member sees the co-op light, dark, or as their device is set (GLOSSARY: Color Scheme). System is the
 /// default and follows the browser or operating system setting.
 /// </summary>
 public sealed record ColorScheme

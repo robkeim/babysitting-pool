@@ -1,4 +1,4 @@
-// Colour comes from the theme tokens in src/index.css, never from a palette class or a literal, so light and
+// Color comes from the theme tokens in src/index.css, never from a palette class or a literal, so light and
 // dark stay consistent by construction (docs/design.md). `src/components/ui` is shadcn output and is not linted.
 const PALETTE =
   'slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose'
@@ -11,7 +11,7 @@ export const RAW_COLOR = new RegExp(
 const HEX_LITERAL = /^#[0-9a-fA-F]{3,8}$/
 
 const message =
-  'Use a theme token (bg-card, text-muted-foreground, bg-primary, ...) instead of a raw colour (docs/design.md).'
+  'Use a theme token (bg-card, text-muted-foreground, bg-primary, ...) instead of a raw color (docs/design.md).'
 
 /** @type {import('eslint').Linter.Config[]} */
 export const colorTokenConfigs = [

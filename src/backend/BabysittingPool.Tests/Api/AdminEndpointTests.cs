@@ -204,7 +204,7 @@ public class AdminEndpointTests : IDisposable
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<JsonElement>();
-        result.GetProperty("cancelled").GetInt32().Should().Be(1);
+        result.GetProperty("canceled").GetInt32().Should().Be(1);
         result.GetProperty("withdrawn").GetInt32().Should().Be(0);
         result.GetProperty("burnedQuarterCredits").GetInt64().Should().Be(40);
         (await leaverClient.GetAsync("/api/me/account")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);

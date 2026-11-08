@@ -11,7 +11,7 @@ const STATUS_MESSAGES: Record<MemberRequestView['status'], MessageId> = {
   Posted: 'requests.status.Posted',
   Claimed: 'requests.status.Claimed',
   Completed: 'requests.status.Completed',
-  Cancelled: 'requests.status.Cancelled',
+  Canceled: 'requests.status.Canceled',
   Expired: 'requests.status.Expired',
 }
 

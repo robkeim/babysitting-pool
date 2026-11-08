@@ -3,7 +3,7 @@ import { expect, test } from './fixtures.ts'
 // Playwright emulates the browser's setting; the app starts on System, so it follows it.
 test.use({ colorScheme: 'light' })
 
-test('a Member picks a Colour Scheme, it overrides the system setting and outlives a reload', async ({
+test('a Member picks a Color Scheme, it overrides the system setting and outlives a reload', async ({
   page,
   backend,
 }) => {
