@@ -33,3 +33,7 @@ Time-dependent frontend code is display formatting only (countdown labels, co-op
 - Sign-in flows read the magic link from the fake outbox.
 - Journeys, one file each: Invitation to account (10.0 Credits); Admin invites, re-sends and the person joins (own stack via the `ownBackend` fixture, because it consumes the bootstrap Admin Invitation that the shared stack keeps for the sign-in journey); post, claim and complete a Request with balances on both sides; cancel with refund; claim race (two browser contexts); Demurrage after a time jump.
 - Traces kept on failure. If the suite exceeds about 5 minutes, move slow journeys to nightly.
+
+## Coverage
+
+The full gate checks diff coverage, not a global percentage ([ADR 0021](adr/0021-diff-coverage-gate.md)): at least 80% of the executable lines a branch changes must be hit by the Vitest or xUnit tests (Playwright does not count). Cover a line with an assertion, not just a call; the number cannot tell the difference. Generated code, migrations and `components/ui` are excluded in `src/backend/coverage.runsettings` and `vite.config.ts`.

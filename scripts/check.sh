@@ -7,7 +7,8 @@
 #   --fast     skip the slow tests: backend API and Infrastructure tests (the Domain and Application tests still run)
 #              and the slow scans (git history, Semgrep, dependency audits)
 #   --e2e      also run the Playwright journeys (frontend only; needs `npx playwright install chromium`)
-#   --full     the full gate: every test, the Playwright journeys, the generated-contract drift check and the scans
+#   --full     the full gate: every test, the Playwright journeys, the generated-contract drift check, the scans
+#              and the diff-coverage check (ADR 0021; DIFF_COVERAGE_MIN=n sets the threshold, DIFF_COVERAGE=off skips it)
 #   --stamped  exit 0 at once if a passing `all` run is already stamped for this exact tree and level
 #   --quiet    print one line when green, or the last 40 lines and the log path when red (keeps agent output small)
 #
@@ -76,6 +77,9 @@ if [[ $stamped == 1 ]]; then
   done
 fi
 
+# Where the full gate's backend coverage reports land; inside .git so nothing needs ignoring.
+coverage_dir=$(cd "$(git rev-parse --git-path .)" && pwd)/coverage
+
 step() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 
 need() {
@@ -118,6 +122,11 @@ backend() {
   if [[ $fast == 1 ]]; then
     dotnet test BabysittingPool.sln --no-build --nologo \
       --filter "FullyQualifiedName!~.Api.&FullyQualifiedName!~.Infrastructure."
+  elif [[ $full == 1 ]]; then
+    # Coverage feeds the diff-coverage check at the end (ADR 0021).
+    rm -rf "$coverage_dir/backend"
+    dotnet test BabysittingPool.sln --no-build --nologo --settings coverage.runsettings \
+      --collect:"XPlat Code Coverage" --results-directory "$coverage_dir/backend"
   else
     dotnet test BabysittingPool.sln --no-build --nologo
   fi
@@ -133,7 +142,11 @@ frontend() {
   step "frontend: tsc"
   npx tsc -b
   step "frontend: vitest"
-  npx vitest run
+  if [[ $full == 1 ]]; then
+    npx vitest run --coverage
+  else
+    npx vitest run
+  fi
   if [[ $e2e == 1 ]]; then
     step "frontend: playwright"
     npx playwright test --reporter=line
@@ -166,6 +179,16 @@ case "$scope" in
   # was swallowed and the run stamped green.
   all) (backend); (frontend) ;;
 esac
+
+if [[ $full == 1 ]]; then
+  step "coverage: changed lines are tested"
+  reports=()
+  if [[ $scope != frontend ]]; then
+    while IFS= read -r report; do reports+=("$report"); done < <(find "$coverage_dir/backend" -name coverage.cobertura.xml)
+  fi
+  [[ $scope == backend ]] || reports+=(src/frontend/coverage/lcov.info)
+  node scripts/diff-coverage.mjs "${reports[@]}"
+fi
 
 if [[ $scope == all ]]; then
   tree_hash >"$stamp_fast"
