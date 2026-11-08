@@ -60,20 +60,19 @@ public sealed class EmailWiringTests
 
         var response = await client.PostAsJsonAsync("/api/auth/sign-in-links", new { email = "co.op+ryan@mail.example" });
 
-        // The send was attempted (and failed on the unreachable host), and the link is in the outbox regardless.
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        // Delivery is queued, so the unreachable host cannot slow or fail the request; the link is in the outbox.
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
         outbox.Messages.Should().HaveCount(2).And.Contain(m => m.To == "co.op+ryan@mail.example");
     }
 
     [Fact]
-    public async Task An_smtp_failure_surfaces_with_the_message_already_in_the_outbox()
+    public async Task An_smtp_failure_is_not_surfaced_to_the_caller_and_the_message_is_in_the_outbox()
     {
         using var factory = new PlainApiFactory("Development", settings: Smtp);
         var outbox = factory.Services.GetRequiredService<EmailOutbox>();
 
-        var act = () => factory.InviteAsync("new.person@example.com");
+        await factory.InviteAsync("new.person@example.com");
 
-        await act.Should().ThrowAsync<Exception>();
         outbox.Messages.Should().Contain(m => m.To == "new.person@example.com");
     }
 }

@@ -3,9 +3,11 @@ using BabysittingPool.Application.Credits;
 using BabysittingPool.Application.Identity;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Identity;
+using BabysittingPool.Infrastructure;
 using BabysittingPool.Tests.Support;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BabysittingPool.Tests.Application;
 
@@ -193,6 +195,33 @@ public class IdentityHandlerTests : IAsyncLifetime
         });
 
         _database.Outbox.Messages.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Requesting_a_link_does_not_wait_for_the_email_sender_for_a_member_or_a_stranger()
+    {
+        await AcceptAsync(await InviteAndGetTokenAsync("ada@example.com"));
+        var neverFinishes = new TaskCompletionSource();
+        // Production puts the queue in front of SMTP, so the handler never waits on the real sender.
+        var slowSender = new QueuedEmailSender(new SlowEmailSender(neverFinishes.Task), NullLogger<QueuedEmailSender>.Instance);
+
+        async Task<bool> CompletesQuicklyAsync(string address) => await RunAsync(async sp =>
+        {
+            var handler = new RequestSignInLinkHandler(
+                sp.GetRequiredService<IIdentityStore>(), slowSender, sp.GetRequiredService<AppLinks>(),
+                sp.GetRequiredService<CoopSettings>(), sp.GetRequiredService<TimeProvider>());
+            var request = handler.HandleAsync(Email(address), CancellationToken.None);
+            return await Task.WhenAny(request, Task.Delay(TimeSpan.FromMilliseconds(500))) == request;
+        });
+
+        (await CompletesQuicklyAsync("ghost@example.com")).Should().BeTrue();
+        (await CompletesQuicklyAsync("ada@example.com")).Should().BeTrue();
+        neverFinishes.SetResult();
+    }
+
+    private sealed class SlowEmailSender(Task gate) : IEmailSender
+    {
+        public Task SendAsync(EmailMessage message, CancellationToken cancellationToken) => gate;
     }
 
     [Fact]
