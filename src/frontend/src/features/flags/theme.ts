@@ -19,7 +19,7 @@ function remember(on: boolean) {
   }
 }
 
-/** Applies the last theme before the first render, so a Member does not see the default colours flash first. */
+/** Applies the last theme before the first render, so a Member does not see the default colors flash first. */
 export function restoreTheme() {
   try {
     apply(localStorage.getItem(STORAGE_KEY) === 'vacation' ? 'vacation' : undefined)

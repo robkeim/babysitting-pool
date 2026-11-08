@@ -14,6 +14,7 @@ export default defineConfig(
   {
     ignores: [
       'dist',
+      'coverage',
       'test-results',
       'playwright-report',
       'src/routeTree.gen.ts',

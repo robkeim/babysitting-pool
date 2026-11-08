@@ -81,7 +81,7 @@ describe('MyRequestsPage', () => {
 
   it('cancels a Posted or Claimed Request, and offers nothing for ended ones', async () => {
     const user = userEvent.setup()
-    const cancelled: string[] = []
+    const canceled: string[] = []
     server.use(
       myRequestsHandler({
         items: [
@@ -91,14 +91,14 @@ describe('MyRequestsPage', () => {
         ],
         nextCursor: null,
       }),
-      releaseRequestHandler('cancel', 'Cancelled', (id) => cancelled.push(id)),
+      releaseRequestHandler('cancel', 'Canceled', (id) => canceled.push(id)),
     )
 
     renderWithProviders(<MyRequestsPage />)
     await user.click(await screen.findByRole('button', { name: /cancel the request in hilltop/i }))
 
     await vi.waitFor(() => {
-      expect(cancelled).toEqual(['b'])
+      expect(canceled).toEqual(['b'])
     })
     expect(screen.getAllByRole('button', { name: /cancel the request/i })).toHaveLength(2)
   })

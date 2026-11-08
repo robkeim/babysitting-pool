@@ -49,7 +49,7 @@ try {
   collection.info = { ...collection.info, name: 'Babysitting Pool API' }
   // The Vite origin, not the API port: cookies and the /api proxy then behave as they do in the browser.
   collection.variable = [{ key: 'baseUrl', value: 'http://localhost:5173', type: 'string' }]
-  // CSRF defence (ADR 0006): state-changing calls need this header.
+  // CSRF defense (ADR 0006): state-changing calls need this header.
   collection.event = [
     {
       listen: 'prerequest',

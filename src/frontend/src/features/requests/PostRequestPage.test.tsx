@@ -190,7 +190,7 @@ describe('PostRequestPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/at least 6 hours/i)
   })
 
-  it('prices each option inline and itemises the backend quote as a receipt', async () => {
+  it('prices each option inline and itemizes the backend quote as a receipt', async () => {
     const user = userEvent.setup()
     server.use(
       availableBalanceHandler(84),

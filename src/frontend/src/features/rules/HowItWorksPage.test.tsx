@@ -18,7 +18,7 @@ describe('HowItWorksPage', () => {
     expect(pricing).toHaveAttribute('id', 'pricing')
     expect(within(pricing).getByText(/second child adds 0\.50 per hour/i)).toBeInTheDocument()
 
-    const requests = screen.getByRole('region', { name: 'Posting, claiming and cancelling' })
+    const requests = screen.getByRole('region', { name: 'Posting, claiming and canceling' })
     expect(requests).toHaveAttribute('id', 'requests')
     expect(within(requests).getByText(/at least 6 hours after/i)).toBeInTheDocument()
     expect(within(requests).getByText(/until 3 hours before/i)).toBeInTheDocument()

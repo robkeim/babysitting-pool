@@ -109,7 +109,7 @@ public class AdminViewsHandlerTests : IAsyncLifetime
         var other = await AddMemberAsync("other", Today.AddDays(-100));
         await AddRequestAsync(other, asSitter, RequestStatus.Completed, Today.AddDays(-5));
         await AddRequestAsync(asRequester, other, RequestStatus.Completed, Today.AddDays(-60));
-        await AddRequestAsync(asRequester, null, RequestStatus.Cancelled, Today.AddDays(-2));
+        await AddRequestAsync(asRequester, null, RequestStatus.Canceled, Today.AddDays(-2));
 
         var dormant = await RunAsync(sp => sp.GetRequiredService<ListDormantMembersHandler>().HandleAsync(default));
 
@@ -145,7 +145,7 @@ public class AdminViewsHandlerTests : IAsyncLifetime
         await AddRequestAsync(a, b, RequestStatus.Claimed, Today.AddDays(1));
         await AddRequestAsync(a, b, RequestStatus.Claimed, Today.AddHours(-2));
         await AddRequestAsync(a, b, RequestStatus.Completed, Today.AddDays(-3));
-        await AddRequestAsync(a, null, RequestStatus.Cancelled, Today.AddDays(3));
+        await AddRequestAsync(a, null, RequestStatus.Canceled, Today.AddDays(3));
         await AddRequestAsync(a, null, RequestStatus.Expired, Today.AddDays(-3));
 
         var overview = await RunAsync(sp => sp.GetRequiredService<GetPoolOverviewHandler>().HandleAsync(default));
@@ -156,7 +156,7 @@ public class AdminViewsHandlerTests : IAsyncLifetime
             BurnedByDemurrageQuarterCredits: 13,
             BurnedByOffboardingQuarterCredits: 28,
             OpenMembers: 2,
-            Requests: new RequestCounts(Posted: 1, Claimed: 1, Completed: 2, Cancelled: 1, Expired: 2)));
+            Requests: new RequestCounts(Posted: 1, Claimed: 1, Completed: 2, Canceled: 1, Expired: 2)));
     }
 
     [Fact]

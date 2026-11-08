@@ -5,7 +5,7 @@ import { creditsValue, formatCredits } from '@/features/credits'
 import type { CostQuote, QuoteDetails } from './types'
 
 interface CostReceiptProps {
-  /** The backend's itemised quote; the receipt only formats it and never prices anything itself. */
+  /** The backend's itemized quote; the receipt only formats it and never prices anything itself. */
   quote: CostQuote | undefined
   details: QuoteDetails
   available: number | undefined

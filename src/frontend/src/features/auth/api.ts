@@ -71,7 +71,7 @@ export function useChangeLanguage() {
   })
 }
 
-/** Saves the Member's Colour Scheme and applies it at once; the server confirms on the next `me` fetch. */
+/** Saves the Member's Color Scheme and applies it at once; the server confirms on the next `me` fetch. */
 export function useChangeColorScheme() {
   const client = useQueryClient()
   return useMutation({

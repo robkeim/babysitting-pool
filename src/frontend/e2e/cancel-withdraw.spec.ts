@@ -49,10 +49,10 @@ test('a Sitter withdraws and the Request reopens, then the Requester cancels and
     'Posted',
   )
 
-  // Cancelling ends it and returns the Escrow.
+  // Canceling ends it and returns the Escrow.
   await requester.getByRole('button', { name: /cancel the request in riverside/i }).click()
   await expect(requester.getByRole('listitem').filter({ hasText: /riverside/i })).toContainText(
-    'Cancelled',
+    'Canceled',
   )
   await expect(requester.getByRole('button', { name: /cancel the request/i })).toHaveCount(0)
   await sitter.goto(`${backend.appUrl}/open-requests`)

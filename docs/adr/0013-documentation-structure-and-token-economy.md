@@ -20,7 +20,7 @@ Agents pay tokens for every file they open, and `AGENTS.md` is paid for in every
 ## Staying current
 
 - `scripts/check-docs.sh` runs first in `scripts/check.sh` (so in hooks and CI): `AGENTS.md` ≤ 60 lines, every ADR listed in the index, every relative Markdown link resolves.
-- The PR template has a checkbox: spec, ADRs and glossary updated if behaviour or a decision changed.
+- The PR template has a checkbox: spec, ADRs and glossary updated if behavior or a decision changed.
 - ADRs are append-only: a new ADR supersedes (the old one is marked `Superseded by`), a small change is a dated amendment note (as in ADR 0008).
 - Generated artifacts stay guarded by the existing CI drift checks (ADR 0006).
 - No doc-gardening agent: deterministic checks first, as in ADR 0008.
@@ -40,3 +40,5 @@ Soft targets, measured as characters ÷ 4 until a real `/context` reading replac
 | `AGENTS.md` + index + 2 ADRs | 9.5 KB | ~2.4k |
 
 Retune after the first feature slices land.
+
+**Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.
