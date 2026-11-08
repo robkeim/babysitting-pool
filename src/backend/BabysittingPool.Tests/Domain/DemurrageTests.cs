@@ -149,4 +149,20 @@ public class DemurrageScheduleTests
             new DateTime(2026, 3, 29, 22, 0, 0, DateTimeKind.Utc),
             new DateTime(2026, 4, 5, 22, 0, 0, DateTimeKind.Utc));
     }
+
+    [Fact]
+    public void A_boundary_inside_the_skipped_hour_is_charged_an_hour_later()
+    {
+        var berlin = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+        var schedule = new DemurrageSchedule(DayOfWeek.Sunday, new TimeOnly(2, 30), berlin);
+
+        var boundaries = schedule.BoundariesBetween(
+            new DateTime(2026, 3, 22, 12, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 5, 12, 0, 0, DateTimeKind.Utc)).ToList();
+
+        // 02:30 does not exist on Sunday 29 March 2026 (02:00 jumps to 03:00), so that week is charged at 03:30 local
+        // (01:30 UTC, summer time). The week before is 02:30 winter time (01:30 UTC too); the week after is 02:30 summer time.
+        boundaries.Should().Equal(
+            new DateTime(2026, 3, 29, 1, 30, 0, DateTimeKind.Utc),
+            new DateTime(2026, 4, 5, 0, 30, 0, DateTimeKind.Utc));
+    }
 }
