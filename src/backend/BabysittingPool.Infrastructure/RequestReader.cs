@@ -38,8 +38,14 @@ internal sealed class RequestReader(BabysittingPoolDbContext db) : IRequestReade
         var rows = await db.Requests.AsNoTracking().Where(r => r.SitterId == sitterId)
             .ToKeysetPageAsync(page, r => r.StartsAt, r => r.Id, descending: true, cancellationToken);
 
-        return page.ToPage(rows, r => new KeysetPosition(r.StartsAt, r.Id), r => ToRead(r).ToView(now));
+        return page.ToPage(rows, r => new KeysetPosition(r.StartsAt, r.Id), r => ToSitterView(r, now));
     }
+
+    // A Requester's cancellation drops the claim (the Sitter id stays for history), so the Sitter keeps no exact
+    // details of a Request they no longer sit for (spec §4.6).
+    private static RequestView ToSitterView(RequestRecord r, DateTime now) => r.Status == RequestStatus.Cancelled
+        ? ToRead(r).ToView(now) with { Address = null, Instructions = null, Notes = null }
+        : ToRead(r).ToView(now);
 
     public async Task<IReadOnlyList<Guid>> ListDueForExpiryAsync(DateTime now, CancellationToken cancellationToken) =>
         await db.Requests.AsNoTracking()
