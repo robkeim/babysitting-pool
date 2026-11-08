@@ -40,7 +40,7 @@ const STATUS_CLASSES: Record<RequestStatus, string> = {
   Posted: 'bg-accent text-accent-foreground',
   Claimed: 'bg-primary text-primary-foreground',
   Completed: 'bg-success/15 text-success',
-  Cancelled: 'bg-muted text-muted-foreground',
+  Canceled: 'bg-muted text-muted-foreground',
   Expired: 'bg-muted text-muted-foreground',
 }
 

@@ -9,7 +9,7 @@ public sealed record CancelRequestCommand(Guid RequestId, Guid RequesterId);
 public sealed class CancelRequestHandler(IRequestStore store, TimeProvider clock, NotificationAnnouncer announcer)
 {
     /// <summary>
-    /// The cancelled Request, or null when it does not exist or is not the caller's (ADR 0014). Rule violations
+    /// The canceled Request, or null when it does not exist or is not the caller's (ADR 0014). Rule violations
     /// throw <see cref="DomainException"/>; a concurrent change throws <see cref="ConcurrencyConflictException"/>.
     /// </summary>
     public async Task<RequestView?> HandleAsync(CancelRequestCommand command, CancellationToken cancellationToken)

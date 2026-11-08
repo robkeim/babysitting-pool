@@ -156,6 +156,10 @@ frontend() {
 step "docs"
 scripts/check-docs.sh
 
+# en-US spelling (cspell.json flags British spellings). Pinned and run through npx, like openapi-typescript.
+step "spelling: cspell (en-US)"
+git ls-files | npx --yes cspell@9.8.0 --no-progress --no-summary --no-must-find-files --file-list stdin
+
 scan_secrets
 [[ $fast == 1 ]] || scan_code
 

@@ -169,19 +169,19 @@ internal sealed class RequestStore(BabysittingPoolDbContext db) : IRequestStore
         Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken)
     {
         await SetRequestStateAsync(request, cancellationToken);
-        if (request.Status is RequestStatus.Cancelled or RequestStatus.Expired)
+        if (request.Status is RequestStatus.Canceled or RequestStatus.Expired)
         {
             await SetAccountAsync(request.RequesterId, requester, cancellationToken);
             AddLedgerEntry(request.RequesterId, request, LedgerEntryKind.Refund, now);
         }
 
-        // A Cancelled Request keeps its Sitter, so only a cancelled claim has someone to tell the Sitter. A withdrawal
+        // A Canceled Request keeps its Sitter, so only a canceled claim has someone to tell the Sitter. A withdrawal
         // clears the Sitter and ends Posted or Expired, and it is the Requester who hears of it. Same SaveChanges as
         // the release, so a lost race leaves no Notification (ADR 0019).
         NotificationRecord? notification = null;
-        if (request is { Status: RequestStatus.Cancelled, SitterId: { } sitterId })
+        if (request is { Status: RequestStatus.Canceled, SitterId: { } sitterId })
         {
-            notification = ReleaseNotification(sitterId, NotificationKinds.RequestCancelled, request, now);
+            notification = ReleaseNotification(sitterId, NotificationKinds.RequestCanceled, request, now);
         }
         else if (request.Status is RequestStatus.Posted or RequestStatus.Expired)
         {

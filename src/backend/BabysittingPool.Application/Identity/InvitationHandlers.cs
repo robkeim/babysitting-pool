@@ -21,7 +21,7 @@ public sealed record SignedIn(string SessionSecret);
 /// <summary>Creates the Member, their Credit Account with the Starting Balance, and a Session from an Invitation.</summary>
 public sealed class AcceptInvitationHandler(IIdentityStore store, TimeProvider clock)
 {
-    /// <summary>Null if the Invitation is unknown, used, expired, or can no longer be honoured.</summary>
+    /// <summary>Null if the Invitation is unknown, used, expired, or can no longer be honored.</summary>
     public async Task<SignedIn?> HandleAsync(AcceptInvitationCommand command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);

@@ -71,11 +71,11 @@ export function NotificationList() {
         href: '/open-requests',
       }
     }
-    if (notification.kind === NOTIFICATION_KINDS.requestCancelled) {
+    if (notification.kind === NOTIFICATION_KINDS.requestCanceled) {
       const date = notification.startsAt ? formatInstant(notification.startsAt) : ''
       return {
         text: intl.formatMessage(
-          { id: date ? 'notifications.cancelled.dated' : 'notifications.cancelled.generic' },
+          { id: date ? 'notifications.canceled.dated' : 'notifications.canceled.generic' },
           { date },
         ),
         stale: false,

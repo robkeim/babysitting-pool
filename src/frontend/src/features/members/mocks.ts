@@ -36,7 +36,7 @@ export const sampleOverview: PoolOverview = {
   burnedByDemurrageQuarterCredits: 16,
   burnedByOffboardingQuarterCredits: 40,
   openMembers: 7,
-  requests: { posted: 3, claimed: 2, completed: 11, cancelled: 4, expired: 1 },
+  requests: { posted: 3, claimed: 2, completed: 11, canceled: 4, expired: 1 },
 }
 
 export const sampleDormant: DormantMemberView = {

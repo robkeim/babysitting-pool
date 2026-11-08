@@ -30,7 +30,7 @@ describe('ColorSchemeCard', () => {
     ])
   })
 
-  it('saves the Colour Scheme the Member picks and shows it selected', async () => {
+  it('saves the Color Scheme the Member picks and shows it selected', async () => {
     let saved: unknown
     server.use(
       meHandler(ada),
