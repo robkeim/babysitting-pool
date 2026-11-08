@@ -3,7 +3,9 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AwesomeAssertions;
 using BabysittingPool.Domain.Credits;
+using BabysittingPool.Infrastructure.Persistence;
 using BabysittingPool.Tests.Support;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BabysittingPool.Tests.Api;
 
@@ -340,6 +342,80 @@ public class AdminEndpointTests : IDisposable
             .Should().Be("invitation_already_sent");
         (await client.PostAsync($"/api/admin/invitations/{Guid.NewGuid()}/resend", null))
             .StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Inviting_a_current_member_is_unprocessable()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        var member = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        using var client = _factory.CreateMemberClient(admin);
+
+        var response = await client.PostAsJsonAsync("/api/admin/invitations", new { email = $"{member:N}@example.test" });
+
+        await AssertUnprocessableAsync(response, "already_a_member");
+    }
+
+    [Fact]
+    public async Task Resending_an_accepted_invitation_is_unprocessable()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        await _factory.InviteAsync("joined@example.com");
+        using var plain = _factory.CreateClient();
+        var outbox = await plain.GetFromJsonAsync<JsonElement>("/api/test/outbox?to=joined%40example.com");
+        var link = outbox.EnumerateArray().Last().GetProperty("link").GetString()!;
+        var token = System.Web.HttpUtility.ParseQueryString(new Uri(link).Query)["token"]!;
+        using var joiner = _factory.CreateClient(new() { HandleCookies = true });
+        joiner.DefaultRequestHeaders.Add("X-Requested-With", "fetch");
+        (await joiner.PostAsJsonAsync("/api/invitations/accept", new { token, displayName = "Joined" })).EnsureSuccessStatusCode();
+        using var client = _factory.CreateMemberClient(admin);
+        var id = await OnlyInvitationIdAsync(client, "joined@example.com");
+
+        var response = await client.PostAsync($"/api/admin/invitations/{id}/resend", null);
+
+        await AssertUnprocessableAsync(response, "invitation_already_accepted");
+    }
+
+    [Fact]
+    public async Task Resending_an_invitation_to_a_current_member_is_unprocessable()
+    {
+        var admin = await _factory.SeedAccountAsync(Credits.FromDecimal(10m), Credits.FromQuarterCredits(0));
+        await _factory.MakeAdminAsync(admin);
+        await _factory.InviteAsync("ada@example.com");
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<BabysittingPoolDbContext>();
+            db.Members.Add(new MemberRecord
+            {
+                Id = Guid.NewGuid(),
+                Email = "ada@example.com",
+                DisplayName = "Ada",
+                CreatedAt = _factory.Clock.GetUtcNow().UtcDateTime,
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = _factory.CreateMemberClient(admin);
+        var id = await OnlyInvitationIdAsync(client, "ada@example.com");
+
+        var response = await client.PostAsync($"/api/admin/invitations/{id}/resend", null);
+
+        await AssertUnprocessableAsync(response, "already_a_member");
+    }
+
+    private static async Task<Guid> OnlyInvitationIdAsync(HttpClient adminClient, string email)
+    {
+        var list = await adminClient.GetFromJsonAsync<JsonElement>("/api/admin/invitations");
+        return list.GetProperty("items").EnumerateArray().Single(i => i.GetProperty("email").GetString() == email)
+            .GetProperty("id").GetGuid();
+    }
+
+    private static async Task AssertUnprocessableAsync(HttpResponseMessage response, string code)
+    {
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString().Should().Be(code);
     }
 
     [Theory]
