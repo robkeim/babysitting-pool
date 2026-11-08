@@ -549,7 +549,7 @@ public class RequestEndpointTests : IDisposable
     }
 
     [Fact]
-    public async Task Quote_itemises_the_cost_so_the_lines_sum_to_the_total()
+    public async Task Quote_itemizes_the_cost_so_the_lines_sum_to_the_total()
     {
         using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
 

@@ -48,7 +48,7 @@ dotnet_diagnostic.SA1513.severity = warning
 dotnet_diagnostic.SA1516.severity = warning
 dotnet_diagnostic.SA1517.severity = warning
 
-# Analyzer noise that does not fit an application (no library consumers, no localisation yet).
+# Analyzer noise that does not fit an application (no library consumers, no localization yet).
 dotnet_diagnostic.CA1303.severity = none
 dotnet_diagnostic.CA1848.severity = none
 dotnet_diagnostic.CA2007.severity = none

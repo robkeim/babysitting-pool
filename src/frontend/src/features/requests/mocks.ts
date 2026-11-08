@@ -67,7 +67,7 @@ const zeroQuote: CostQuote = {
   },
 }
 
-/** Answers every quote with the same itemised cost; unset parts are the one-child defaults. */
+/** Answers every quote with the same itemized cost; unset parts are the one-child defaults. */
 export function quoteHandler(quote: Partial<CostQuote> & Pick<CostQuote, 'costQuarterCredits'>) {
   return http.get('*/api/requests/quote', () => HttpResponse.json({ ...zeroQuote, ...quote }))
 }
