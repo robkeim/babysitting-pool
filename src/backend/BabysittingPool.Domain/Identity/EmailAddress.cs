@@ -20,7 +20,7 @@ public sealed record EmailAddress
             return false;
         }
 
-#pragma warning disable CA1308 // Normalised for comparison and storage, never for security decisions.
+#pragma warning disable CA1308 // Normalized for comparison and storage, never for security decisions.
         email = new EmailAddress(trimmed.ToLowerInvariant());
 #pragma warning restore CA1308
         return true;

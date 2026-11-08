@@ -1,4 +1,4 @@
-# Frontend is organised in feature slices with lint-enforced one-way dependencies
+# Frontend is organized in feature slices with lint-enforced one-way dependencies
 
 `src/` is split by feature slice named after glossary concepts (`features/requests`, `features/credits`, `features/members`, `features/auth`), not by technical layer. Layers (`components/`, `hooks/`, `api/`) make one feature change fan out across many folders, which is costly for agents; a slice keeps a change local and makes boundaries lintable.
 

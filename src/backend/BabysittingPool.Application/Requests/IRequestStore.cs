@@ -44,9 +44,9 @@ public interface IRequestStore
     Task<IReadOnlyList<NotificationDelivery>> SaveClaimedAsync(Request request, DateTime now, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Saves a Request a Requester cancelled or a Sitter withdrew from. When the Request ended Cancelled or Expired
-    /// the Requester's refunded account and the Refund Ledger entry go in the same transaction. A Cancelled Request
-    /// that had a Sitter also stores a Cancelled Notification for them, and a withdrawn claim (the Request ends Posted or Expired) stores a Withdrawn one for the Requester; either is returned for the caller to announce. Throws
+    /// Saves a Request a Requester canceled or a Sitter withdrew from. When the Request ended Canceled or Expired
+    /// the Requester's refunded account and the Refund Ledger entry go in the same transaction. A Canceled Request
+    /// that had a Sitter also stores a Canceled Notification for them, and a withdrawn claim (the Request ends Posted or Expired) stores a Withdrawn one for the Requester; either is returned for the caller to announce. Throws
     /// <see cref="ConcurrencyConflictException"/> if the Request or account changed since it was read.
     /// </summary>
     Task<IReadOnlyList<NotificationDelivery>> SaveReleasedAsync(Request request, CreditAccount requester, DateTime now, CancellationToken cancellationToken);
