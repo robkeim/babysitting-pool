@@ -17,13 +17,14 @@ internal sealed class TestDatabase : IAsyncDisposable
     private readonly string _path = Path.Combine(Path.GetTempPath(), $"babysitting-{Guid.NewGuid():N}.db");
     private readonly ServiceProvider _services;
 
-    public TestDatabase()
+    public TestDatabase(Action<IServiceCollection>? configure = null)
     {
         Clock = new FakeTimeProvider(new DateTimeOffset(2026, 3, 1, 9, 0, 0, TimeSpan.Zero));
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddCoopCore(new CoopCoreOptions(
             $"Data Source={_path}", new Uri("https://coop.example/"), s => s.AddEmailOutbox(), Clock));
+        configure?.Invoke(services);
         _services = services.BuildServiceProvider();
     }
 
@@ -33,9 +34,9 @@ internal sealed class TestDatabase : IAsyncDisposable
 
     public EmailOutbox Outbox => _services.GetRequiredService<EmailOutbox>();
 
-    public static async Task<TestDatabase> CreateMigratedAsync()
+    public static async Task<TestDatabase> CreateMigratedAsync(Action<IServiceCollection>? configure = null)
     {
-        var database = new TestDatabase();
+        var database = new TestDatabase(configure);
         await database.Services.MigrateDatabaseAsync();
         return database;
     }
