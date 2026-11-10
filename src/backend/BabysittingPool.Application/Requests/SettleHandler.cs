@@ -31,7 +31,7 @@ public sealed partial class SettleHandler(
 
         foreach (var id in await reader.ListDueForExpiryAsync(now, cancellationToken))
         {
-            if (await SettleAsync(id, ExpireAsync, "Expiry", cancellationToken))
+            if (await SettleAsync(id, ExpireAsync, "Expiry", LogExpired, cancellationToken))
             {
                 expired++;
             }
@@ -43,7 +43,7 @@ public sealed partial class SettleHandler(
 
         foreach (var id in await reader.ListDueForPayoutAsync(now, cancellationToken))
         {
-            if (await SettleAsync(id, CompleteAsync, "Payout", cancellationToken))
+            if (await SettleAsync(id, CompleteAsync, "Payout", LogCompleted, cancellationToken))
             {
                 completed++;
             }
@@ -98,6 +98,7 @@ public sealed partial class SettleHandler(
         Guid requestId,
         Func<IRequestStore, Guid, DateTime, CancellationToken, Task> settle,
         string step,
+        Action<Guid> logSettled,
         CancellationToken cancellationToken)
     {
         // A scope per Request is its own transaction and its own tracked state (ADR 0004).
@@ -106,7 +107,7 @@ public sealed partial class SettleHandler(
         try
         {
             await settle(store, requestId, clock.GetUtcNow().UtcDateTime, cancellationToken);
-            LogSettled(step, requestId);
+            logSettled(requestId);
             return true;
         }
         catch (ConcurrencyConflictException)
@@ -150,7 +151,7 @@ public sealed partial class SettleHandler(
             }
 
             await store.SaveChargedAsync(memberId, candidate.Account, charges, now, cancellationToken);
-            LogSettled("Demurrage", memberId);
+            LogCharged(memberId);
             return true;
         }
         catch (ConcurrencyConflictException)
@@ -202,8 +203,14 @@ public sealed partial class SettleHandler(
     [LoggerMessage(Level = LogLevel.Error, Message = "NotificationSweepFailed")]
     private partial void LogSweepFailed(Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Settled {Step} {Id}")]
-    private partial void LogSettled(string step, Guid id);
+    [LoggerMessage(Level = LogLevel.Information, Message = "RequestExpired {RequestId}")]
+    private partial void LogExpired(Guid requestId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "RequestCompleted {RequestId}")]
+    private partial void LogCompleted(Guid requestId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "DemurrageCharged {MemberId}")]
+    private partial void LogCharged(Guid memberId);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "SettleConflicted {Step} {Id}")]
     private partial void LogConflicted(string step, Guid id);

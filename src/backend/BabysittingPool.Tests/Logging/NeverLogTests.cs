@@ -78,6 +78,21 @@ public partial class NeverLogTests : IDisposable
         (await owner.PostAsync($"/api/requests/{id}/cancel", null)).EnsureSuccessStatusCode();
         (await owner.GetAsync("/api/me/requests")).EnsureSuccessStatusCode();
 
+        // The time-driven and Admin outcomes log too: a Request that completes, one that expires, one released by Offboarding.
+        var adminId = await _factory.SeedMemberAsync();
+        await _factory.MakeAdminAsync(adminId);
+        using var admin = _factory.CreateMemberClient(adminId);
+        var completing = await PostNotedAsync(owner);
+        await PostNotedAsync(owner);
+        (await sitter.PostAsync($"/api/requests/{completing}/claim", null)).EnsureSuccessStatusCode();
+        _factory.Clock.Advance(TimeSpan.FromHours(11));
+        (await admin.PostAsync("/api/admin/settle", null)).EnsureSuccessStatusCode();
+        await PostNotedAsync(owner);
+        var ownerId = await MemberIdAsync(owner);
+        (await admin.PostAsync($"/api/admin/members/{ownerId}/offboard", null)).EnsureSuccessStatusCode();
+        _logs.Events.Select(e => e.MessageTemplate.Text.Split(' ')[0]).Should()
+            .Contain(["RequestPosted", "RequestClaimed", "ClaimWithdrawn", "RequestCanceled", "RequestCompleted", "RequestExpired", "MemberOffboarded"]);
+
         _factory.Clock.Advance(TimeSpan.FromDays(1));
         var logged = _logs.AllText();
         _logs.Events.Should().Contain(e => e.MessageTemplate.Text.StartsWith("HttpRequestHandled", StringComparison.Ordinal));
@@ -159,6 +174,24 @@ public partial class NeverLogTests : IDisposable
         secrets.Add(secret);
         return (client, secret);
     }
+
+    private async Task<string> PostNotedAsync(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync("/api/requests", new
+        {
+            startsAt = _factory.Clock.GetUtcNow().AddHours(10),
+            durationMinutes = 120,
+            childCount = 1,
+            location = "SittersHouse",
+            transport = "None",
+            notes = Note,
+        });
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetString()!;
+    }
+
+    private static async Task<Guid> MemberIdAsync(HttpClient client) =>
+        (await client.GetFromJsonAsync<JsonElement>("/api/me")).GetProperty("memberId").GetGuid();
 
     private async Task<string> LatestLinkAsync(string to)
     {

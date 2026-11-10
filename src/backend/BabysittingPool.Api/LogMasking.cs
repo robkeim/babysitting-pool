@@ -66,7 +66,8 @@ internal sealed class DenylistMaskingEnricher : ILogEventEnricher
 
 /// <summary>
 /// Drops what ASP.NET's own request scope puts on every event: <c>RequestPath</c> is the raw path, which the
-/// never-log list forbids, and <c>RequestId</c> and <c>ConnectionId</c> are noise next to <c>TraceId</c>.
+/// never-log list forbids, and <c>RequestId</c> and <c>ConnectionId</c> are noise next to <c>TraceId</c>. A
+/// <c>RequestId</c> that is not ASP.NET's string (the Guid a handler logs, ADR 0010) is kept.
 /// </summary>
 internal sealed class HostingScopeScrubEnricher : ILogEventEnricher
 {
@@ -77,6 +78,11 @@ internal sealed class HostingScopeScrubEnricher : ILogEventEnricher
         ArgumentNullException.ThrowIfNull(logEvent);
         foreach (var name in Dropped)
         {
+            if (name == "RequestId" && logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue { Value: not string })
+            {
+                continue;
+            }
+
             logEvent.RemovePropertyIfPresent(name);
         }
     }
