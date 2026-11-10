@@ -189,6 +189,7 @@ public static class ApiHost
         app.MapAccountEndpoints();
         app.MapRequestEndpoints();
         app.MapNotificationEndpoints();
+        app.MapClientLogEndpoints();
         app.MapAddressEndpoints();
         app.MapAdminEndpoints();
         app.MapFeatureFlagEndpoints();
