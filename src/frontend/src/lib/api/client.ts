@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger'
+
 /**
  * A non-2xx response; `code` is the stable machine-readable ProblemDetails code (ADR 0006) and `traceId` the
  * reference a Member can quote, matching the backend log lines of that request (ADR 0010).
@@ -45,24 +47,35 @@ interface RequestOptions {
  */
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const trace = newTraceParent()
-  const response = await fetch(new URL(path, window.location.origin), {
-    method: options.method ?? 'GET',
-    headers: {
-      accept: 'application/json',
-      'x-requested-with': 'fetch',
-      traceparent: trace.header,
-      ...(options.body === undefined ? {} : { 'content-type': 'application/json' }),
-    },
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-  })
+  logger.setCurrentTraceId(trace.traceId)
+  let response: Response
+  try {
+    response = await fetch(new URL(path, window.location.origin), {
+      method: options.method ?? 'GET',
+      headers: {
+        accept: 'application/json',
+        'x-requested-with': 'fetch',
+        traceparent: trace.header,
+        ...(options.body === undefined ? {} : { 'content-type': 'application/json' }),
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    })
+  } catch (error) {
+    // The message of a network failure can carry the URL, so only the code and trace id are reported.
+    logger.error('Network request failed', { code: 'network_error', traceId: trace.traceId })
+    throw error
+  }
   if (!response.ok) {
     const problem = (await response.json().catch(() => ({}))) as Problem
-    throw new ApiError(
+    const apiError = new ApiError(
       response.status,
       problem.code ?? 'unknown',
       problem.title ?? response.statusText,
       problem.traceId ?? response.headers.get('x-trace-id') ?? trace.traceId,
     )
+    // Expected 4xx outcomes are not errors (ADR 0010); the error object is marked so the boundary does not report it again.
+    if (response.status >= 500) logger.reportError(apiError)
+    throw apiError
   }
   if (response.status === 204 || response.status === 202) return undefined as T
   return (await response.json()) as T

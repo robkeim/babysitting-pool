@@ -11,6 +11,7 @@ import {
   Waves,
 } from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AppShell, type ShellMore, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
 import { useFlagTheme } from '@/features/flags'
@@ -60,7 +61,9 @@ export const Route = createRootRoute({
           navExtra={me.data ? <NotificationBell /> : undefined}
           account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
         >
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </AppShell>
       </I18nProvider>
     )
