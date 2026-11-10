@@ -17,3 +17,5 @@ The co-op runs as a single Docker image on one always-on Fly.io Machine. Cost is
 **Follow-up tickets.** #146 Dockerfile and SPA serving; #147 `fly.toml` and the deploy script; #148 backup job and restore drill; #149 production runbook and Gmail configuration.
 
 **Amendment (2026-10-27, #149).** Production now refuses to start without the SMTP secrets (the placeholder sender that failed on first send is removed). The runbook is in `docs/development.md`; the forwarded-header settings are in ADR 0014.
+
+**Amendment (2026-11-10, #279).** There is no external backup or uptime alerting, since this is not a production service: a failed backup shows only in the container logs, and an outage is noticed by a Member. If it is wanted later, a dead-man's-switch ping (for example Healthchecks.io) goes at the end of the success path in `scripts/backup-daily.sh`, after `backup.sh` succeeds, so a silent failure or a dead container raises the alarm.
