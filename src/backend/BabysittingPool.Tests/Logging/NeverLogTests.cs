@@ -88,6 +88,27 @@ public partial class NeverLogTests : IDisposable
     }
 
     [Fact]
+    public async Task Rejected_client_logs_leave_none_of_their_content_in_the_log()
+    {
+        var secrets = new List<string> { "CLIENT-LOG-LEAK-1", "CLIENT-LOG-LEAK-2", "CLIENT-LOG-LEAK-3" };
+        using var client = _factory.CreateMemberClient(await _factory.SeedMemberAsync());
+
+        var unknownField = await client.PostAsJsonAsync("/api/client-logs", new { message = "m", code = "c", route = "/", appVersion = "1", extra = secrets[0] });
+        var badRoute = await client.PostAsJsonAsync("/api/client-logs", new { message = "m", code = "c", route = $"/?{secrets[1]}", appVersion = "1" });
+        var oversized = await client.PostAsJsonAsync("/api/client-logs", new { message = secrets[2] + new string('x', 5000), code = "c", route = "/", appVersion = "1" });
+
+        unknownField.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        badRoute.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        oversized.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge);
+        var logged = _logs.AllText();
+        logged.Should().Contain("ClientLogRejected");
+        foreach (var secret in secrets)
+        {
+            logged.Should().NotContain(secret);
+        }
+    }
+
+    [Fact]
     public void The_masking_backstop_hides_a_denylisted_property_whatever_its_value()
     {
         var sink = new CapturedLogEvents();
