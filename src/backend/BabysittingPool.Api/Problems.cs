@@ -82,7 +82,7 @@ internal static class Problems
     public static IResult RequestNotFound() =>
         Problem(StatusCodes.Status404NotFound, "request_not_found", "There is no such Request.");
 
-    private static IResult Problem(
+    private static ProblemResult Problem(
         int status, string code, string title, Dictionary<string, string[]>? errors = null)
     {
         var extensions = new Dictionary<string, object?> { ["code"] = code };
@@ -91,6 +91,17 @@ internal static class Problems
             extensions["errors"] = errors;
         }
 
-        return Results.Problem(statusCode: status, title: title, extensions: extensions);
+        return new ProblemResult(status, title, extensions);
+    }
+
+    /// <summary>A Problem that quotes the request's trace id, known only once it is written.</summary>
+    private sealed class ProblemResult(int status, string title, Dictionary<string, object?> extensions) : IResult
+    {
+        public Task ExecuteAsync(HttpContext httpContext)
+        {
+            ArgumentNullException.ThrowIfNull(httpContext);
+            extensions["traceId"] = httpContext.TraceId();
+            return Results.Problem(statusCode: status, title: title, extensions: extensions).ExecuteAsync(httpContext);
+        }
     }
 }
