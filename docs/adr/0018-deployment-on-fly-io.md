@@ -17,3 +17,5 @@ The co-op runs as a single Docker image on one always-on Fly.io Machine. Cost is
 **Follow-up tickets.** #146 Dockerfile and SPA serving; #147 `fly.toml` and the deploy script; #148 backup job and restore drill; #149 production runbook and Gmail configuration.
 
 **Amendment (2026-10-27, #149).** Production now refuses to start without the SMTP secrets (the placeholder sender that failed on first send is removed). The runbook is in `docs/development.md`; the forwarded-header settings are in ADR 0014.
+
+**Amendment (2026-11-10, #275).** `/health` now reads the main database: `200` when it answers, `503` with `{"status":"unavailable"}` when it does not, so Fly stops treating a Machine with a broken volume as healthy. Still anonymous, without details, outside rate limiting and the SPA fallback; the `fly.toml` check is unchanged. The rate-limit file is not checked, because losing it only resets the windows.
