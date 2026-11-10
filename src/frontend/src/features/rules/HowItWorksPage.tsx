@@ -7,6 +7,7 @@ import { creditsValue, formatCredits } from '@/features/credits'
 import { useRules } from './api'
 import { formatDuration } from './formatDuration'
 import type { PricingExample, RulesView } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 /** Anchors a link can point at, e.g. `/how-it-works#pricing` from the post form. */
 const SECTION_IDS = {
@@ -230,6 +231,7 @@ export function HowItWorksPage() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="rules.loadFailed.body" />
+          <ErrorReference error={rules.error} />
         </AlertDescription>
       </Alert>
     )

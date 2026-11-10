@@ -1,6 +1,7 @@
 {
   "common.appName": "Babysitting Pool",
   "common.somethingWentWrong": "Une erreur s’est produite.",
+  "common.errorReference": "Référence : {reference}",
   "error.unauthenticated": "Vous n’êtes pas connecté.",
   "error.not_admin": "Seul l’administrateur peut faire cela.",
   "error.csrf_header_missing": "Cette demande a été bloquée. Veuillez recharger la page et réessayer.",

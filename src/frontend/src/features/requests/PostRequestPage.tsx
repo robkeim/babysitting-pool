@@ -15,6 +15,7 @@ import { useQuote, usePostRequest } from './api'
 import { CostReceipt } from './CostReceipt'
 import { NotesField } from './NotesField'
 import type { BabysittingLocation, QuoteDetails, TransportOption } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 interface PostRequestPageProps {
   onPosted: () => void
@@ -415,6 +416,7 @@ export function PostRequestPage({ onPosted }: PostRequestPageProps) {
                     lead: rules.data ? formatDuration(intl, rules.data.minimumLeadTimeMinutes) : '',
                   }}
                 />
+                <ErrorReference error={post.error} />
               </AlertDescription>
             </Alert>
           )}

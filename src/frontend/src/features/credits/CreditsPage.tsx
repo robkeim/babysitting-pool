@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMyAccount } from './api'
 import { formatCredits } from './format'
 import { LedgerList } from './LedgerList'
+import { ErrorReference } from '@/components/ErrorReference'
 
 export function CreditsPage() {
   const intl = useIntl()
@@ -19,6 +20,7 @@ export function CreditsPage() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="credits.loadFailed.body" />
+          <ErrorReference error={account.error} />
         </AlertDescription>
       </Alert>
     )

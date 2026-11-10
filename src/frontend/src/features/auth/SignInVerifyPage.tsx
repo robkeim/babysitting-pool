@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStartSession } from './api'
+import { ErrorReference } from '@/components/ErrorReference'
 
 interface SignInVerifyPageProps {
   token: string | undefined
@@ -31,6 +32,7 @@ export function SignInVerifyPage({ token, onSignedIn }: SignInVerifyPageProps) {
             id="auth.verify.unusable.body"
             values={{ link: (chunks) => <a href="/sign-in">{chunks}</a> }}
           />
+          <ErrorReference error={start.error} />
         </AlertDescription>
       </Alert>
     )
