@@ -10,6 +10,7 @@ using BabysittingPool.Infrastructure.Persistence;
 using BabysittingPool.Tests.Support;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BabysittingPool.Tests.Application;
 
@@ -250,7 +251,8 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
         });
         var handler = new OffboardMemberHandler(
             _database.Services.GetRequiredService<IIdentityStore>(), reader,
-            _database.Services.GetRequiredService<IServiceScopeFactory>(), _database.Clock);
+            _database.Services.GetRequiredService<IServiceScopeFactory>(), _database.Clock,
+            NullLogger<OffboardMemberHandler>.Instance);
 
         var result = await handler.HandleAsync(new OffboardMemberCommand(_leaver), default);
 

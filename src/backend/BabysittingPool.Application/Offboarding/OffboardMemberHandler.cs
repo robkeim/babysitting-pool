@@ -3,6 +3,7 @@ using BabysittingPool.Application.Requests;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using CreditAmount = BabysittingPool.Domain.Credits.Credits;
 
 namespace BabysittingPool.Application.Offboarding;
@@ -20,8 +21,9 @@ public sealed record OffboardMemberResult(int Canceled, int Withdrawn, int Settl
 /// each open Request they posted or claimed is released in its own transaction (ADR 0004), and finally the remaining
 /// Available Balance is burned. Safe to repeat: after a failure the Admin runs it again and it picks up what is left.
 /// </summary>
-public sealed class OffboardMemberHandler(
-    IIdentityStore identity, IRequestReader reader, IServiceScopeFactory scopes, TimeProvider clock)
+public sealed partial class OffboardMemberHandler(
+    IIdentityStore identity, IRequestReader reader, IServiceScopeFactory scopes, TimeProvider clock,
+    ILogger<OffboardMemberHandler> logger)
 {
     /// <summary>
     /// The outcome, or null when there is no such Member. Offboarding the Admin throws <see cref="DomainException"/>;
@@ -57,6 +59,7 @@ public sealed class OffboardMemberHandler(
         }
 
         var burned = await BurnAsync(member.Id, now, cancellationToken);
+        LogOffboarded(member.Id, canceled, withdrawn, settled, burned.QuarterCredits);
         return new OffboardMemberResult(canceled, withdrawn, settled, burned.QuarterCredits);
     }
 
@@ -83,7 +86,7 @@ public sealed class OffboardMemberHandler(
     /// or withdrawn by the Sitter. Claimed and already started: completed, as Settle would, so the Sitter is paid
     /// and nothing stays in Escrow.
     /// </summary>
-    private static async Task<Release> ReleaseAsync(
+    private async Task<Release> ReleaseAsync(
         IRequestStore store, Guid requestId, Guid memberId, DateTime now, CancellationToken cancellationToken)
     {
         if (await store.FindRequestAsync(requestId, cancellationToken) is not { Status: RequestStatus.Posted or RequestStatus.Claimed } request)
@@ -100,6 +103,7 @@ public sealed class OffboardMemberHandler(
                 ?? throw new InvalidOperationException("The Sitter has no Credit Account.");
             request.Complete(requester, sitter, now);
             await store.SaveCompletedAsync(request, requester, sitter, now, cancellationToken);
+            LogCompleted(requestId);
             return Release.Settled;
         }
 
@@ -107,6 +111,7 @@ public sealed class OffboardMemberHandler(
         {
             request.Expire(requester, now);
             await store.SaveExpiredAsync(request, requester, now, cancellationToken);
+            LogExpired(requestId);
             return Release.Settled;
         }
 
@@ -114,11 +119,28 @@ public sealed class OffboardMemberHandler(
         {
             request.Cancel(memberId, requester, now);
             await store.SaveReleasedAsync(request, requester, now, cancellationToken);
+            LogCanceled(requestId, memberId);
             return Release.Canceled;
         }
 
         request.Withdraw(memberId, requester, now);
         await store.SaveReleasedAsync(request, requester, now, cancellationToken);
+        LogWithdrawn(requestId, memberId);
         return Release.Withdrawn;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "MemberOffboarded {MemberId} {Canceled} {Withdrawn} {Settled} {BurnedQuarterCredits}")]
+    private partial void LogOffboarded(Guid memberId, int canceled, int withdrawn, int settled, long burnedQuarterCredits);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "RequestCompleted {RequestId}")]
+    private partial void LogCompleted(Guid requestId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "RequestExpired {RequestId}")]
+    private partial void LogExpired(Guid requestId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "RequestCanceled {RequestId} {MemberId}")]
+    private partial void LogCanceled(Guid requestId, Guid memberId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "ClaimWithdrawn {RequestId} {MemberId}")]
+    private partial void LogWithdrawn(Guid requestId, Guid memberId);
 }

@@ -2,6 +2,7 @@ using BabysittingPool.Application.Identity;
 using BabysittingPool.Application.Notifications;
 using BabysittingPool.Domain.Credits;
 using BabysittingPool.Domain.Requests;
+using Microsoft.Extensions.Logging;
 using DomainCredits = BabysittingPool.Domain.Credits.Credits;
 
 namespace BabysittingPool.Application.Requests;
@@ -13,8 +14,8 @@ public sealed record PostRequestCommand(
     string? Notes = null);
 
 /// <summary>Posts a Request and escrows its cost from the Requester's Available Balance (spec §4.1).</summary>
-public sealed class PostRequestHandler(
-    IRequestStore store, TimeProvider clock, CoopSettings settings, NotificationAnnouncer announcer)
+public sealed partial class PostRequestHandler(
+    IRequestStore store, TimeProvider clock, CoopSettings settings, NotificationAnnouncer announcer, ILogger<PostRequestHandler> logger)
 {
     /// <summary>Null when the Requester has no Credit Account. Rule violations throw <see cref="DomainException"/>.</summary>
     public async Task<RequestView?> HandleAsync(PostRequestCommand command, CancellationToken cancellationToken)
@@ -33,9 +34,13 @@ public sealed class PostRequestHandler(
             command.RequesterId, account, command.Details, command.StartsAt, home,
             now, settings.MinimumLeadTime, settings.ClaimCutoff, command.Notes);
         announcer.Created(await store.AddPostedAsync(request, account, now, cancellationToken));
+        LogPosted(request.Id, command.RequesterId);
 
         return RequestRead.From(request).ToView(now);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "RequestPosted {RequestId} {MemberId}")]
+    private partial void LogPosted(Guid requestId, Guid memberId);
 }
 
 /// <summary>The live cost preview on the post form: the calculator's answer for the details as entered.</summary>
