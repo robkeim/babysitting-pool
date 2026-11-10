@@ -10,7 +10,9 @@ A PR exists only for validated work, so it opens ready for review, never as a dr
 Opening ends the run: the human reviews the PR next, and Merge starts only when they ask for it.
 
 1. Run the full gate. Done when it prints green.
-2. Push branch `<issue>-<slug>` and run `gh pr create` with a Conventional Commit title and the body from the `pr` skill, ending in `Closes #n`.
+2. Review in a fresh context. Spawn one sub-agent (`general-purpose`) with no knowledge of how the change was written. Give it only the diff command (`git diff main...HEAD`), the ticket (`gh issue view <n>`) and [`docs/review-checklist.md`](../../../docs/review-checklist.md), and have it run the `code-review` skill (Standards and Spec axes) plus every checklist item. It returns findings as `path:line`, description and severity. Fix each blocking finding and re-run step 1, or keep it and state why in the PR body. Done when every blocking finding is resolved or accepted.
+3. Push branch `<issue>-<slug>` and run `gh pr create` with a Conventional Commit title and the body from the `pr` skill, ending in `Closes #n`. List accepted blocking findings in the body.
+4. Post the findings as one PR comment in the table format from the checklist (`gh pr comment`), with status `resolved` or `accepted` for each.
 
 Done when `gh pr view --json isDraft,url` shows `isDraft: false`.
 
