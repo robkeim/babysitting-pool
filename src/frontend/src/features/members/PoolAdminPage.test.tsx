@@ -1,4 +1,5 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { server } from '@/test/server'
 import { renderWithProviders } from '@/test/render'
 import { PoolAdminPage } from './PoolAdminPage'
@@ -8,6 +9,8 @@ import {
   poolOverviewHandler,
   sampleDormant,
   sampleOverview,
+  settleHandler,
+  settleRejectedHandler,
 } from './mocks'
 
 vi.mock('@tanstack/react-router', () => ({
@@ -58,5 +61,75 @@ describe('PoolAdminPage', () => {
 
     expect(await screen.findByText("We couldn't load the pool overview")).toBeInTheDocument()
     expect(await screen.findByText("We couldn't load the dormant members")).toBeInTheDocument()
+  })
+
+  describe('Run settle', () => {
+    beforeEach(() => {
+      server.use(poolOverviewHandler(sampleOverview), dormantHandler([]))
+    })
+
+    it('asks for confirmation, runs Settle and reports what it did', async () => {
+      const onSettle = vi.fn()
+      server.use(settleHandler(onSettle, { expired: 1, completed: 2, charged: 3, failed: 0 }))
+      const user = userEvent.setup()
+      renderWithProviders(<PoolAdminPage />)
+
+      await user.click(await screen.findByRole('button', { name: 'Run settle' }))
+      expect(onSettle).not.toHaveBeenCalled()
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Run settle' }),
+      )
+
+      expect(
+        await screen.findByText(
+          'Settle ran. 2 Requests paid out, 1 Request expired and refunded, 3 Members charged Demurrage.',
+        ),
+      ).toBeVisible()
+      expect(onSettle).toHaveBeenCalledOnce()
+      expect(screen.queryByText(/will be retried/)).not.toBeInTheDocument()
+    })
+
+    it('runs nothing when the confirmation is canceled', async () => {
+      const onSettle = vi.fn()
+      server.use(settleHandler(onSettle, { expired: 0, completed: 0, charged: 0, failed: 0 }))
+      const user = userEvent.setup()
+      renderWithProviders(<PoolAdminPage />)
+
+      await user.click(await screen.findByRole('button', { name: 'Run settle' }))
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Cancel' }),
+      )
+
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+      expect(onSettle).not.toHaveBeenCalled()
+    })
+
+    it('says how many items failed and will be retried', async () => {
+      server.use(settleHandler(vi.fn(), { expired: 0, completed: 1, charged: 0, failed: 2 }))
+      const user = userEvent.setup()
+      renderWithProviders(<PoolAdminPage />)
+
+      await user.click(await screen.findByRole('button', { name: 'Run settle' }))
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Run settle' }),
+      )
+
+      expect(
+        await screen.findByText('2 items failed and will be retried on the next run.'),
+      ).toBeVisible()
+    })
+
+    it('shows an error when the run is rejected', async () => {
+      server.use(settleRejectedHandler(500, 'internal_error'))
+      const user = userEvent.setup()
+      renderWithProviders(<PoolAdminPage />)
+
+      await user.click(await screen.findByRole('button', { name: 'Run settle' }))
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Run settle' }),
+      )
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong.')
+    })
   })
 })

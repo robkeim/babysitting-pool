@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures.ts'
+import { BOOTSTRAP_ADMIN_EMAIL, expect, test } from './fixtures.ts'
 
 // The start time is typed in the browser's local time; pin it so the expected instant is exact.
 test.use({ timezoneId: 'UTC' })
@@ -86,4 +86,53 @@ test('Settle refunds a Request nobody claimed once its Claim Cutoff passes', asy
   await expect(page.getByRole('listitem').filter({ hasText: /expiry heights/i })).toContainText(
     'Expired',
   )
+})
+
+test('the Admin runs Settle from the Pool screen and a Member cannot', async ({
+  browser,
+  page,
+  ownBackend: backend,
+}) => {
+  await backend.setClock('2026-03-01T09:00:00Z')
+  const memberId = await backend.seedMember([40], { area: 'Button Hill', address: '12 River Rd' })
+  const member = await browser.newContext({ timezoneId: 'UTC' })
+  await backend.signIn(member, memberId)
+  const memberPage = await member.newPage()
+  await memberPage.goto(`${backend.appUrl}/requests/new`)
+  await memberPage.getByLabel(/start time/i).fill('2026-03-02T10:00')
+  await memberPage.getByLabel(/duration/i).fill('120')
+  await memberPage.getByLabel('Location').selectOption('RequestingFamilysHouse')
+  await memberPage.getByRole('button', { name: /post request/i }).click()
+  await expect(memberPage.getByRole('listitem').filter({ hasText: /button hill/i })).toContainText(
+    'Posted',
+  )
+
+  // Past the Claim Cutoff, so the unclaimed Request is due to expire.
+  await backend.setClock('2026-03-02T07:00:00Z')
+
+  await memberPage.goto(`${backend.appUrl}/admin/pool`)
+  await expect(memberPage.getByRole('button', { name: 'Run settle' })).toHaveCount(0)
+
+  await page.goto(await backend.latestLink(BOOTSTRAP_ADMIN_EMAIL))
+  await page.getByLabel('Your name').fill('Rosa Root')
+  await page.getByRole('button', { name: 'Create my account' }).click()
+  await expect(page).toHaveURL(/\/credits$/)
+  await page.goto(`${backend.appUrl}/admin/pool`)
+
+  await page.getByRole('button', { name: 'Run settle' }).click()
+  const confirm = page.getByRole('alertdialog')
+  await confirm.getByRole('button', { name: 'Cancel' }).click()
+  await expect(confirm).toBeHidden()
+  await expect(page.getByRole('status')).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Run settle' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Run settle' }).click()
+  await expect(page.getByRole('status')).toContainText('1 Request expired and refunded')
+  await expect(page.getByRole('group', { name: 'Expired' })).toContainText('1')
+
+  // Settle is idempotent: a second run finds nothing left to do.
+  await expect(page.getByRole('alertdialog')).toBeHidden()
+  await page.getByRole('button', { name: 'Run settle' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Run settle' }).click()
+  await expect(page.getByRole('status')).toContainText('0 Requests expired and refunded')
 })

@@ -24,6 +24,7 @@ Rules:
 - Clock: inject `TimeProvider`; tests use `FakeTimeProvider`. Never call `DateTime.UtcNow`.
 - Concurrency (first claim wins) has an integration test with two concurrent claims; the loser gets 409.
 - A test asserts the Ledger triggers reject `UPDATE`/`DELETE`.
+- Logging (ADR 0010): to read what the app logged, register an `ILogEventSink` in the factory's `configureServices` (`CapturedLogEvents`). `NeverLogTests` fails on `{@` in any backend source and runs the main flows asserting no event holds the test token, email, display name, note or session secret; a new flow that handles such a value belongs in it.
 
 ## Frontend (Vitest + RTL + user-event + MSW)
 
