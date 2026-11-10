@@ -1,3 +1,4 @@
+import { ErrorReference } from '@/components/ErrorReference'
 import { Bell, Loader2, X } from 'lucide-react'
 import { useIntl } from 'react-intl'
 import { Button } from '@/components/ui/button'
@@ -171,6 +172,7 @@ export function NotificationList() {
       {(dismiss.isError || dismissAll.isError) && (
         <p role="alert" className="border-t p-3 text-destructive">
           {intl.formatMessage({ id: 'common.somethingWentWrong' })}
+          <ErrorReference error={dismiss.error ?? dismissAll.error} />
         </p>
       )}
     </>

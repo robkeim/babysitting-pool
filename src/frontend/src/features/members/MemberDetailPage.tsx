@@ -6,6 +6,7 @@ import { formatCredits, formatInstant, LedgerList } from '@/features/credits'
 import { type MessageId } from '@/lib/i18n'
 import { useMemberDetail, useMemberRequests } from './api'
 import type { MemberRequestView } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const STATUS_MESSAGES: Record<MemberRequestView['status'], MessageId> = {
   Posted: 'requests.status.Posted',
@@ -97,6 +98,7 @@ export function MemberDetailPage({ memberId }: { memberId: string }) {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="members.admin.loadFailed.body" />
+          <ErrorReference error={detail.error} />
         </AlertDescription>
       </Alert>
     )

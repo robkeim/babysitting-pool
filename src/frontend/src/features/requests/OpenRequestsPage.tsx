@@ -8,6 +8,7 @@ import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useClaimRequest, useOpenRequests } from './api'
 import { RequestCard } from './RequestCard'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const CLAIM_FAILURE_CODES: Partial<Record<string, MessageId>> = {
   invalid_state: 'error.invalid_state',
@@ -37,6 +38,7 @@ export function OpenRequestsPage() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="requests.open.loadFailed.body" />
+          <ErrorReference error={requests.error} />
         </AlertDescription>
       </Alert>
     )
@@ -54,6 +56,7 @@ export function OpenRequestsPage() {
           </AlertTitle>
           <AlertDescription>
             <FormattedMessage id={claimFailure(claim.error)} />
+            <ErrorReference error={claim.error} />
           </AlertDescription>
         </Alert>
       )}

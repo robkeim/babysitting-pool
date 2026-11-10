@@ -7,6 +7,7 @@ import { type MessageId } from '@/lib/i18n'
 import { useEditNotes } from './api'
 import { NotesField } from './NotesField'
 import type { RequestStatus } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 interface EditNotesProps {
   requestId: string
@@ -70,6 +71,7 @@ export function EditNotes({ requestId, notes, status }: EditNotesProps) {
         <Alert variant="destructive">
           <AlertDescription>
             <FormattedMessage id={editFailure(edit.error)} />
+            <ErrorReference error={edit.error} />
           </AlertDescription>
         </Alert>
       )}

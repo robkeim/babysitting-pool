@@ -8,6 +8,7 @@ import { useCancelRequest, useMyRequests } from './api'
 import { EditNotes } from './EditNotes'
 import { releaseFailure } from './releaseFailure'
 import { RequestCard } from './RequestCard'
+import { ErrorReference } from '@/components/ErrorReference'
 
 /** "My Requests": everything the Member posted, with its state. Only the owner sees the exact address. */
 export function MyRequestsPage() {
@@ -23,6 +24,7 @@ export function MyRequestsPage() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="requests.myRequests.loadFailed.body" />
+          <ErrorReference error={requests.error} />
         </AlertDescription>
       </Alert>
     )
@@ -46,6 +48,7 @@ export function MyRequestsPage() {
           </AlertTitle>
           <AlertDescription>
             <FormattedMessage id={releaseFailure(release.error)} />
+            <ErrorReference error={release.error} />
           </AlertDescription>
         </Alert>
       )}

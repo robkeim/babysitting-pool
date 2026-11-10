@@ -19,6 +19,7 @@ import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useEraseMember, useMembers, useOffboardMember } from './api'
 import type { AdminMemberView } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const KNOWN_FAILURES: Record<string, MessageId> = {
   member_not_found: 'error.member_not_found',
@@ -172,11 +173,13 @@ function MemberRow({ member }: { member: AdminMemberView }) {
         {offboard.isError && (
           <p role="alert" className="text-sm text-destructive">
             <FormattedMessage id={failure(offboard.error)} />
+            <ErrorReference error={offboard.error} />
           </p>
         )}
         {erase.isError && (
           <p role="alert" className="text-sm text-destructive">
             <FormattedMessage id={failure(erase.error)} />
+            <ErrorReference error={erase.error} />
           </p>
         )}
         {offboard.isSuccess && (
@@ -215,6 +218,7 @@ export function MembersAdminPage() {
           </AlertTitle>
           <AlertDescription>
             <FormattedMessage id="members.admin.loadFailed.body" />
+            <ErrorReference error={members.error} />
           </AlertDescription>
         </Alert>
       )}
