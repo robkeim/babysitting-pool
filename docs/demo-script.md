@@ -94,7 +94,7 @@ Present these as roadmap, not live:
 *Shows: payout to the sitter, the credit economy closing the loop.*
 
 1. The seed already left Oscar's request Claimed by Sarah with a start time in the past. As Sarah, open **My Claims** to show it.
-2. Run Settle: call `POST /api/admin/settle` as the Admin from Postman ([`development.md`](development.md#postman)); it returns `completed: 1`. This needs the API started with `Settle__Enabled=false` (Setup), or the minute tick pays out first.
+2. Run Settle: as the Admin, open **Admin**, then **Pool**, select **Run settle** and confirm. The result line says 1 Request paid out. This needs the API started with `Settle__Enabled=false` (Setup), or the minute tick pays out first.
 3. As Sarah, open **Credits**: a Payout entry, with a balance above 0.0.
 4. As Oscar (or the Admin, on his Member page), show the request as Completed and its escrow gone.
 5. As Sarah, who now has credits, post a request of her own to close the loop.

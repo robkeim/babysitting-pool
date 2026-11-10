@@ -7,6 +7,7 @@ import type {
   MemberSummaryView,
   OffboardMemberResult,
   PoolOverview,
+  SettleResult,
 } from './types'
 
 export const sampleMember: AdminMemberView = {
@@ -95,6 +96,17 @@ export function dormantHandler(items: DormantMemberView[]) {
   return http.get('*/api/admin/dormant-members', () =>
     HttpResponse.json({ items, nextCursor: null }),
   )
+}
+
+export function settleHandler(onSettle: () => void, result: SettleResult) {
+  return http.post('*/api/admin/settle', () => {
+    onSettle()
+    return HttpResponse.json(result)
+  })
+}
+
+export function settleRejectedHandler(status: number, code: string) {
+  return http.post('*/api/admin/settle', () => problem(status, code))
 }
 
 export function failureHandler(path: string) {

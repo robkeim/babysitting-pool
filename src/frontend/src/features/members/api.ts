@@ -7,6 +7,7 @@ import type {
   MemberRequestPage,
   OffboardMemberResult,
   PoolOverview,
+  SettleResult,
 } from './types'
 
 export const memberKeys = {
@@ -82,5 +83,18 @@ export function useDormantMembers() {
   return useQuery({
     queryKey: memberKeys.dormant(),
     queryFn: () => apiFetch<DormantMemberPage>('/api/admin/dormant-members'),
+  })
+}
+
+/** Runs Settle now: expiry, payout and demurrage that are due; idempotent, so safe to repeat (ADR 0007). */
+export function useRunSettle() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => apiFetch<SettleResult>('/api/admin/settle', { method: 'POST' }),
+    onSettled: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: memberKeys.pool() }),
+        client.invalidateQueries({ queryKey: memberKeys.dormant() }),
+      ]),
   })
 }
