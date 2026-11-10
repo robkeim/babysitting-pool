@@ -29,7 +29,7 @@ flowchart LR
     subgraph fly["One always-on Fly.io Machine (iad)"]
         subgraph app["ASP.NET Core container, serves API and SPA"]
             api["Api<br/>endpoints, auth"] --> application
-            application["Application<br/>commands and queries as plain handlers, ports"] --> domain["Domain<br/>pure C#: Credits, Requests, Identity"]
+            application["Application<br/>commands and queries as plain handlers, ports"] --> domain["Domain<br/>pure C#: Credits, Identity"]
             infra["Infrastructure<br/>EF Core, email, adapters"] -. implements ports .-> application
         end
         db[("SQLite file on a volume")]

@@ -6,7 +6,7 @@ Agents pay tokens for every file they open, and `AGENTS.md` is paid for in every
 
 | Layer | Files | Job |
 |---|---|---|
-| Humans | `README.md` | The front door: the problem, architecture, screenshots, how it was built, quickstart and a docs map; rules and how-to detail stay in their own layers and are linked, not restated |
+| Humans | `README.md` | What the project is and how to start; links to `docs/development.md`, repeats nothing |
 | Agent entry | `AGENTS.md` | A router of at most 60 lines: stack in one line each, a read-first table, the definition of done. It never restates a rule that lives elsewhere |
 | Rules | `docs/specs/`, `docs/adr/`, `GLOSSARY.md` | Business rules, decisions and vocabulary |
 | How-to | `docs/development.md`, `docs/testing.md`, `docs/agents/` | Running, testing and working the tracker |
