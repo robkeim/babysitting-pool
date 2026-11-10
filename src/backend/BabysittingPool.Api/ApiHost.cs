@@ -184,7 +184,7 @@ public static class ApiHost
         app.UseApiRateLimiting();
         app.UseAuthorization();
 
-        app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+        app.MapGet("/health", HealthCheck.HandleAsync);
         app.MapAuthEndpoints();
         app.MapAccountEndpoints();
         app.MapRequestEndpoints();
