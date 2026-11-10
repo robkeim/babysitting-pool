@@ -14,7 +14,7 @@ cd src/frontend && npm run dev                                               # S
 ```
 
 - **Database:** a SQLite file `babysitting.db` is created next to the API and migrated at startup (ADR 0004). Delete it to start fresh. Rate-limit counters sit in `babysitting.db.rate-limits` beside it (ADR 0014); delete that file to reset the limits.
-- **Sign-in:** passwordless (ADR 0012, `docs/specs/sign-in.md`). In Development the API seeds an Admin (`admin@example.test`, or `Bootstrap:AdminEmail`) and three Members (`ryan@`, `sarah@`, `oscar@example.test`, holding 10.0, 0.0 and 25.5 credits), and logs the Admin's sign-in link to the console at startup. By default nothing is sent: for any other seeded Member, request a link at `/sign-in` and read it from the console or `GET /api/dev/outbox?to=<email>`, then open it.
+- **Sign-in:** passwordless (ADR 0012, `docs/specs/sign-in.md`). In Development the API seeds an Admin (`admin@example.test`, or `Bootstrap:AdminEmail`) and three Members (`ryan@`, `sarah@`, `oscar@example.test`, holding 10.0, 0.0 and 25.5 credits), and logs the Admin's sign-in link to the console at startup. By default nothing is sent: for any other seeded Member, request a link at `/sign-in` and read it from the console (Development only) or `GET /api/dev/outbox?to=<email>`, then open it.
 - **Real email in Development (optional):** set the SMTP secrets once and sign-in and invitation emails are delivered for real, on top of the console and outbox. Gmail needs an [app password](https://support.google.com/accounts/answer/185833) (2-Step Verification on), not the account password.
 
   ```sh

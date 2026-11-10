@@ -41,6 +41,6 @@ State-changing calls need the `X-Requested-With` header (ADR 0006).
 
 ## 4. Development and test support
 
-- Development and E2E: the fake outbox logs each message, including the link, and is readable at `GET /api/dev/outbox` (Development) or `GET /api/test/outbox` (E2E, needs the E2E token); the Admin's sign-in link is logged at startup. Development seeds one Admin and three Members (balances 10.0, 0.0, 25.5) through the application layer, idempotently.
+- Development and E2E: the fake outbox keeps each message and is readable at `GET /api/dev/outbox` (Development) or `GET /api/test/outbox` (E2E, needs the E2E token); Development alone also logs each message, including the link (ADR 0010), and the Admin's sign-in link is logged at startup. Development seeds one Admin and three Members (balances 10.0, 0.0, 25.5) through the application layer, idempotently.
 - E2E only (needs the E2E token): `POST /api/test/sessions { memberId }` returns a session token for the cookie.
 - Offboarding and Erasure are offered from the Admin Members list (#143, #96; the API is `POST /api/admin/members/{id}/offboard`, see credit-engine.md §2A).

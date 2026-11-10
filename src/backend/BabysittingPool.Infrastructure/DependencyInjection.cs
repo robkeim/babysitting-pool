@@ -40,10 +40,10 @@ public static class DependencyInjection
         return services;
     }
 
-    /// <summary>E2E and tests: emails are kept and logged, never sent.</summary>
-    public static IServiceCollection AddEmailOutbox(this IServiceCollection services)
+    /// <summary>E2E and tests: emails are kept, never sent. Development also logs them (<paramref name="logMessages"/>).</summary>
+    public static IServiceCollection AddEmailOutbox(this IServiceCollection services, bool logMessages = false)
     {
-        services.AddSingleton(sp => new EmailOutbox(sp.GetRequiredService<ILogger<EmailOutbox>>()));
+        services.AddSingleton(sp => new EmailOutbox(sp.GetRequiredService<ILogger<EmailOutbox>>(), logMessages: logMessages));
         services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<EmailOutbox>());
         return services;
     }
@@ -54,7 +54,7 @@ public static class DependencyInjection
         services.AddSingleton(new SmtpEmailSender(settings));
         services.AddQueuedSender();
         services.AddSingleton(sp => new EmailOutbox(
-            sp.GetRequiredService<ILogger<EmailOutbox>>(), sp.GetRequiredService<QueuedEmailSender>()));
+            sp.GetRequiredService<ILogger<EmailOutbox>>(), sp.GetRequiredService<QueuedEmailSender>(), logMessages: true));
         services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<EmailOutbox>());
         return services;
     }

@@ -1,4 +1,5 @@
 using BabysittingPool.Application.Requests;
+using Serilog.Context;
 
 namespace BabysittingPool.Api;
 
@@ -18,15 +19,20 @@ internal sealed partial class SettleHostedService(
         using var timer = new PeriodicTimer(Interval, clock);
         do
         {
-            try
+            // Each tick is its own trace (ADR 0010), failure included.
+            using (LogContext.PushProperty("TraceId", Correlation.NewTraceId()))
+            using (LogContext.PushProperty("Source", Correlation.SettleSource))
             {
-                await using var scope = scopes.CreateAsyncScope();
-                await scope.ServiceProvider.GetRequiredService<SettleHandler>().HandleAsync(stoppingToken);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                // A failed tick is retried on the next one; it must never stop the loop.
-                LogTickFailed(ex);
+                try
+                {
+                    await using var scope = scopes.CreateAsyncScope();
+                    await scope.ServiceProvider.GetRequiredService<SettleHandler>().HandleAsync(stoppingToken);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    // A failed tick is retried on the next one; it must never stop the loop.
+                    LogTickFailed(ex);
+                }
             }
         }
         while (await WaitAsync(timer, stoppingToken));
