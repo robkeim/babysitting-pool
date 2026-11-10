@@ -61,8 +61,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
     })
   } catch (error) {
-    // The message of a network failure can carry the URL, so only the code and trace id are reported.
-    logger.error('Network request failed', { code: 'network_error', traceId: trace.traceId })
+    logger.reportError(error, { code: 'network_error', traceId: trace.traceId })
     throw error
   }
   if (!response.ok) {

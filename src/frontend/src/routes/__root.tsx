@@ -55,16 +55,16 @@ export const Route = createRootRoute({
     useColorScheme(me.data?.colorScheme)
     return (
       <I18nProvider language={me.data?.language}>
-        <AppShell
-          tabs={me.data ? MEMBER_TABS : undefined}
-          more={me.data?.isAdmin ? ADMIN_MORE : undefined}
-          navExtra={me.data ? <NotificationBell /> : undefined}
-          account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
-        >
-          <ErrorBoundary>
+        <ErrorBoundary>
+          <AppShell
+            tabs={me.data ? MEMBER_TABS : undefined}
+            more={me.data?.isAdmin ? ADMIN_MORE : undefined}
+            navExtra={me.data ? <NotificationBell /> : undefined}
+            account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
+          >
             <Outlet />
-          </ErrorBoundary>
-        </AppShell>
+          </AppShell>
+        </ErrorBoundary>
       </I18nProvider>
     )
   },

@@ -90,8 +90,8 @@ describe('apiFetch', () => {
       expect(reportError).not.toHaveBeenCalled()
     })
 
-    it('logs a network failure with the trace id it sent, without the URL', async () => {
-      const logError = vi.spyOn(logger, 'error').mockImplementation(() => undefined)
+    it('logs a network failure with the trace id it sent', async () => {
+      const reportError = vi.spyOn(logger, 'reportError').mockImplementation(() => undefined)
       let sent = ''
       server.use(
         http.get('*/api/ping', ({ request }) => {
@@ -102,7 +102,7 @@ describe('apiFetch', () => {
 
       await expect(apiFetch('/api/ping')).rejects.toThrow()
 
-      expect(logError).toHaveBeenCalledWith('Network request failed', {
+      expect(reportError).toHaveBeenCalledWith(expect.any(TypeError), {
         code: 'network_error',
         traceId: sent,
       })

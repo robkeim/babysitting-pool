@@ -9,8 +9,12 @@ export function setRouteName(name: string) {
   routeName = name
 }
 
+export function getRouteName() {
+  return routeName
+}
+
 export const logger = new Logger({
   production: import.meta.env.PROD,
   appVersion: (import.meta.env.VITE_APP_VERSION as string | undefined) ?? 'dev',
-  getRoute: () => routeName,
+  getRoute: getRouteName,
 })
