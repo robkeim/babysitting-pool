@@ -1,12 +1,22 @@
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Moon } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { EmptyState } from '@/components/EmptyState'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCredits, formatInstant } from '@/features/credits'
 import { type MessageId } from '@/lib/i18n'
-import { useDormantMembers, usePoolOverview } from './api'
+import { useDormantMembers, usePoolOverview, useRunSettle } from './api'
 import type { PoolOverview } from './types'
 
 const REQUEST_STATES: readonly [keyof PoolOverview['requests'], MessageId][] = [
@@ -140,10 +150,98 @@ function Dormant() {
   )
 }
 
-/** The Admin's totals for the whole pool and the list of Dormant Members (spec §2A, §5). */
+function RunSettle() {
+  const settle = useRunSettle()
+  const [confirming, setConfirming] = useState(false)
+
+  return (
+    <div className="space-y-3">
+      <h3 className="pt-2 text-base font-semibold">
+        <FormattedMessage id="members.pool.settle.title" />
+      </h3>
+      <p className="text-sm text-muted-foreground">
+        <FormattedMessage id="members.pool.settle.hint" />
+      </p>
+      <Button
+        className="h-11 w-full lg:h-8 lg:w-auto"
+        disabled={settle.isPending}
+        onClick={() => {
+          settle.reset()
+          setConfirming(true)
+        }}
+      >
+        <FormattedMessage id="members.pool.settle.run" />
+      </Button>
+
+      <AlertDialog
+        open={confirming}
+        onOpenChange={(open) => {
+          if (!open && !settle.isPending) setConfirming(false)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogTitle>
+            <FormattedMessage id="members.pool.settle.confirmTitle" />
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            <FormattedMessage id="members.pool.settle.confirmBody" />
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogClose
+              render={
+                <Button variant="outline" className="h-11 lg:h-8" disabled={settle.isPending} />
+              }
+            >
+              <FormattedMessage id="members.admin.cancel" />
+            </AlertDialogClose>
+            <Button
+              className="h-11 lg:h-8"
+              disabled={settle.isPending}
+              onClick={() => {
+                settle.mutate(undefined, {
+                  onSettled: () => {
+                    setConfirming(false)
+                  },
+                })
+              }}
+            >
+              <FormattedMessage id="members.pool.settle.confirm" />
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {settle.isPending && (
+        <p role="status" className="text-sm">
+          <FormattedMessage id="members.pool.settle.running" />
+        </p>
+      )}
+      {settle.isError && (
+        <p role="alert" className="text-sm text-destructive">
+          <FormattedMessage id="common.somethingWentWrong" />
+        </p>
+      )}
+      {settle.isSuccess && (
+        <div role="status" className="space-y-1 text-sm">
+          <p>
+            <FormattedMessage id="members.pool.settle.result" values={settle.data} />
+          </p>
+          {settle.data.failed > 0 && (
+            <p className="text-destructive">
+              <FormattedMessage id="members.pool.settle.failed" values={settle.data} />
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** The Admin's totals for the whole pool, Settle on demand and the list of Dormant Members (spec §2A, §5, §6). */
 export function PoolAdminPage() {
   return (
     <div className="space-y-4">
+      <RunSettle />
       <Overview />
       <h3 className="pt-2 text-base font-semibold">
         <FormattedMessage id="members.dormant.title" />

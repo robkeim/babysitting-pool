@@ -94,7 +94,7 @@ Present these as roadmap, not live:
 *Shows: payout to the sitter, the credit economy closing the loop.*
 
 1. As Ryan, post a new request (Scenario 4), then as Sarah claim it (Scenario 5).
-2. Make the start time pass and run Settle: call `POST /api/admin/settle` as the Admin from Postman ([`development.md`](development.md#postman)). The minimum lead time is 6 hours, so for a live demo run the API in the `E2E` environment and advance its clock, or run this step ahead of time.
+2. Make the start time pass and run Settle: as the Admin, open **Admin**, then **Pool**, select **Run settle** and confirm. The result line counts Requests paid out, Requests expired and Members charged Demurrage. The minimum lead time is 6 hours, so for a live demo run the API in the `E2E` environment and advance its clock, or run this step ahead of time.
 3. As Sarah, open **Credits**: a Payout entry, with a balance above 0.0.
 4. As Ryan, open **My Requests**: the request is Completed and escrow is gone.
 5. As Sarah, who now has credits, post a request of her own to close the loop.
