@@ -9,7 +9,15 @@ From many tests to few:
 1. **Domain unit tests**: pure C#, no I/O, no clock (pass `now` in). The bulk of the tests.
 2. **Application handler tests**: real handlers on real SQLite (fresh in-memory database per test, built from the real migrations). Fake only the email and clock ports. The fixture builds its container with `AddCoopCore`, the same entry point `ApiHost` uses, varying only the database path, email sender and clock. Per feature: the happy path and the main failure.
 3. **API tests**: `WebApplicationFactory` over HTTP, for the contract surface only (status codes, ProblemDetails, auth).
-4. **Architecture tests**: layer boundaries.
+4. **Architecture tests** (`Architecture/LayerBoundaryTests.cs`, NetArchTest): layer boundaries, in the fast gate. They fail on any type that references a forbidden namespace:
+
+| Layer | Must not reference |
+|---|---|
+| Domain | Application, Infrastructure, Api, TestSupport, E2E, ASP.NET Core, EF Core, `Microsoft.Data`, `Microsoft.Extensions`, `System.Data`, `System.Net.Http`, MailKit, MimeKit, Serilog |
+| Application | Infrastructure, Api, TestSupport, E2E, ASP.NET Core, EF Core, `Microsoft.Data`, `System.Data`, `System.Net.Http`, MailKit, MimeKit, Serilog (DI and logging abstractions are allowed) |
+| Infrastructure | Api, TestSupport, E2E |
+| Api | TestSupport, E2E (it is the composition root, so it may reference Infrastructure) |
+| A handler (`*Handler` in Application) | any other handler (ADR 0002); share logic through a service such as `InvitationIssuer` or a view factory |
 
 Rules:
 - No hand-written in-memory repositories. An in-memory SQLite database lives only while its connection is open, so the fixture holds one connection for the test's lifetime (or uses a temp file).

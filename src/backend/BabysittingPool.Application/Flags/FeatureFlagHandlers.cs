@@ -10,19 +10,9 @@ public sealed record FeatureFlagView(
     int RolloutPercent,
     IReadOnlyList<Guid> AllowedMemberIds,
     IReadOnlyList<Guid> DeniedMemberIds,
-    IReadOnlyList<RoleRollout> RoleRollouts);
-
-public sealed record UpdateFeatureFlagCommand(string Name, FeatureFlagSettings Settings);
-
-public sealed class ListFeatureFlagsHandler(FeatureFlagRegistry registry, IFeatureFlagStore store)
+    IReadOnlyList<RoleRollout> RoleRollouts)
 {
-    public async Task<IReadOnlyList<FeatureFlagView>> HandleAsync(CancellationToken cancellationToken)
-    {
-        var stored = await store.GetAllAsync(cancellationToken);
-        return registry.All.Select(flag => ToView(flag, stored.GetValueOrDefault(flag.Name))).ToList();
-    }
-
-    internal static FeatureFlagView ToView(FeatureFlag flag, FeatureFlagSettings? stored)
+    internal static FeatureFlagView From(FeatureFlag flag, FeatureFlagSettings? stored)
     {
         var settings = stored ?? FeatureFlagSettings.Initial(flag.Default);
         return new FeatureFlagView(
@@ -34,6 +24,17 @@ public sealed class ListFeatureFlagsHandler(FeatureFlagRegistry registry, IFeatu
             settings.AllowedMemberIds,
             settings.DeniedMemberIds,
             settings.RoleRollouts);
+    }
+}
+
+public sealed record UpdateFeatureFlagCommand(string Name, FeatureFlagSettings Settings);
+
+public sealed class ListFeatureFlagsHandler(FeatureFlagRegistry registry, IFeatureFlagStore store)
+{
+    public async Task<IReadOnlyList<FeatureFlagView>> HandleAsync(CancellationToken cancellationToken)
+    {
+        var stored = await store.GetAllAsync(cancellationToken);
+        return registry.All.Select(flag => FeatureFlagView.From(flag, stored.GetValueOrDefault(flag.Name))).ToList();
     }
 }
 
@@ -53,6 +54,6 @@ public sealed class UpdateFeatureFlagHandler(FeatureFlagRegistry registry, IFeat
         }
 
         await store.SaveAsync(flag.Name, command.Settings, cancellationToken);
-        return ListFeatureFlagsHandler.ToView(flag, command.Settings);
+        return FeatureFlagView.From(flag, command.Settings);
     }
 }
