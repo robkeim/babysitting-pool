@@ -14,7 +14,7 @@ Opening ends the run: the human reviews the PR next, and Merge starts only when 
 3. Push branch `<issue>-<slug>` and run `gh pr create` with a Conventional Commit title and the body from the `pr` skill, ending in `Closes #n`. List accepted blocking findings in the body.
 4. Post the findings as one PR comment in the table format from the checklist (`gh pr comment`), with status `resolved` or `accepted` for each.
 
-Done when `gh pr view --json isDraft,url` shows `isDraft: false`.
+Done when `gh pr view --json isDraft,url` shows `isDraft: false` and the findings comment is posted.
 
 ## Merge
 
