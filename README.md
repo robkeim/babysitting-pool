@@ -21,3 +21,4 @@ Details, configuration and the API contract workflow: [docs/development.md](docs
 - Decisions: [docs/adr/](docs/adr/README.md)
 - Testing: [docs/testing.md](docs/testing.md)
 - Working with coding agents: [AGENTS.md](AGENTS.md)
+- Contributing and onboarding: [CONTRIBUTING.md](CONTRIBUTING.md), [docs/onboarding.md](docs/onboarding.md)
