@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -128,9 +129,12 @@ internal static partial class ClientLogEndpoints
         return IsMatch(report.AppVersion, MaxVersionLength, VersionCharacters()) ? null : ("appVersion", "invalid");
     }
 
-    /// <summary>Non-blank, within the length, and no control characters, so a message cannot forge a log line.</summary>
+    /// <summary>Non-blank, within the length, and no control, format or line-separator characters, so a message cannot forge or disguise a log line.</summary>
     private static bool IsText(string? value, int maxLength) =>
-        !string.IsNullOrWhiteSpace(value) && value.Length <= maxLength && !value.Any(char.IsControl);
+        !string.IsNullOrWhiteSpace(value) && value.Length <= maxLength && !value.Any(IsInvisible);
+
+    private static bool IsInvisible(char c) =>
+        char.IsControl(c) || char.GetUnicodeCategory(c) is UnicodeCategory.Format or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator;
 
     private static bool IsMatch(string? value, int maxLength, Regex characters) =>
         !string.IsNullOrEmpty(value) && value.Length <= maxLength && characters.IsMatch(value);

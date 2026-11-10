@@ -124,6 +124,8 @@ public class ClientLogEndpointTests : IDisposable
         { """{"code":"c","route":"/","appVersion":"1"}""", "message" },
         { """{"message":"  ","code":"c","route":"/","appVersion":"1"}""", "message" },
         { """{"message":"line one\nINJECTED SCHEMA-PROBE","code":"c","route":"/","appVersion":"1"}""", "message" },
+        { """{"message":"line\u2028INJECTED SCHEMA-PROBE","code":"c","route":"/","appVersion":"1"}""", "message" },
+        { """{"message":"fake\u202Eline SCHEMA-PROBE","code":"c","route":"/","appVersion":"1"}""", "message" },
         { """{"message":"m","code":"has space","route":"/","appVersion":"1"}""", "code" },
         { """{"message":"m","code":"c","route":"/?token=SCHEMA-PROBE","appVersion":"1"}""", "route" },
         { """{"message":"m","code":"c","route":"/","traceId":"NOT-A-TRACE","appVersion":"1"}""", "traceId" },
