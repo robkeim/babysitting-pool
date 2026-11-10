@@ -50,6 +50,12 @@ The one definition of green, at two levels (ADR 0015). The **fast gate** (`all -
 
 Husky hooks install on `npm install` in `src/frontend`: pre-commit formats staged files; commit-msg rejects a subject that is not a Conventional Commit (`scripts/check-commit-msg.sh`); pre-push runs `scripts/check.sh all --full --stamped --quiet`. Claude Code runs the fast gate on `Stop` and the full gate before `git push` and `gh pr create`. Nothing runs on GitHub.
 
+## Demo seed
+
+`scripts/demo-seed.sh` brings a running local stack to the state `docs/demo-script.md` starts from, on top of the Development seed (Admin, Ryan, Sarah, Oscar): Oscar gets one Posted Request and one Claimed by Sarah whose start passed 3 hours ago, so `POST /api/admin/settle` pays Sarah out without Postman clock changes. Start the API with `Settle__Enabled=false scripts/dev.sh` first, or the background Settle (about every minute, ADR 0007) pays out before the demo. Posting in the past is refused, so the script posts through the API as Oscar and Sarah (links read from `/api/dev/outbox`, never emailed) and then moves that Request's start back in the SQLite file; `DEMO_DB` and `DEMO_API_URL` override the database path and API origin.
+
+It is idempotent (it does nothing when a Claimed Request is already past its start) and refuses to run unless the API is on localhost and answers `/api/dev/outbox`, which only Development and E2E have. Delete `babysitting.db` to start over. Its sign-in requests count against the rate limits (ADR 0014); after repeated runs against one database, delete `babysitting.db.rate-limits`.
+
 ## Black-box pentest
 
 `scripts/blackbox-pentest.sh [--with-spec]` starts a throwaway stack, seeds two Members and prepares a brief for a fresh agent that has never seen the code. Run it before each release; see [`docs/security/blackbox-pentest.md`](security/blackbox-pentest.md).
