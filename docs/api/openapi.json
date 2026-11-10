@@ -8,7 +8,7 @@
     "/health": {
       "get": {
         "tags": [
-          "BabysittingPool.Api"
+          "HealthCheck"
         ],
         "responses": {
           "200": {
@@ -3687,6 +3687,9 @@
     }
   },
   "tags": [
+    {
+      "name": "HealthCheck"
+    },
     {
       "name": "BabysittingPool.Api"
     }
