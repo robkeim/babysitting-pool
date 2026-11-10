@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useAcceptInvitation, useInvitationPreview } from './api'
+import { ErrorReference } from '@/components/ErrorReference'
 
 interface InvitationPageProps {
   token: string | undefined
@@ -30,6 +31,7 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="auth.invitation.unusable.body" />
+          <ErrorReference error={preview.error} />
         </AlertDescription>
       </Alert>
     )
@@ -77,6 +79,7 @@ export function InvitationPage({ token, onJoined }: InvitationPageProps) {
               </AlertTitle>
               <AlertDescription>
                 <FormattedMessage id="auth.invitation.failed.body" />
+                <ErrorReference error={accept.error} />
               </AlertDescription>
             </Alert>
           )}

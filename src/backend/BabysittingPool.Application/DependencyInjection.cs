@@ -19,7 +19,7 @@ public static class DependencyInjection
         services.AddSingleton(new CoopSettings());
         services.AddScoped<InvitationMailer>();
         services.AddScoped<GetRulesHandler>();
-        services.AddScoped<IssueInvitationHandler>();
+        services.AddScoped<InvitationIssuer>();
         services.AddScoped<ListInvitationsHandler>();
         services.AddScoped<ListMembersHandler>();
         services.AddScoped<InviteMemberHandler>();

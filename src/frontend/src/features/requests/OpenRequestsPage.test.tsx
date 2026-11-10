@@ -79,4 +79,12 @@ describe('OpenRequestsPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/couldn.t load the open requests/i)
     expect(screen.queryByText('Boom')).not.toBeInTheDocument()
   })
+
+  it('shows a reference a Member can quote when a load fails', async () => {
+    server.use(openRequestsFailureHandler())
+
+    renderWithProviders(<OpenRequestsPage />)
+
+    expect(await screen.findByText('f'.repeat(32))).toBeInTheDocument()
+  })
 })

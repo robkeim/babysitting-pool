@@ -1,3 +1,4 @@
+import { ErrorReference } from '@/components/ErrorReference'
 import type { ReactNode } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { isUnauthenticated, useMe } from './api'
@@ -16,6 +17,7 @@ export function RequireMember({ children, signedOut }: RequireMemberProps) {
     ) : (
       <p>
         <FormattedMessage id="common.somethingWentWrong" />
+        <ErrorReference error={me.error} />
       </p>
     )
   if (!me.data) return null

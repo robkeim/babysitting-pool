@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useRequestSignInLink } from './api'
+import { ErrorReference } from '@/components/ErrorReference'
 
 /** Asks for an email address and says, whatever it is, that a link was sent if it belongs to a Member. */
 export function SignInPage() {
@@ -61,6 +62,7 @@ export function SignInPage() {
                 </AlertTitle>
                 <AlertDescription>
                   <FormattedMessage id="auth.signIn.invalid.body" />
+                  <ErrorReference error={request.error} />
                 </AlertDescription>
               </Alert>
             )}

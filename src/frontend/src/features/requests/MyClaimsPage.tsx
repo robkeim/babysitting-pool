@@ -7,6 +7,7 @@ import { formatInstant } from '@/features/credits'
 import { useWithdrawClaim, useMyClaims } from './api'
 import { releaseFailure } from './releaseFailure'
 import { RequestCard } from './RequestCard'
+import { ErrorReference } from '@/components/ErrorReference'
 
 /** "My Claims": the Requests the Member took as Sitter. They see the exact address once it is theirs (spec §4.6). */
 export function MyClaimsPage() {
@@ -22,6 +23,7 @@ export function MyClaimsPage() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="requests.claims.loadFailed.body" />
+          <ErrorReference error={claims.error} />
         </AlertDescription>
       </Alert>
     )
@@ -45,6 +47,7 @@ export function MyClaimsPage() {
           </AlertTitle>
           <AlertDescription>
             <FormattedMessage id={releaseFailure(release.error)} />
+            <ErrorReference error={release.error} />
           </AlertDescription>
         </Alert>
       )}

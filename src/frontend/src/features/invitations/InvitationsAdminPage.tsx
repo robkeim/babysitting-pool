@@ -11,6 +11,7 @@ import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useInvitations, useInviteMember, useResendInvitation } from './api'
 import type { InvitationStatus, InvitationView } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const STATUS_MESSAGES: Record<InvitationStatus, MessageId> = {
   Pending: 'invitations.admin.status.Pending',
@@ -80,6 +81,7 @@ function InviteForm() {
               </AlertTitle>
               <AlertDescription>
                 <FormattedMessage id={failure(invite.error)} />
+                <ErrorReference error={invite.error} />
               </AlertDescription>
             </Alert>
           )}
@@ -185,6 +187,7 @@ export function InvitationsAdminPage() {
           </AlertTitle>
           <AlertDescription>
             <FormattedMessage id="invitations.admin.loadFailed.body" />
+            <ErrorReference error={invitations.error} />
           </AlertDescription>
         </Alert>
       )}

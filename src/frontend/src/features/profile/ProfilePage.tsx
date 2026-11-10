@@ -9,6 +9,7 @@ import { type MessageId } from '@/lib/i18n'
 import { AddressSearch } from './AddressSearch'
 import { useMyProfile, useUpdateProfile } from './api'
 import type { AddressSuggestion, ProfileView } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const INSTRUCTIONS_MAX_LENGTH = 300
 
@@ -107,6 +108,7 @@ function ProfileForm({ profile }: { profile: ProfileView }) {
               </AlertTitle>
               <AlertDescription>
                 <FormattedMessage id={failure(update.error)} />
+                <ErrorReference error={update.error} />
               </AlertDescription>
             </Alert>
           )}
@@ -137,6 +139,7 @@ export function ProfilePage() {
       <Alert variant="destructive">
         <AlertDescription>
           <FormattedMessage id="common.somethingWentWrong" />
+          <ErrorReference error={profile.error} />
         </AlertDescription>
       </Alert>
     )

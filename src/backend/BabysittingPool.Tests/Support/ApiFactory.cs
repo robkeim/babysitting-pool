@@ -156,7 +156,7 @@ internal abstract class ApiFactoryBase<TEntry>(
     {
         await using var scope = Services.CreateAsyncScope();
         EmailAddress.TryParse(email, out var address).Should().BeTrue();
-        await scope.ServiceProvider.GetRequiredService<IssueInvitationHandler>()
+        await scope.ServiceProvider.GetRequiredService<InvitationIssuer>()
             .HandleAsync(new IssueInvitationCommand(address, isAdmin), CancellationToken.None);
     }
 

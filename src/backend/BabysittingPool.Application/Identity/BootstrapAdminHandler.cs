@@ -6,7 +6,7 @@ namespace BabysittingPool.Application.Identity;
 /// Gets the first Admin in (ADR 0011): when no Admin exists and no Admin Invitation is outstanding, invites
 /// the configured address.
 /// </summary>
-public sealed class BootstrapAdminHandler(IIdentityStore store, IssueInvitationHandler issue, TimeProvider clock)
+public sealed class BootstrapAdminHandler(IIdentityStore store, InvitationIssuer issue, TimeProvider clock)
 {
     public async Task HandleAsync(EmailAddress? adminEmail, CancellationToken cancellationToken)
     {

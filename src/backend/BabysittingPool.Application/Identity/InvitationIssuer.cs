@@ -12,7 +12,7 @@ public enum IssueInvitationResult
 }
 
 /// <summary>Creates an Invitation and emails the link (credit-engine.md §2A).</summary>
-public sealed class IssueInvitationHandler(
+public sealed class InvitationIssuer(
     IIdentityStore store, InvitationMailer mailer, CoopSettings settings, TimeProvider clock)
 {
     public async Task<IssueInvitationResult> HandleAsync(IssueInvitationCommand command, CancellationToken cancellationToken)

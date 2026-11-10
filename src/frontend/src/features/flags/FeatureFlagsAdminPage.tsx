@@ -10,6 +10,7 @@ import { ApiError } from '@/lib/api/client'
 import { type MessageId } from '@/lib/i18n'
 import { useAdminFeatureFlags, useUpdateFeatureFlag } from './api'
 import type { FeatureFlagView } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const ROLES = ['Member', 'Admin'] as const
 
@@ -208,6 +209,7 @@ function FlagCard({ flag }: { flag: FeatureFlagView }) {
               </AlertTitle>
               <AlertDescription>
                 <FormattedMessage id={saveFailure(update.error)} />
+                <ErrorReference error={update.error} />
               </AlertDescription>
             </Alert>
           )}
@@ -244,6 +246,7 @@ export function FeatureFlagsAdminPage() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="flags.admin.loadFailed.body" />
+          <ErrorReference error={flags.error} />
         </AlertDescription>
       </Alert>
     )

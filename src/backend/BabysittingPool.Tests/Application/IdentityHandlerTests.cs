@@ -40,7 +40,7 @@ public class IdentityHandlerTests : IAsyncLifetime
     private static string TokenIn(Uri link) => System.Web.HttpUtility.ParseQueryString(link.Query)["token"]!;
 
     private Task<IssueInvitationResult> InviteAsync(string email, bool isAdmin = false) =>
-        RunAsync(sp => sp.GetRequiredService<IssueInvitationHandler>()
+        RunAsync(sp => sp.GetRequiredService<InvitationIssuer>()
             .HandleAsync(new IssueInvitationCommand(Email(email), isAdmin), CancellationToken.None));
 
     private Task<SignedIn?> AcceptAsync(string token, string name = "Ada") =>

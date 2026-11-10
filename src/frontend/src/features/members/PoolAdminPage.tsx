@@ -18,6 +18,7 @@ import { formatCredits, formatInstant } from '@/features/credits'
 import { type MessageId } from '@/lib/i18n'
 import { useDormantMembers, usePoolOverview, useRunSettle } from './api'
 import type { PoolOverview } from './types'
+import { ErrorReference } from '@/components/ErrorReference'
 
 const REQUEST_STATES: readonly [keyof PoolOverview['requests'], MessageId][] = [
   ['posted', 'requests.status.Posted'],
@@ -52,6 +53,7 @@ function Overview() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="members.admin.loadFailed.body" />
+          <ErrorReference error={overview.error} />
         </AlertDescription>
       </Alert>
     )
@@ -100,6 +102,7 @@ function Dormant() {
         </AlertTitle>
         <AlertDescription>
           <FormattedMessage id="members.admin.loadFailed.body" />
+          <ErrorReference error={dormant.error} />
         </AlertDescription>
       </Alert>
     )
@@ -219,6 +222,7 @@ function RunSettle() {
       {settle.isError && (
         <p role="alert" className="text-sm text-destructive">
           <FormattedMessage id="common.somethingWentWrong" />
+          <ErrorReference error={settle.error} />
         </p>
       )}
       {settle.isSuccess && (

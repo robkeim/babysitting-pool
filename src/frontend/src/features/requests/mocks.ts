@@ -122,7 +122,7 @@ export function openRequestsHandler(page: OpenRequestPage) {
 export function openRequestsFailureHandler() {
   return http.get('*/api/requests/open', () =>
     HttpResponse.json(
-      { status: 500, title: 'Boom', code: 'internal_error' },
+      { status: 500, title: 'Boom', code: 'internal_error', traceId: 'f'.repeat(32) },
       { status: 500, headers: { 'content-type': 'application/problem+json' } },
     ),
   )

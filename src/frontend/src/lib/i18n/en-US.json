@@ -1,6 +1,7 @@
 {
   "common.appName": "Babysitting Pool",
   "common.somethingWentWrong": "Something went wrong.",
+  "common.errorReference": "Reference: {reference}",
   "error.unauthenticated": "You're not signed in.",
   "error.not_admin": "Only the Admin can do that.",
   "error.csrf_header_missing": "That request was blocked. Please reload the page and try again.",
