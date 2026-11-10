@@ -18,7 +18,6 @@ Present these as roadmap, not live:
 
 - In-app notifications: the backend and live stream exist behind the `notifications` feature flag, but there is no screen yet. Members find changes on **My Requests** and **My Claims**.
 - Editing a Request (cancel and re-post instead).
-- Running Settle from the UI. Payout and expiry need `POST /api/admin/settle` as the Admin (Postman) until the Run settle screen lands.
 - Demurrage in action: it only bites after 21 days of inactivity, so explain it verbally and point at the rules page and the Pool overview.
 - Several addresses per Member, child profiles, disputes and no-show handling.
 

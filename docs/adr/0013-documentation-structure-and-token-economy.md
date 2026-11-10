@@ -6,7 +6,7 @@ Agents pay tokens for every file they open, and `AGENTS.md` is paid for in every
 
 | Layer | Files | Job |
 |---|---|---|
-| Humans | `README.md` | What the project is and how to start; links to `docs/development.md`, repeats nothing |
+| Humans | `README.md` | The front door: the problem, architecture, screenshots, how it was built, quickstart and a docs map; rules and how-to detail stay in their own layers and are linked, not restated |
 | Agent entry | `AGENTS.md` | A router of at most 60 lines: stack in one line each, a read-first table, the definition of done. It never restates a rule that lives elsewhere |
 | Rules | `docs/specs/`, `docs/adr/`, `GLOSSARY.md` | Business rules, decisions and vocabulary |
 | How-to | `docs/development.md`, `docs/testing.md`, `docs/agents/` | Running, testing and working the tracker |
@@ -42,3 +42,5 @@ Soft targets, measured as characters ÷ 4 until a real `/context` reading replac
 Retune after the first feature slices land.
 
 **Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.
+
+**Amendment (2026-11-11, #291).** The README grew from a 23-line pointer into the front door for people shown the project: problem, architecture diagram, screenshots and delivery numbers. It still links to the owning doc for every rule and how-to instead of restating it, and each number links to `docs/metrics.md`.
