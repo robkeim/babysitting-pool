@@ -7,7 +7,7 @@ using BabysittingPool.Application.Addresses;
 using BabysittingPool.Infrastructure;
 using BabysittingPool.Tests.Support;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Serilog.Core;
 
 namespace BabysittingPool.Tests.Api;
 
@@ -26,7 +26,7 @@ public class AddressSuggestionTests : IDisposable
         """;
 
     private readonly FakeBan _ban = new();
-    private readonly CapturedLogs _logs = new();
+    private readonly CapturedLogEvents _logs = new();
     private readonly ApiFactory _factory;
 
     public AddressSuggestionTests()
@@ -35,7 +35,7 @@ public class AddressSuggestionTests : IDisposable
         {
             services.AddHttpClient<IAddressSuggester, BanAddressSuggester>()
                 .ConfigurePrimaryHttpMessageHandler(() => _ban);
-            services.AddLogging(logging => logging.AddProvider(_logs));
+            services.AddSingleton<ILogEventSink>(_logs);
         });
     }
 
@@ -43,7 +43,6 @@ public class AddressSuggestionTests : IDisposable
     {
         _factory.Dispose();
         _ban.Dispose();
-        _logs.Dispose();
     }
 
     private HttpClient MemberClient(Guid member) => _factory.CreateMemberClient(member);
@@ -146,8 +145,8 @@ public class AddressSuggestionTests : IDisposable
         _ban.Respond(HttpStatusCode.OK, Features);
         await client.GetAsync($"/api/address-suggestions?q={Uri.EscapeDataString(Secret)}");
 
-        _logs.Messages.Should().NotBeEmpty("the capture must be wired, or this test proves nothing");
-        _logs.Messages.Should().NotContain(m => m.Contains("Zorglub", StringComparison.OrdinalIgnoreCase));
+        _logs.Events.Should().NotBeEmpty("the capture must be wired, or this test proves nothing");
+        _logs.AllText().Should().NotContainEquivalentOf("Zorglub");
     }
 
     [Fact]
@@ -191,43 +190,6 @@ public class AddressSuggestionTests : IDisposable
         {
             Requests.Add((request.RequestUri!.Query, request.RequestUri.AbsolutePath));
             return Task.FromResult(_next());
-        }
-    }
-
-    private sealed class CapturedLogs : ILoggerProvider
-    {
-        private readonly List<string> _messages = [];
-
-        public IReadOnlyList<string> Messages
-        {
-            get
-            {
-                lock (_messages)
-                {
-                    return [.. _messages];
-                }
-            }
-        }
-
-        public ILogger CreateLogger(string categoryName) => new Capture(this);
-
-        public void Dispose()
-        {
-        }
-
-        private sealed class Capture(CapturedLogs owner) : ILogger
-        {
-            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-
-            public bool IsEnabled(LogLevel logLevel) => true;
-
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-            {
-                lock (owner._messages)
-                {
-                    owner._messages.Add($"{formatter(state, exception)} {exception}");
-                }
-            }
         }
     }
 }
