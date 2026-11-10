@@ -342,7 +342,7 @@ public class OffboardMemberHandlerTests : IAsyncLifetime
 
         await using (var scope = _database.CreateScope())
         {
-            (await scope.ServiceProvider.GetRequiredService<IssueInvitationHandler>()
+            (await scope.ServiceProvider.GetRequiredService<InvitationIssuer>()
                 .HandleAsync(new IssueInvitationCommand(address, false), default)).Should().Be(IssueInvitationResult.Issued);
         }
 

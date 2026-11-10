@@ -40,7 +40,7 @@ public sealed record InviteMemberResult(InviteMemberOutcome Outcome, InvitationV
 /// The Admin invites a person. An address with an unaccepted Invitation is refused: re-send that one instead,
 /// so the list never holds two Invitations for one person.
 /// </summary>
-public sealed class InviteMemberHandler(IIdentityStore store, IssueInvitationHandler issue, TimeProvider clock)
+public sealed class InviteMemberHandler(IIdentityStore store, InvitationIssuer issue, TimeProvider clock)
 {
     public async Task<InviteMemberResult> HandleAsync(InviteMemberCommand command, CancellationToken cancellationToken)
     {
