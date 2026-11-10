@@ -9,6 +9,7 @@ import tseslint from 'typescript-eslint'
 
 import { boundaryConfigs } from './eslint.boundaries.js'
 import { colorTokenConfigs } from './eslint.colors.js'
+import { loggingConfigs } from './eslint.logging.js'
 
 export default defineConfig(
   {
@@ -32,7 +33,12 @@ export default defineConfig(
       globals: { ...globals.browser },
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['eslint.config.js', 'eslint.boundaries.js', 'eslint.colors.js'],
+          allowDefaultProject: [
+            'eslint.config.js',
+            'eslint.boundaries.js',
+            'eslint.colors.js',
+            'eslint.logging.js',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -56,6 +62,7 @@ export default defineConfig(
       'formatjs/no-literal-string-in-object': 'error',
     },
   },
+  ...loggingConfigs,
   {
     files: ['**/*.{test,spec}.{ts,tsx}', 'src/test/**', 'e2e/**'],
     rules: { 'react-refresh/only-export-components': 'off' },

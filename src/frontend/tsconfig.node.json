@@ -30,6 +30,8 @@
     "eslint.boundaries.d.ts",
     "eslint.colors.js",
     "eslint.colors.d.ts",
+    "eslint.logging.js",
+    "eslint.logging.d.ts",
     "e2e"
   ]
 }

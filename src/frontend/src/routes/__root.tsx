@@ -11,6 +11,7 @@ import {
   Waves,
 } from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AppShell, type ShellMore, type ShellTab } from '@/components/AppShell'
 import { AccountMenu, useMe } from '@/features/auth'
 import { useFlagTheme } from '@/features/flags'
@@ -54,14 +55,16 @@ export const Route = createRootRoute({
     useColorScheme(me.data?.colorScheme)
     return (
       <I18nProvider language={me.data?.language}>
-        <AppShell
-          tabs={me.data ? MEMBER_TABS : undefined}
-          more={me.data?.isAdmin ? ADMIN_MORE : undefined}
-          navExtra={me.data ? <NotificationBell /> : undefined}
-          account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
-        >
-          <Outlet />
-        </AppShell>
+        <ErrorBoundary>
+          <AppShell
+            tabs={me.data ? MEMBER_TABS : undefined}
+            more={me.data?.isAdmin ? ADMIN_MORE : undefined}
+            navExtra={me.data ? <NotificationBell /> : undefined}
+            account={<AccountMenu onSignedOut={() => void navigate({ to: '/sign-in' })} />}
+          >
+            <Outlet />
+          </AppShell>
+        </ErrorBoundary>
       </I18nProvider>
     )
   },
