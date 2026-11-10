@@ -77,6 +77,17 @@ if [[ $stamped == 1 ]]; then
   done
 fi
 
+# One line per real run (timestamp, level, pass/fail) for scripts/delivery-metrics.mjs. Lives in the common git dir so
+# every worktree appends to the same file; never committed.
+record_run() {
+  local status=$? level=standard
+  [[ $fast == 1 ]] && level=fast
+  [[ $full == 1 ]] && level=full
+  printf '%s %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$level" "$([[ $status == 0 ]] && echo pass || echo fail)" \
+    >>"$(git rev-parse --path-format=absolute --git-common-dir)/check-history.log" || true
+}
+trap record_run EXIT
+
 # Where the full gate's backend coverage reports land; inside .git so nothing needs ignoring.
 coverage_dir=$(cd "$(git rev-parse --git-path .)" && pwd)/coverage
 
@@ -172,6 +183,9 @@ scripts/check-docs.sh
 # en-US spelling (cspell.json flags British spellings). Pinned and run through npx, like openapi-typescript.
 step "spelling: cspell (en-US)"
 git ls-files | npx --yes cspell@9.8.0 --no-progress --no-summary --no-must-find-files --file-list stdin
+
+step "scripts: unit tests"
+node --test scripts/*.test.mjs
 
 scan_secrets
 [[ $fast == 1 ]] || scan_code

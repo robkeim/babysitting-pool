@@ -4,10 +4,10 @@ A run-through for pitching the co-op to people: which scenarios to show and in w
 
 ## Setup
 
-1. Start fresh: delete `babysitting.db` next to the API, then run `scripts/dev.sh` ([`development.md`](development.md)).
-2. Open two browser profiles (or one normal and one private window) so two Members stay signed in side by side: **Ryan** (Requester) and **Sarah** (Sitter). **Oscar** (25.5 credits) is the Member the Admin offboards in Scenario 9; before then, have Oscar post one request so there is something to cancel. Use a third window or profile for the Admin.
+1. Start fresh: delete `babysitting.db` next to the API, then run `Settle__Enabled=false scripts/dev.sh` ([`development.md`](development.md)); the flag stops the API's own minute tick from paying out Scenario 7's request early. In a second terminal run `scripts/demo-seed.sh` ([`development.md`](development.md#demo-seed)).
+2. Open two browser profiles (or one normal and one private window) so two Members stay signed in side by side: **Ryan** (Requester) and **Sarah** (Sitter). **Oscar** (25.5 credits) is the Member the Admin offboards in Scenario 9; the seed gives him a Posted request to cancel. Use a third window or profile for the Admin.
 3. Set the SMTP secrets once, before the first start ([`development.md`](development.md)), so invitations and sign-in links arrive in a real inbox. Keep a terminal visible too: links also appear in the API console and at `GET /api/dev/outbox?to=<email>`.
-4. Seeded data, as plus-addresses of the base address you set (`<local>+admin@<domain>`, `+ryan`, `+sarah`, `+oscar`): the Admin, then Ryan, Sarah and Oscar holding 10.0, 0.0 and 25.5 credits. None has a profile address yet. Without the secrets the seed falls back to `admin@`, `ryan@`, `sarah@` and `oscar@example.test`, which can't receive mail.
+4. Seeded data, as plus-addresses of the base address you set (`<local>+admin@<domain>`, `+ryan`, `+sarah`, `+oscar`): the Admin, then Ryan, Sarah and Oscar holding 10.0, 0.0 and 25.5 credits. None has a profile address yet. `scripts/demo-seed.sh` adds two Requests from Oscar: a Posted one (for Scenario 9) and one Claimed by Sarah whose start passed 3 hours ago (for Scenario 7). Oscar's balance shows the escrow for both. Without the secrets the seed falls back to `admin@`, `ryan@`, `sarah@` and `oscar@example.test`, which can't receive mail.
 5. Sign in as the Admin with the link logged at startup.
 
 > Sarah starts with 0.0 credits, which suits the story: she can't post until she earns by sitting.
@@ -18,7 +18,7 @@ Present these as roadmap, not live:
 
 - In-app notifications: the backend and live stream exist behind the `notifications` feature flag, but there is no screen yet. Members find changes on **My Requests** and **My Claims**.
 - Editing a Request (cancel and re-post instead).
-- Running Settle from the UI. Payout and expiry need `POST /api/admin/settle` or the clock to pass.
+- Running Settle from the UI. Payout and expiry need `POST /api/admin/settle` as the Admin (Postman) until the Run settle screen lands.
 - Demurrage in action: it only bites after 21 days of inactivity, so explain it verbally and point at the rules page and the Pool overview.
 - Several addresses per Member, child profiles, disputes and no-show handling.
 
@@ -75,8 +75,8 @@ Present these as roadmap, not live:
 *Shows: privacy of the exact address, first claim wins.*
 
 1. As Sarah (other window), open **Open Requests**.
-2. Ryan's request is listed with area, time, size and credits, but no address.
-3. Select **Claim**.
+2. Ryan's request is listed with area, time, size and credits, but no address (Oscar's seeded request is listed too).
+3. Select **Claim** on Ryan's.
 4. Open **My Claims** and show the request as Claimed.
 5. As Ryan, refresh **My Requests** and show it is now Claimed.
 
@@ -93,10 +93,10 @@ Present these as roadmap, not live:
 
 *Shows: payout to the sitter, the credit economy closing the loop.*
 
-1. As Ryan, post a new request (Scenario 4), then as Sarah claim it (Scenario 5).
-2. Make the start time pass and run Settle: as the Admin, open **Admin**, then **Pool**, select **Run settle** and confirm. The result line counts Requests paid out, Requests expired and Members charged Demurrage. The minimum lead time is 6 hours, so for a live demo run the API in the `E2E` environment and advance its clock, or run this step ahead of time.
+1. The seed already left Oscar's request Claimed by Sarah with a start time in the past. As Sarah, open **My Claims** to show it.
+2. Run Settle: as the Admin, open **Admin**, then **Pool**, select **Run settle** and confirm. The result line says 1 Request paid out. This needs the API started with `Settle__Enabled=false` (Setup), or the minute tick pays out first.
 3. As Sarah, open **Credits**: a Payout entry, with a balance above 0.0.
-4. As Ryan, open **My Requests**: the request is Completed and escrow is gone.
+4. As Oscar (or the Admin, on his Member page), show the request as Completed and its escrow gone.
 5. As Sarah, who now has credits, post a request of her own to close the loop.
 
 ## Scenario 8: The rules that protect the pool

@@ -50,6 +50,7 @@ public static class ApiHost
         });
         ProductionGuard.Refuse(builder);
         host.ConfigureBuilder?.Invoke(builder);
+        builder.AddCoopLogging();
 
         // Deterministic output (ADR 0006): the document is committed and drift-checked, so it must not
         // vary with the host it was fetched from.
@@ -94,7 +95,8 @@ public static class ApiHost
         }
         else
         {
-            addEmailSender = services => services.AddEmailOutbox();
+            var logOutbox = builder.Environment.IsDevelopment();
+            addEmailSender = services => services.AddEmailOutbox(logOutbox);
         }
 
         builder.Services.AddCoopCore(new CoopCoreOptions(
@@ -110,7 +112,8 @@ public static class ApiHost
         // The default handlers log the full request URL, which holds the query: a partial home address (ADR 0010).
         .RemoveAllLoggers();
         builder.Services.AddExceptionHandler<DomainFailureHandler>();
-        builder.Services.AddProblemDetails();
+        builder.Services.AddProblemDetails(options =>
+            options.CustomizeProblemDetails = context => context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceId());
         builder.Services.AddSessionAuthentication();
         builder.Services.AddFeatureFlags();
         builder.Services.AddApiRateLimiting(builder.Configuration);
@@ -156,6 +159,9 @@ public static class ApiHost
             app.MapOpenApi();
         }
 
+        // Outside the exception handler, so a handled failure is logged by its status and not as an exception.
+        app.UseTraceId();
+        app.UseCoopRequestLogging();
         app.UseExceptionHandler();
         app.UseConfiguredForwardedHeaders();
         if (app.Environment.IsProduction())
@@ -174,6 +180,7 @@ public static class ApiHost
 
         app.UseCsrfHeaderCheck();
         app.UseAuthentication();
+        app.UseMemberLogScope();
         app.UseApiRateLimiting();
         app.UseAuthorization();
 
