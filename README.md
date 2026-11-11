@@ -92,3 +92,4 @@ Configuration, real email, the demo seed and the API contract workflow: [docs/de
 | Pitching it | [docs/demo-script.md](docs/demo-script.md) |
 | Delivery numbers | [docs/metrics.md](docs/metrics.md) |
 | Working with coding agents | [AGENTS.md](AGENTS.md) and [docs/agents/](docs/agents/issue-tracker.md) |
+| Contributing and onboarding | [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/onboarding.md](docs/onboarding.md) |
