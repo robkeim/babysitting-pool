@@ -42,3 +42,5 @@ Soft targets, measured as characters ÷ 4 until a real `/context` reading replac
 Retune after the first feature slices land.
 
 **Amendment (2026-11-08, #246).** Spelling normalized to en-US (color, behavior, honor, organized, centered, judgment); no decision changed.
+
+**Amendment (2026-11-11, #291).** The README grew from a 23-line pointer into the front door for people shown the project: problem, architecture diagram, screenshots and delivery numbers. It still links to the owning doc for every rule and how-to instead of restating it, and each number links to `docs/metrics.md`.
