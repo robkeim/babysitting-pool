@@ -9,12 +9,12 @@ This project has one human maintainer, with coding agents as the other engineers
 
 ## Pick up a ticket
 
-- **Ready** means labeled `ready-for-agent` or `ready-for-human`, no open blocker, and a **Read first:** line ([`docs/agents/triage-labels.md`](docs/agents/triage-labels.md), [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md)).
-- One ticket is one vertical slice and one PR ([ADR 0013](docs/adr/0013-documentation-structure-and-token-economy.md)). Read the **Read first:** docs and the spec section before writing code ([`AGENTS.md`](AGENTS.md)).
+- **Ready** means labeled `ready-for-agent` or `ready-for-human`, and no open blocker; agent tickets also carry a **Read first:** line ([`docs/agents/triage-labels.md`](docs/agents/triage-labels.md), [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md)).
+- Ticket sizing: [ADR 0013](docs/adr/0013-documentation-structure-and-token-economy.md). What to read before coding: [`AGENTS.md`](AGENTS.md).
 
 ## Branch, commit, gate
 
-- Branch, commit, PR and definition of done: [`AGENTS.md`](AGENTS.md). The `commit-msg` hook lints commits; nothing lints the PR title.
+- Branch, commit, PR and definition of done: [`AGENTS.md`](AGENTS.md). What the hooks lint: [ADR 0015](docs/adr/0015-local-two-level-gate-replaces-github-ci.md).
 - Fast gate while iterating, full gate before pushing: [ADR 0015](docs/adr/0015-local-two-level-gate-replaces-github-ci.md), [`docs/development.md`](docs/development.md#checks). Tests: [`docs/testing.md`](docs/testing.md), [ADR 0021](docs/adr/0021-diff-coverage-gate.md).
 
 ## Review and merge
