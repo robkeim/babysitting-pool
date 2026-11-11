@@ -49,7 +49,7 @@ sarah=$(member_email Sarah)
 sign_in() { # email jar-name
   api POST /api/auth/sign-in-links "{\"email\":\"$1\"}" >/dev/null
   local link token
-  link=$(api GET "/api/dev/outbox?to=$1" | python3 -c 'import json, sys; print(json.load(sys.stdin)[-1]["link"])')
+  link=$(api GET "/api/dev/outbox?to=${1//+/%2B}" | python3 -c 'import json, sys; print(json.load(sys.stdin)[-1]["link"])')
   token=$(python3 -c 'import sys, urllib.parse as u; print(u.parse_qs(u.urlparse(sys.argv[1]).query).get("token", [u.urlparse(sys.argv[1]).fragment])[0])' "$link")
   api POST /api/auth/sessions "{\"token\":\"$token\"}" "$2" >/dev/null
 }
