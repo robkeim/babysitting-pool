@@ -26,7 +26,7 @@ public sealed class SmtpEmailSender(SmtpSettings settings) : IEmailSender
         using var client = new SmtpClient { CheckCertificateRevocation = false };
         await client.ConnectAsync(settings.Host, settings.Port, SecureSocketOptions.StartTls, cancellationToken);
         await client.AuthenticateAsync(settings.Address, settings.Password, cancellationToken);
-        await client.SendAsync(mime, cancellationToken);
+        await client.SendAsync(new SmtpSendRequest(mime), cancellationToken);
         await client.DisconnectAsync(true, cancellationToken);
     }
 }
