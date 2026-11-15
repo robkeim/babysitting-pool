@@ -16,7 +16,7 @@ A run-through for pitching the co-op to people: which scenarios to show and in w
 
 Present these as roadmap, not live:
 
-- Editing a Request beyond its notes (a Claimed Request's terms can't change yet; cancel and re-post instead).
+- Editing a Request beyond its notes (the terms of a Posted or Claimed Request can't change yet; cancel and re-post instead).
 - Demurrage in action: it only bites after 21 days of inactivity, so explain it verbally and point at the rules page and the Pool overview.
 - Several addresses per Member, child profiles, disputes and no-show handling.
 
@@ -61,7 +61,7 @@ Present these as roadmap, not live:
 
 1. As Ryan, open **My Requests** (empty) and select **Post a request**.
 2. Enter start time and a duration. Try 50 minutes to show the 15-minute rule, then fix it.
-3. Optionally add **Notes for the sitter** (for example "the youngest has a cold").
+3. Add **Notes for the sitter** (for example "the youngest has a cold").
 4. Change the number of children, meals and transport and watch the **Cost breakdown** update, including "After posting: … credits left".
 5. Select **How is this calculated?** to show the pricing rules open in a new tab.
 6. Choose the Requesting family's house. Transport is disabled with an explanation, and the form says the request will use the area and address from his profile.
@@ -74,7 +74,7 @@ Present these as roadmap, not live:
 *Shows: privacy of the exact address, first claim wins.*
 
 1. As Sarah (other window), open **Open Requests**.
-2. Sarah's bell in the header shows "New request in <area> on <date>" (live, no refresh), with no address.
+2. Sarah's bell in the header shows "New request in <area> on <date>" (live, no refresh), with no address; Ryan's is the newest of two, since Oscar's seeded request is there too.
 3. Ryan's request is listed with area, time, size and credits, but no address (Oscar's seeded request is listed too).
 4. Select **Claim** on Ryan's.
 5. Open **My Claims** and show the request as Claimed.
