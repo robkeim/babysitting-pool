@@ -16,8 +16,7 @@ A run-through for pitching the co-op to people: which scenarios to show and in w
 
 Present these as roadmap, not live:
 
-- In-app notifications: the backend and live stream exist behind the `notifications` feature flag, but there is no screen yet. Members find changes on **My Requests** and **My Claims**.
-- Editing a Request (cancel and re-post instead).
+- Editing a Request beyond its notes (the terms of a Posted or Claimed Request can't change yet; cancel and re-post instead).
 - Demurrage in action: it only bites after 21 days of inactivity, so explain it verbally and point at the rules page and the Pool overview.
 - Several addresses per Member, child profiles, disputes and no-show handling.
 
@@ -62,30 +61,33 @@ Present these as roadmap, not live:
 
 1. As Ryan, open **My Requests** (empty) and select **Post a request**.
 2. Enter start time and a duration. Try 50 minutes to show the 15-minute rule, then fix it.
-3. Change the number of children, meals and transport and watch the **Cost breakdown** update, including "After posting: … credits left".
-4. Select **How is this calculated?** to show the pricing rules open in a new tab.
-5. Choose the Requesting family's house. Transport is disabled with an explanation, and the form says the request will use the area and address from his profile.
-6. Post the request.
-7. On **My Requests**, the request is Posted and shows his exact address.
-8. Open **Credits**: available dropped by the cost, the cost shows as In escrow, and the Ledger has an Escrow entry.
+3. Add **Notes for the sitter** (for example "the youngest has a cold").
+4. Change the number of children, meals and transport and watch the **Cost breakdown** update, including "After posting: … credits left".
+5. Select **How is this calculated?** to show the pricing rules open in a new tab.
+6. Choose the Requesting family's house. Transport is disabled with an explanation, and the form says the request will use the area and address from his profile.
+7. Post the request.
+8. On **My Requests**, the request is Posted and shows his exact address.
+9. Open **Credits**: available dropped by the cost, the cost shows as In escrow, and the Ledger has an Escrow entry.
 
 ## Scenario 5: Sarah finds and claims the request
 
 *Shows: privacy of the exact address, first claim wins.*
 
 1. As Sarah (other window), open **Open Requests**.
-2. Ryan's request is listed with area, time, size and credits, but no address (Oscar's seeded request is listed too).
-3. Select **Claim** on Ryan's.
-4. Open **My Claims** and show the request as Claimed.
-5. As Ryan, refresh **My Requests** and show it is now Claimed.
+2. Sarah's bell in the header shows "New request in <area> on <date>" (live, no refresh), with no address; Ryan's is the newest of two, since Oscar's seeded request is there too.
+3. Ryan's request is listed with area, time, size and credits, but no address (Oscar's seeded request is listed too).
+4. Select **Claim** on Ryan's.
+5. Open **My Claims** and show the request as Claimed.
+6. As Ryan, open the bell: "Sarah claimed your request for <date>", and **My Requests** shows it Claimed. Dismiss the notification.
+7. As Ryan, select **Edit notes** on the request, change them and save. The claim stays, and Sarah sees the new notes on **My Claims**.
 
 ## Scenario 6: Plans change (withdraw and cancel)
 
 *Shows: no-penalty cancellation and full refunds.*
 
-1. As Sarah, **My Claims**, select **Withdraw**. The request returns to Posted for others.
+1. As Sarah, **My Claims**, select **Withdraw**. The request returns to Posted for others, and Ryan's bell says "The sitter withdrew from your request for <date>".
 2. As Sarah, claim it again.
-3. As Ryan, select **Cancel** on the request.
+3. As Ryan, select **Cancel** on the request. Sarah's bell says "A request you claimed for <date> was canceled".
 4. As Ryan, open **Credits**: escrow is released, a Refund entry is in the Ledger, and available is back to 10.0.
 
 ## Scenario 7: Credits move when the babysitting happens
