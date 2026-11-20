@@ -1,6 +1,6 @@
 # Contributing
 
-This project has one human maintainer, with coding agents as the other engineers. The process is built so a second human could join without changing it. Each rule lives in one doc and this file links to it (ADR 0013). New here? Follow [`docs/onboarding.md`](docs/onboarding.md). What would change at team scale: `docs/interview-stories.md` (pending #290; link it when it lands).
+This project has one human maintainer, with coding agents as the other engineers. The process is built so a second human could join without changing it. Each rule lives in one doc and this file links to it (ADR 0013). New here? Follow [`docs/onboarding.md`](docs/onboarding.md).
 
 ## Set up
 
